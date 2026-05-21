@@ -383,17 +383,22 @@ function fbInit(){
   return fbReady;
 }
 function cloudActive(){var c=getCloud();return fbInit()&&!!c.code&&c.auto!==false;}
+var _lastCloudErr="";
 function cloudPush(done){
-  if(!fbInit())return done&&done(false);
-  var c=getCloud(); if(!c.code)return done&&done(false);
-  try{ fbDB.ref("saves/"+c.code).set({t:Date.now(),json:JSON.stringify(ROOT)},function(err){done&&done(!err);}); }
-  catch(e){ done&&done(false); }
+  if(!fbInit()){_lastCloudErr="Firebase SDK not loaded (offline or blocked).";return done&&done(false);}
+  var c=getCloud(); if(!c.code){_lastCloudErr="No cloud code set.";return done&&done(false);}
+  try{ fbDB.ref("saves/"+c.code).set({t:Date.now(),json:JSON.stringify(ROOT)},function(err){
+    if(err){_lastCloudErr=(err&&(err.code||err.message))?String(err.code||err.message):"unknown error";}
+    else{_lastCloudErr="";}
+    done&&done(!err);
+  }); }
+  catch(e){ _lastCloudErr=String(e&&e.message||e); done&&done(false); }
 }
 function cloudPull(cb){
-  if(!fbInit())return cb(null);
-  var c=getCloud(); if(!c.code)return cb(null);
-  try{ fbDB.ref("saves/"+c.code).once("value").then(function(s){cb(s.val());},function(){cb(null);}); }
-  catch(e){ cb(null); }
+  if(!fbInit()){_lastCloudErr="Firebase SDK not loaded (offline or blocked).";return cb(null);}
+  var c=getCloud(); if(!c.code){_lastCloudErr="No cloud code set.";return cb(null);}
+  try{ fbDB.ref("saves/"+c.code).once("value").then(function(s){_lastCloudErr="";cb(s.val());},function(err){_lastCloudErr=(err&&(err.code||err.message))?String(err.code||err.message):"unknown error";cb(null);}); }
+  catch(e){ _lastCloudErr=String(e&&e.message||e); cb(null); }
 }
 function adoptCloud(rem){
   if(!rem||!rem.json)return false;
@@ -1784,18 +1789,19 @@ function screenReport(){
   $("rsC").onclick=function(){var t=prompt("Paste your backup code here:");if(t&&t.trim())applyBackup(t.trim());};
   $("reset").onclick=function(){if(confirm("Reset ALL progress for '"+S.name+"'? This cannot be undone.")){var nm=S.name;S=defaultState();S.name=nm;save();toast("Progress reset");view="map";render();}};
   function ccStatus(){var e=$("ccStat");if(!e)return;
-    e.textContent = !fbConfigured() ? "Cloud not set up." :
+    var base = !fbConfigured() ? "Cloud not set up." :
       (!fbInit() ? "Cloud offline — no internet?" :
-      (getCloud().code ? ("Synced as: "+getCloud().code+(getCloud().auto!==false?" · auto-save ON":" · auto-save OFF")) : "Enter a Cloud Code to turn on cloud save."));}
+      (getCloud().code ? ("Synced as: "+getCloud().code+(getCloud().auto!==false?" · auto-save ON":" · auto-save OFF")) : "Enter a Cloud Code to turn on cloud save."));
+    e.textContent = base + (_lastCloudErr ? "  ⚠ "+_lastCloudErr : "");}
   ccStatus();
   $("ccSet").onclick=function(){var v=$("cc").value.trim();if(!v){toast("Enter a cloud code first");return;}
     var c=getCloud();c.code=v;c.auto=true;setCloud(c);
     if(!fbInit()){toast("Cloud offline — check internet");ccStatus();return;}
     cloudPull(function(rem){var lt=+(localStorage.getItem(TS_KEY)||0);
       if(rem&&rem.json&&(rem.t||0)>lt&&adoptCloud(rem)){toast("☁️ Loaded your cloud save");view="map";render();}
-      else{cloudPush(function(ok){toast(ok?"☁️ Cloud sync is ON":"Cloud save failed");ccStatus();});}});};
+      else{cloudPush(function(ok){toast(ok?"☁️ Cloud sync is ON":("Cloud save failed: "+(_lastCloudErr||"unknown")));ccStatus();});}});};
   $("ccUp").onclick=function(){if(!getCloud().code){toast("Set a cloud code first");return;}
-    cloudPush(function(ok){toast(ok?"⬆ Saved to cloud":"Cloud save failed");});};
+    cloudPush(function(ok){toast(ok?"⬆ Saved to cloud":("Cloud save failed: "+(_lastCloudErr||"unknown")));ccStatus();});};
   $("ccDn").onclick=function(){if(!getCloud().code){toast("Set a cloud code first");return;}
     cloudPull(function(rem){if(rem&&rem.json&&adoptCloud(rem)){toast("⬇ Loaded — reloading…");setTimeout(function(){location.reload();},700);}else toast("No cloud save found for that code");});};
   $("ccAuto").onclick=function(){var c=getCloud();c.auto=(c.auto===false);setCloud(c);toast("Auto-sync "+(c.auto!==false?"ON":"OFF"));render();};
