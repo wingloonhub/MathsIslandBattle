@@ -1405,13 +1405,16 @@ function render(){
   screenBoot();
 }
 function screenBoot(){
-  // If we have local progress, go straight in (returning player on this device).
+  // Gate the app on auth: if Firebase is configured and the user hasn't signed
+  // in (and hasn't explicitly chosen offline), show the login screen first —
+  // regardless of whether local progress exists. The "Continue without account"
+  // button on the auth screen sets mathisland_skipauth=1 and lets them through.
+  var skip=false; try{ skip=localStorage.getItem("mathisland_skipauth")==="1"; }catch(e){}
+  if(fbConfigured() && !skip && !_authUser && _authReady){view="auth";return render();}
+  // Returning player on this device with active profile → straight to map.
   if(ROOT.current){view="map";return render();}
   var profs=listProfiles();
   if(profs.length>0){view="profiles";return render();}
-  // Fresh device: show the Netflix-style login first (unless user chose offline).
-  var skip=false; try{ skip=localStorage.getItem("mathisland_skipauth")==="1"; }catch(e){}
-  if(fbConfigured() && !skip && !_authUser){view="auth";return render();}
   // Offline mode chosen, or Firebase not configured: fall back to original splash.
   $("app").innerHTML='<div class="center" style="min-height:80vh">'+
    '<div style="font-size:70px" class="idle">🥋</div>'+
@@ -1472,16 +1475,38 @@ function screenAuth(){
     var after=function(ok){
       if(!ok)return paint();
       if(mode==="reset"){toast("📧 Reset email sent — check your inbox");mode="signin";_lastAuthErr="";return paint();}
-      // Sign-in / sign-up success. Pull cloud save, then go to profile picker.
       toast(mode==="signup"?"🎉 Account created":"👋 Signed in");
-      // Save current typed code into cloud config so it's no-op safe.
       var c=getCloud(); c.code=em; c.auto=true; setCloud(c);
-      cloudPull(function(rem){
+      // Fetch from BOTH the new UID path and the legacy email path, then pick
+      // whichever has data (newest wins). This sidesteps the race where the
+      // async migration hasn't yet copied legacy -> uid by the time we pull.
+      var legPath = "saves/"+safePath(em);
+      var done=function(rem){
         if(rem && rem.json && adoptCloud(rem)){
           toast("☁️ Loaded your cloud save");
+          // Make sure the new UID path also has the data (idempotent).
+          cloudPush(function(){});
         }
         view="boot"; render();
-      });
+      };
+      function pullUid(){
+        if(!_authUser){ return setTimeout(pullUid, 150); } // wait for auth state to settle
+        var uidPath = "saves/"+_authUser.uid;
+        fbDB.ref(uidPath).once("value").then(function(uSnap){
+          var uVal=uSnap.val();
+          fbDB.ref(legPath).once("value").then(function(lSnap){
+            var lVal=lSnap.val();
+            var best = null;
+            if(uVal && uVal.json) best = uVal;
+            if(lVal && lVal.json && (!best || (lVal.t||0)>(best.t||0))) best = lVal;
+            done(best);
+          },function(){ done(uVal&&uVal.json?uVal:null); });
+        },function(err){
+          // UID path unreadable (e.g. rules). Fall back to legacy.
+          fbDB.ref(legPath).once("value").then(function(lSnap){done(lSnap.val());},function(){done(null);});
+        });
+      }
+      if(fbInit()) pullUid(); else done(null);
     };
     if(mode==="signup")authSignUp(em,pw,after);
     else if(mode==="reset")authReset(em,after);
