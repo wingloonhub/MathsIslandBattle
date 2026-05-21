@@ -384,10 +384,15 @@ function fbInit(){
 }
 function cloudActive(){var c=getCloud();return fbInit()&&!!c.code&&c.auto!==false;}
 var _lastCloudErr="";
+// Firebase RTDB paths can't contain . # $ [ ] / — translate the user-facing
+// code (e.g. an email) into a safe key. The original code stays visible in the UI.
+function safePath(code){return String(code||"").toLowerCase()
+  .replace(/@/g,"_at_").replace(/\./g,"_dot_")
+  .replace(/[#\$\[\]\/]/g,"_").replace(/\s+/g,"_");}
 function cloudPush(done){
   if(!fbInit()){_lastCloudErr="Firebase SDK not loaded (offline or blocked).";return done&&done(false);}
   var c=getCloud(); if(!c.code){_lastCloudErr="No cloud code set.";return done&&done(false);}
-  try{ fbDB.ref("saves/"+c.code).set({t:Date.now(),json:JSON.stringify(ROOT)},function(err){
+  try{ fbDB.ref("saves/"+safePath(c.code)).set({t:Date.now(),json:JSON.stringify(ROOT)},function(err){
     if(err){_lastCloudErr=(err&&(err.code||err.message))?String(err.code||err.message):"unknown error";}
     else{_lastCloudErr="";}
     done&&done(!err);
@@ -397,7 +402,7 @@ function cloudPush(done){
 function cloudPull(cb){
   if(!fbInit()){_lastCloudErr="Firebase SDK not loaded (offline or blocked).";return cb(null);}
   var c=getCloud(); if(!c.code){_lastCloudErr="No cloud code set.";return cb(null);}
-  try{ fbDB.ref("saves/"+c.code).once("value").then(function(s){_lastCloudErr="";cb(s.val());},function(err){_lastCloudErr=(err&&(err.code||err.message))?String(err.code||err.message):"unknown error";cb(null);}); }
+  try{ fbDB.ref("saves/"+safePath(c.code)).once("value").then(function(s){_lastCloudErr="";cb(s.val());},function(err){_lastCloudErr=(err&&(err.code||err.message))?String(err.code||err.message):"unknown error";cb(null);}); }
   catch(e){ _lastCloudErr=String(e&&e.message||e); cb(null); }
 }
 function adoptCloud(rem){
