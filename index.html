@@ -1313,9 +1313,18 @@ function trainQCount(level){return 10+(level-1)*5;}
 function trainTime(kind,level){var base=kind==="mult"?8:10;return Math.max(4,base-Math.floor((level-1)/2));}
 function trainMakeQ(kind,level){
   if(kind==="mult" || kind==="wingchun"){
-    // wingchun is Wing's island centre: always 2-6 tables (Year 3 spec).
-    var tables = (kind==="wingchun") ? [2,3,4,5,6] : (level<=5?[1,2,3,4,5]:[6,7,8,9]);
-    var a=pick(tables),b=rnd(1,9),ans=a*b,wr=[],t=0;
+    // wingchun is Wing's island centre: BOTH factors strictly from {2,3,4,5,6}
+    // so no "9 × 4" style questions slip through. Year 3 spec.
+    var aPool, bPool;
+    if(kind==="wingchun"){
+      aPool = [2,3,4,5,6];
+      bPool = [2,3,4,5,6];
+    } else {
+      aPool = (level<=5?[1,2,3,4,5]:[6,7,8,9]);
+      bPool = null; // legacy mult uses rnd(1,9) for b
+    }
+    var a=pick(aPool), b = bPool ? pick(bPool) : rnd(1,9);
+    var ans=a*b,wr=[],t=0;
     while(wr.length<3&&t<50){t++;var dd=ans+pick([-12,-9,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,8,9,12]);
       if(dd>0&&dd!==ans&&wr.indexOf(dd)<0)wr.push(dd);}
     while(wr.length<3)wr.push(ans+wr.length+1);
