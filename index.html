@@ -301,21 +301,22 @@ var FINAL_BOSSES={
 };
 var FINAL_IDX=99;
 
-/* 13 enemies — one per dragon dojo. */
+/* 13 enemies — one per dragon dojo. Wing spec: all dojo opponents render
+   as human fighters (kungfu / ninja / brute / samurai / monk arts). */
 var ENEMIES=[
- {nm:"Claw Goblin",  art:"goblin", col:"#dc2626"},
- {nm:"Stair Sprite", art:"imp",    col:"#64748b"},
- {nm:"Split Snake",  art:"snake",  col:"#7c3aed"},
- {nm:"Iron Bull",    art:"brute",  col:"#57534e"},
- {nm:"Tail Tiger",   art:"tiger",  col:"#16a34a"},
- {nm:"Water Serpent",art:"snake",  col:"#1d4ed8"},
- {nm:"Coin Crab",    art:"crab",   col:"#f59e0b"},
- {nm:"Shield Bot",   art:"bot",    col:"#94a3b8"},
- {nm:"Stone Block",  art:"bot",    col:"#404040"},
- {nm:"Corner Sphinx",art:"sphinx", col:"#14b8a6"},
- {nm:"Balance Owl",  art:"owl",    col:"#facc15"},
- {nm:"Slice Imp",    art:"imp",    col:"#ea580c"},
- {nm:"Wisdom Dragon",art:"dragon", col:"#6b21a8"}
+ {nm:"Claw Fighter",      art:"kungfu",  col:"#dc2626"},
+ {nm:"Stair Sentinel",    art:"monk",    col:"#64748b"},
+ {nm:"Split Striker",     art:"ninja",   col:"#7c3aed"},
+ {nm:"Iron Brawler",      art:"brute",   col:"#57534e"},
+ {nm:"Tail Whip Sensei",  art:"kungfu",  col:"#16a34a"},
+ {nm:"Water Style Master",art:"ninja",   col:"#1d4ed8"},
+ {nm:"Coin Mercenary",    art:"samurai", col:"#f59e0b"},
+ {nm:"Shield Samurai",    art:"samurai", col:"#94a3b8"},
+ {nm:"Stone Fist",        art:"brute",   col:"#404040"},
+ {nm:"Corner Master",     art:"monk",    col:"#14b8a6"},
+ {nm:"Balance Sensei",    art:"kungfu",  col:"#facc15"},
+ {nm:"Slice Striker",     art:"ninja",   col:"#ea580c"},
+ {nm:"Wisdom Sensei",     art:"kungfu",  col:"#6b21a8"}
 ];
 function enemyFor(islandN,topicIdx){return ENEMIES[topicIdx]||{nm:"Fighter",art:"kungfu",col:"#dc2626"};}
 
@@ -1421,23 +1422,23 @@ var view="boot", curIsland=1;
    Clearing L5 and L10 of each training gives +1 island heart (max +4).
    ========================================================================= */
 var TRAIN={
-  mult:{name:"Multiplication",gear:"dummy",icon:"✖️",breakWord:"the dummy SHATTERS!",art:"kungfu",col:"#b91c1c"},
-  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!",art:"brute",col:"#1d4ed8"},
+  mult:{name:"Multiplication",gear:"dummy",icon:"✖️",breakWord:"the wooden dummy SHATTERS!"},
+  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!"},
   // Island-specific training centres (Dragon Island). 10 questions, timed.
-  // Wing's spec: train against human enemies, not wooden gear.
-  wingchun:{name:"Wing Chun Centre",gear:"dummy",icon:"🪵",breakWord:"the Kung Fu Master is DEFEATED!",art:"kungfu",col:"#b91c1c"},
-  boxing:  {name:"Boxing Centre",   gear:"bag",  icon:"🥊",breakWord:"the Heavyweight Boxer is DEFEATED!",art:"brute",col:"#1d4ed8"}
+  // Wing's spec: keep the wooden dummy / punching bag visuals; just make the
+  // Wing Chun dummy noticeably bigger than the bag.
+  wingchun:{name:"Wing Chun Centre",gear:"dummy",icon:"🪵",breakWord:"the wooden dummy SHATTERS!"},
+  boxing:  {name:"Boxing Centre",   gear:"bag",  icon:"🥊",breakWord:"the punching bag BURSTS!"}
 };
-// Choose the right opponent artwork for a training kind. New training (with
-// `art` set) renders a human enemy via bossSVG. Legacy training falls back
-// to the wooden-gear SVG.
+// Render the gear for a training kind. Wing Chun dummy renders 30% larger
+// than the punching bag for visual emphasis.
 function trainCharSVG(kind,size,broken){
   var t=TRAIN[kind]; size=size||122;
-  if(t && t.art) return bossSVG(t.art,size,t.col||"#dc2626");
-  return trainGearSVG(t?t.gear:kind, broken);
+  var actual = (t && t.gear==="dummy") ? Math.round(size*1.3) : size;
+  return trainGearSVG(t?t.gear:kind, broken, actual);
 }
-function trainGearSVG(kind,broken){
-  var px=148;
+function trainGearSVG(kind,broken,size){
+  var px=size||148;
   if(kind==="bag"){
     var bg = broken
      ? '<rect x="62" y="2" width="6" height="22" fill="#161616"/><circle cx="65" cy="27" r="4" fill="#374151"/>'+
@@ -1592,14 +1593,8 @@ function trainAnswer(given,btn){
   $("tcard").appendChild(msg);
   var win=(TP.qi>=TP.total&&TP.lives>0), fail=(TP.lives<=0), ended=win||fail;
   if(win){var ge=$("gear"); if(ge){
-    if(TRAIN[TP.kind] && TRAIN[TP.kind].art){
-      // Human enemy: play the KO animation (rotate + fall) instead of a
-      // shattered-dummy swap.
-      ge.className="fighter"; void ge.offsetWidth; ge.classList.add("koBoss");
-    } else {
-      ge.innerHTML=trainGearSVG(TRAIN[TP.kind].gear,true);
-      ge.classList.add("doBossHit");
-    }
+    ge.innerHTML=trainCharSVG(TP.kind,122,true);
+    ge.classList.add("doBossHit");
   }}
   if(fail){var he=$("hero");if(he){he.className="fighter hero";void he.offsetWidth;he.classList.add("koHero");}}
   setTimeout(function(){ if(ended)trainEnd(win); else trainNext(); }, ok?620:(fail?1500:1100));
@@ -1869,11 +1864,11 @@ function screenIsland(){
       '<h2 style="margin:0 0 8px">🏋️ Training Centre</h2>'+
       '<div class="grid three">'+
         smallTile("wcCentre",
-          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+bossSVG("kungfu",58,"#b91c1c")+'</div>'+
+          '<div style="height:74px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("dummy",false,74)+'</div>'+
           '<div style="font-weight:800;font-size:13px;margin-top:2px">🪵 Wing Chun</div>'+
           '<div class="muted" style="font-size:11px">2×–6× · 🪙+20</div>')+
         smallTile("bxCentre",
-          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+bossSVG("brute",58,"#1d4ed8")+'</div>'+
+          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("bag",false,58)+'</div>'+
           '<div style="font-weight:800;font-size:13px;margin-top:2px">🥊 Boxing</div>'+
           '<div class="muted" style="font-size:11px">Time · 🪙+20</div>')+
         smallTile("shopTile",
