@@ -1194,7 +1194,10 @@ var view="boot", curIsland=1;
    ========================================================================= */
 var TRAIN={
   mult:{name:"Multiplication",gear:"dummy",icon:"✖️",breakWord:"the wooden dummy SHATTERS!"},
-  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!"}
+  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!"},
+  // Island-specific training centres (Dragon Dojo Island). 10 questions, timed.
+  wingchun:{name:"Wing Chun Centre",gear:"dummy",icon:"🪵",breakWord:"the wooden dummy SHATTERS!"},
+  boxing:  {name:"Boxing Centre",   gear:"bag",  icon:"🥊",breakWord:"the punching bag BURSTS!"}
 };
 function trainGearSVG(kind,broken){
   var px=148;
@@ -1229,15 +1232,18 @@ function trainGearSVG(kind,broken){
 function trainQCount(level){return 10+(level-1)*5;}
 function trainTime(kind,level){var base=kind==="mult"?8:10;return Math.max(4,base-Math.floor((level-1)/2));}
 function trainMakeQ(kind,level){
-  if(kind==="mult"){
-    var tables=level<=5?[1,2,3,4,5]:[6,7,8,9];
+  if(kind==="mult" || kind==="wingchun"){
+    // wingchun is Wing's island centre: always 2-6 tables (Year 3 spec).
+    var tables = (kind==="wingchun") ? [2,3,4,5,6] : (level<=5?[1,2,3,4,5]:[6,7,8,9]);
     var a=pick(tables),b=rnd(1,9),ans=a*b,wr=[],t=0;
     while(wr.length<3&&t<50){t++;var dd=ans+pick([-12,-9,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,8,9,12]);
       if(dd>0&&dd!==ans&&wr.indexOf(dd)<0)wr.push(dd);}
     while(wr.length<3)wr.push(ans+wr.length+1);
     return {prompt:a+" × "+b+" = ?",answer:String(ans),options:shuffle([String(ans)].concat(wr.map(String))),clock:null};
   }
-  var q=genTime(Math.min(5,1+Math.ceil(level/3)));
+  // boxing is Wing's island centre: time questions at mid difficulty (3/5).
+  var d = (kind==="boxing") ? 3 : Math.min(5,1+Math.ceil(level/3));
+  var q=genTime(d);
   return {prompt:q.prompt,answer:q.answer,options:q.options,clock:q.clock};
 }
 function trainMilestone(kind,level){
@@ -1281,6 +1287,13 @@ function startTrain(kind,level){
       tSec:trainTime(kind,level),q:null,locked:false};
   view="trainplay";render();
 }
+// Island training centres (Dragon Dojo): fixed 10 questions, 10s each,
+// 3 lives. Reuses the Training Dojo screens via isIslandCentre flag.
+function startIslandTrain(kind){
+  TP={kind:kind, level:1, total:10, qi:0, lives:3, correct:0,
+      tSec:10, q:null, locked:false, isIslandCentre:true};
+  view="trainplay"; render();
+}
 function screenTrainPlay(){
   var info=TRAIN[TP.kind];
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="quit">⬅ Quit</button>'+
@@ -1292,7 +1305,7 @@ function screenTrainPlay(){
      '<div class="fighter hero idle" id="hero" style="width:74px;height:100px;left:9%">'+heroSVG()+'</div>'+
      '<div class="fighter idle" id="gear" style="right:9%;bottom:40px">'+trainGearSVG(info.gear,false)+'</div>'+
    '</div><div class="card" id="tcard" style="margin-top:12px"></div>';
-  $("quit").onclick=function(){clearInterval(tpTimer);view="trainlvls";render();};
+  $("quit").onclick=function(){clearInterval(tpTimer); view = TP.isIslandCentre ? "island" : "trainlvls"; render();};
   trainPaint();trainNext();
 }
 function trainPaint(){
@@ -1338,27 +1351,44 @@ function trainAnswer(given,btn){
 }
 function trainEnd(won){
   clearInterval(tpTimer);
-  var ms=[];
-  if(won){ if((S.train[TP.kind]||0)<TP.level)S.train[TP.kind]=TP.level; ms=trainMilestone(TP.kind,TP.level); save(); }
-  TR_RESULT={won:won,kind:TP.kind,level:TP.level,correct:TP.correct,total:TP.total,lives:TP.lives,ms:ms};
+  var ms=[], coinsEarned=0;
+  if(won){
+    if(TP.isIslandCentre){
+      // Island centre: flat +20 coins, no level/milestone progression.
+      coinsEarned = 20;
+      S.coins = (S.coins||0) + 20;
+    } else {
+      if((S.train[TP.kind]||0)<TP.level)S.train[TP.kind]=TP.level;
+      ms=trainMilestone(TP.kind,TP.level);
+    }
+    save();
+  }
+  TR_RESULT={won:won,kind:TP.kind,level:TP.level,correct:TP.correct,total:TP.total,
+             lives:TP.lives,ms:ms,isIslandCentre:!!TP.isIslandCentre,coinsEarned:coinsEarned};
   view="trainresult";render();
 }
 function screenTrainResult(){
-  var r=TR_RESULT,info=TRAIN[r.kind],hasNext=r.won&&r.level<10;
+  var r=TR_RESULT,info=TRAIN[r.kind];
+  var isCentre = r.isIslandCentre;
+  var hasNext = !isCentre && r.won && r.level<10;
+  var title = isCentre
+    ? (r.won?'Training Complete!':'Training Failed')
+    : (r.won?'Level '+r.level+' Cleared!':'Training Failed');
   $("app").innerHTML='<div class="center" style="min-height:80vh"><div class="card pop" style="max-width:460px;width:100%;text-align:center">'+
     '<div style="height:130px;display:grid;place-items:center">'+trainGearSVG(info.gear,r.won)+'</div>'+
-    '<h1>'+(r.won?'Level '+r.level+' Cleared!':'Training Failed')+'</h1>'+
+    '<h1>'+esc(title)+'</h1>'+
     '<p style="font-weight:800">'+info.icon+' '+esc(info.name)+' — '+(r.won?esc(info.breakWord):'out of lives!')+'</p>'+
     '<div class="row" style="justify-content:center;gap:18px;margin:10px 0;font-weight:800">'+
       '<span style="color:#16a34a">✅ '+r.correct+'/'+r.total+'</span><span>❤️ '+r.lives+'</span></div>'+
-    (r.ms.length?'<div class="banner" style="background:#15803d">🎉 Island Health +'+r.ms.length+'! Max hearts in island fights is now '+(3+(S.bonusHearts||0))+'.</div>':'')+
+    (isCentre && r.won && r.coinsEarned ? '<div class="banner" style="background:#15803d">🪙 +'+r.coinsEarned+' coins! Coins carry across the whole game.</div>' : '')+
+    (!isCentre && r.ms.length ? '<div class="banner" style="background:#15803d">🎉 Island Health +'+r.ms.length+'! Max hearts in island fights is now '+(3+(S.bonusHearts||0))+'.</div>' : '')+
     '<div class="wrap" style="justify-content:center;margin-top:16px">'+
       (hasNext?'<button class="btn green" id="next">▶ Level '+(r.level+1)+'</button>':'')+
       '<button class="btn" id="retry">🔁 Retry</button>'+
-      '<button class="btn dark" id="menu">🥋 Training</button></div></div></div>';
+      '<button class="btn dark" id="menu">'+(isCentre?'🗺️ Back to Island':'🥋 Training')+'</button></div></div></div>';
   if(hasNext)$("next").onclick=function(){startTrain(r.kind,r.level+1);};
-  $("retry").onclick=function(){startTrain(r.kind,r.level);};
-  $("menu").onclick=function(){TP={kind:r.kind};view="trainlvls";render();};
+  $("retry").onclick=function(){ if(isCentre) startIslandTrain(r.kind); else startTrain(r.kind,r.level); };
+  $("menu").onclick=function(){ if(isCentre){view="island";render();} else {TP={kind:r.kind};view="trainlvls";render();} };
 }
 
 function render(){
@@ -1577,8 +1607,27 @@ function screenIsland(){
     '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×12'+(finalDone?' · ✅':'')+'</div>'+
     (allDojos?'':'<div style="margin-top:6px;color:#fcd34d;font-weight:800;font-size:12px">🔒 Beat all 9 dojos first</div>')+
     '</button>';
+  // Island training centres (always available, don't drain island lives).
+  var centresHTML =
+    '<div class="card" style="margin-top:12px">'+
+      '<h2 style="margin:0 0 6px">🏋️ Training Centres</h2>'+
+      '<p class="muted" style="font-size:13px;margin:0 0 10px">10 quick questions, 10 seconds each, 3 lives. Win to earn 🪙+20.</p>'+
+      '<div class="grid two">'+
+        '<button class="tile" id="wcCentre">'+
+          '<div style="height:120px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("dummy",false)+'</div>'+
+          '<div style="font-weight:800;font-size:17px">🪵 Wing Chun Centre</div>'+
+          '<div class="muted" style="font-size:12px">Wooden dummy · 2×–6× tables</div>'+
+        '</button>'+
+        '<button class="tile" id="bxCentre">'+
+          '<div style="height:120px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("bag",false)+'</div>'+
+          '<div style="font-weight:800;font-size:17px">🥊 Boxing Centre</div>'+
+          '<div class="muted" style="font-size:12px">Punching bag · telling time</div>'+
+        '</button>'+
+      '</div>'+
+    '</div>';
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="back">⬅ Map</button>'+
     '<b>'+isl.emoji+' '+esc(isl.name)+'</b><span class="pill">❤️ '+lives+'/'+max+'</span></div>'+
+  centresHTML +
   '<div class="card" style="margin-top:12px">'+
     (dry
       ? '<div class="banner" style="background:#7f1d1d;color:#fecaca">💀 Out of lives! Visit the 🛒 Shop to buy a First Aid Kit or eat Pizza before fighting.</div>'
@@ -1587,6 +1636,8 @@ function screenIsland(){
     (hasWeak&&!dry?'<button class="btn red" id="practice" style="width:100%;margin-bottom:12px">🎯 Practice Weak Areas</button>':'')+
     '<div class="grid three">'+tiles+finalTile+'</div></div>';
   $("back").onclick=function(){view="map";render();};
+  $("wcCentre").onclick=function(){startIslandTrain("wingchun");};
+  $("bxCentre").onclick=function(){startIslandTrain("boxing");};
   var gs=$("goShop"); if(gs)gs.onclick=function(){view="shop";render();};
   var pr=$("practice");if(pr)pr.onclick=function(){startBattle(isl.n,-1);};
   Array.prototype.forEach.call(document.querySelectorAll(".lvl"),function(b){
