@@ -13,8 +13,70 @@
 <meta name="application-name" content="Maths Battle Quest" />
 <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f59e0b'/><text x='50' y='70' font-size='58' text-anchor='middle'>🥋</text></svg>" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23f59e0b'/><text x='90' y='126' font-size='104' text-anchor='middle'>🥋</text></svg>" />
-<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Maths Battle Quest","short_name":"Maths Battle","description":"Train your mind. Sharpen your focus. Defeat the Maths Masters.","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"%230f172a","theme_color":"%23f59e0b","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27><rect width=%27192%27 height=%27192%27 rx=%2742%27 fill=%27%23f59e0b%27/><text x=%2796%27 y=%27134%27 font-size=%27112%27 text-anchor=%27middle%27>%F0%9F%A5%8B</text></svg>","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27112%27 fill=%27%23f59e0b%27/><text x=%27256%27 y=%27358%27 font-size=%27300%27 text-anchor=%27middle%27>%F0%9F%A5%8B</text></svg>","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}' />
+<link rel="manifest" id="mbq-manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Maths Battle Quest","short_name":"Maths Battle","description":"Train your mind. Sharpen your focus. Defeat the Maths Masters.","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"%230f172a","theme_color":"%23f59e0b","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27><rect width=%27192%27 height=%27192%27 rx=%2742%27 fill=%27%23f59e0b%27/><text x=%2796%27 y=%27134%27 font-size=%27112%27 text-anchor=%27middle%27>%F0%9F%A5%8B</text></svg>","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27112%27 fill=%27%23f59e0b%27/><text x=%27256%27 y=%27358%27 font-size=%27300%27 text-anchor=%27middle%27>%F0%9F%A5%8B</text></svg>","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}' />
 <title>Maths Battle Quest</title>
+<script>
+/* Generate PNG home-screen icons at runtime. iOS Safari prefers PNG for
+   apple-touch-icon (SVG support is patchy on older iOS), and Android
+   maskable icons render more reliably from PNG. This runs synchronously
+   on every page load, well before any "Add to Home Screen" tap. */
+(function(){
+  function buildSVG(size){
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'">'+
+      '<rect width="'+size+'" height="'+size+'" rx="'+Math.round(size*0.22)+'" fill="#f59e0b"/>'+
+      '<text x="'+(size/2)+'" y="'+Math.round(size*0.72)+'" font-size="'+Math.round(size*0.58)+'" text-anchor="middle" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">🥋</text>'+
+      '</svg>';
+  }
+  function rasterize(size){
+    return new Promise(function(resolve){
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var c = document.createElement("canvas");
+          c.width = size; c.height = size;
+          c.getContext("2d").drawImage(img, 0, 0, size, size);
+          resolve(c.toDataURL("image/png"));
+        }catch(e){ resolve(null); }
+      };
+      img.onerror = function(){ resolve(null); };
+      img.src = "data:image/svg+xml;base64," + btoa(buildSVG(size));
+    });
+  }
+  function addAppleIcon(href, sizes){
+    var l = document.createElement("link");
+    l.rel = "apple-touch-icon";
+    if(sizes) l.sizes = sizes;
+    l.href = href;
+    document.head.appendChild(l);
+  }
+  Promise.all([rasterize(180), rasterize(192), rasterize(512), rasterize(167), rasterize(152)]).then(function(pngs){
+    var p180=pngs[0], p192=pngs[1], p512=pngs[2], p167=pngs[3], p152=pngs[4];
+    // Apple touch icons for iPhone and iPad sizes
+    if(p180) addAppleIcon(p180, "180x180");
+    if(p167) addAppleIcon(p167, "167x167");
+    if(p152) addAppleIcon(p152, "152x152");
+    // Swap the manifest to one with PNG icons (Android prefers PNG for maskable).
+    if(p192 && p512){
+      var m = {name:"Maths Battle Quest",short_name:"Maths Battle",
+        description:"Train your mind. Sharpen your focus. Defeat the Maths Masters.",
+        start_url:"./",scope:"./",display:"standalone",orientation:"portrait",
+        background_color:"#0f172a",theme_color:"#f59e0b",
+        icons:[
+          {src:p192,sizes:"192x192",type:"image/png",purpose:"any"},
+          {src:p192,sizes:"192x192",type:"image/png",purpose:"maskable"},
+          {src:p512,sizes:"512x512",type:"image/png",purpose:"any"},
+          {src:p512,sizes:"512x512",type:"image/png",purpose:"maskable"}
+        ]};
+      try{
+        var blob = new Blob([JSON.stringify(m)], {type:"application/manifest+json"});
+        var url = URL.createObjectURL(blob);
+        var existing = document.getElementById("mbq-manifest");
+        if(existing) existing.href = url;
+      }catch(e){}
+    }
+  });
+})();
+</script>
 <!-- Firebase (cloud auto-save). Safe to fail offline — game still works locally. -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
