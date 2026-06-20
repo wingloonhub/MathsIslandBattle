@@ -1421,12 +1421,21 @@ var view="boot", curIsland=1;
    Clearing L5 and L10 of each training gives +1 island heart (max +4).
    ========================================================================= */
 var TRAIN={
-  mult:{name:"Multiplication",gear:"dummy",icon:"✖️",breakWord:"the wooden dummy SHATTERS!"},
-  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!"},
-  // Island-specific training centres (Dragon Dojo Island). 10 questions, timed.
-  wingchun:{name:"Wing Chun Centre",gear:"dummy",icon:"🪵",breakWord:"the wooden dummy SHATTERS!"},
-  boxing:  {name:"Boxing Centre",   gear:"bag",  icon:"🥊",breakWord:"the punching bag BURSTS!"}
+  mult:{name:"Multiplication",gear:"dummy",icon:"✖️",breakWord:"the dummy SHATTERS!",art:"kungfu",col:"#b91c1c"},
+  time:{name:"Telling Time",  gear:"bag",  icon:"🕐",breakWord:"the punching bag BURSTS!",art:"brute",col:"#1d4ed8"},
+  // Island-specific training centres (Dragon Island). 10 questions, timed.
+  // Wing's spec: train against human enemies, not wooden gear.
+  wingchun:{name:"Wing Chun Centre",gear:"dummy",icon:"🪵",breakWord:"the Kung Fu Master is DEFEATED!",art:"kungfu",col:"#b91c1c"},
+  boxing:  {name:"Boxing Centre",   gear:"bag",  icon:"🥊",breakWord:"the Heavyweight Boxer is DEFEATED!",art:"brute",col:"#1d4ed8"}
 };
+// Choose the right opponent artwork for a training kind. New training (with
+// `art` set) renders a human enemy via bossSVG. Legacy training falls back
+// to the wooden-gear SVG.
+function trainCharSVG(kind,size,broken){
+  var t=TRAIN[kind]; size=size||122;
+  if(t && t.art) return bossSVG(t.art,size,t.col||"#dc2626");
+  return trainGearSVG(t?t.gear:kind, broken);
+}
 function trainGearSVG(kind,broken){
   var px=148;
   if(kind==="bag"){
@@ -1540,7 +1549,7 @@ function screenTrainPlay(){
        '<div style="flex:1;text-align:right">Durability<div class="hpbar"><i id="tdur"></i></div></div></div>'+
      '<div class="floor"></div>'+
      '<div class="fighter hero idle" id="hero" style="width:74px;height:100px;left:9%">'+heroSVG()+'</div>'+
-     '<div class="fighter idle" id="gear" style="right:9%;bottom:40px">'+trainGearSVG(info.gear,false)+'</div>'+
+     '<div class="fighter idle" id="gear" style="right:9%;bottom:40px">'+trainCharSVG(TP.kind,122,false)+'</div>'+
    '</div><div class="card" id="tcard" style="margin-top:12px"></div>';
   $("quit").onclick=function(){clearInterval(tpTimer); view = TP.isIslandCentre ? "island" : "trainlvls"; render();};
   trainPaint();trainNext();
@@ -1582,7 +1591,16 @@ function trainAnswer(given,btn){
   msg.innerHTML=ok?'<span style="color:#16a34a">✅ Fast!</span>':'<span style="color:#ef4444">'+(to?'⏰ Too slow!':'❌')+' Answer: '+esc(q.answer)+'</span>';
   $("tcard").appendChild(msg);
   var win=(TP.qi>=TP.total&&TP.lives>0), fail=(TP.lives<=0), ended=win||fail;
-  if(win){$("gear").innerHTML=trainGearSVG(TRAIN[TP.kind].gear,true);$("gear").classList.add("doBossHit");}
+  if(win){var ge=$("gear"); if(ge){
+    if(TRAIN[TP.kind] && TRAIN[TP.kind].art){
+      // Human enemy: play the KO animation (rotate + fall) instead of a
+      // shattered-dummy swap.
+      ge.className="fighter"; void ge.offsetWidth; ge.classList.add("koBoss");
+    } else {
+      ge.innerHTML=trainGearSVG(TRAIN[TP.kind].gear,true);
+      ge.classList.add("doBossHit");
+    }
+  }}
   if(fail){var he=$("hero");if(he){he.className="fighter hero";void he.offsetWidth;he.classList.add("koHero");}}
   setTimeout(function(){ if(ended)trainEnd(win); else trainNext(); }, ok?620:(fail?1500:1100));
 }
@@ -1612,7 +1630,7 @@ function screenTrainResult(){
     ? (r.won?'Training Complete!':'Training Failed')
     : (r.won?'Level '+r.level+' Cleared!':'Training Failed');
   $("app").innerHTML='<div class="center" style="min-height:80vh"><div class="card pop" style="max-width:460px;width:100%;text-align:center">'+
-    '<div style="height:130px;display:grid;place-items:center">'+trainGearSVG(info.gear,r.won)+'</div>'+
+    '<div style="height:130px;display:grid;place-items:center">'+trainCharSVG(r.kind,110,r.won)+'</div>'+
     '<h1>'+esc(title)+'</h1>'+
     '<p style="font-weight:800">'+info.icon+' '+esc(info.name)+' — '+(r.won?esc(info.breakWord):'out of lives!')+'</p>'+
     '<div class="row" style="justify-content:center;gap:18px;margin:10px 0;font-weight:800">'+
@@ -1848,13 +1866,14 @@ function screenIsland(){
   };
   var centresHTML =
     '<div class="card" style="margin-top:12px">'+
+      '<h2 style="margin:0 0 8px">🏋️ Training Centre</h2>'+
       '<div class="grid three">'+
         smallTile("wcCentre",
-          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("dummy",false)+'</div>'+
+          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+bossSVG("kungfu",58,"#b91c1c")+'</div>'+
           '<div style="font-weight:800;font-size:13px;margin-top:2px">🪵 Wing Chun</div>'+
           '<div class="muted" style="font-size:11px">2×–6× · 🪙+20</div>')+
         smallTile("bxCentre",
-          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("bag",false)+'</div>'+
+          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+bossSVG("brute",58,"#1d4ed8")+'</div>'+
           '<div style="font-weight:800;font-size:13px;margin-top:2px">🥊 Boxing</div>'+
           '<div class="muted" style="font-size:11px">Time · 🪙+20</div>')+
         smallTile("shopTile",
@@ -1871,6 +1890,7 @@ function screenIsland(){
       '<span class="pill coin">🪙 '+(S.coins||0)+'</span></div></div>'+
   centresHTML +
   '<div class="card" style="margin-top:12px">'+
+    '<h2 style="margin:0 0 8px">⚔️ Dojos</h2>'+
     (dry
       ? '<div class="banner" style="background:#7f1d1d;color:#fecaca">💀 Out of lives! Tap 🛒 Shop above for a First Aid Kit or Pizza before fighting.</div>'
       : '<p class="muted" style="font-size:13px;margin:0 0 12px">Pick a dojo. Beat all 13 to unlock the Dragon King Arena. Win → +1 📜 and full lives. Lose → −5 📜, −50 🪙.</p>')+
