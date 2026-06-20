@@ -1607,22 +1607,26 @@ function screenIsland(){
     '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×12'+(finalDone?' · ✅':'')+'</div>'+
     (allDojos?'':'<div style="margin-top:6px;color:#fcd34d;font-weight:800;font-size:12px">🔒 Beat all 9 dojos first</div>')+
     '</button>';
-  // Island training centres (always available, don't drain island lives).
+  // Compact tiles row: 2 training centres + Shop, all small enough to sit on
+  // one row even on phones. Tiles stay enabled when island lives are 0.
+  var smallTile = function(id, body){
+    return '<button class="tile" id="'+id+'" style="padding:8px 6px">'+body+'</button>';
+  };
   var centresHTML =
     '<div class="card" style="margin-top:12px">'+
-      '<h2 style="margin:0 0 6px">🏋️ Training Centres</h2>'+
-      '<p class="muted" style="font-size:13px;margin:0 0 10px">10 quick questions, 10 seconds each, 3 lives. Win to earn 🪙+20.</p>'+
-      '<div class="grid two">'+
-        '<button class="tile" id="wcCentre">'+
-          '<div style="height:120px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("dummy",false)+'</div>'+
-          '<div style="font-weight:800;font-size:17px">🪵 Wing Chun Centre</div>'+
-          '<div class="muted" style="font-size:12px">Wooden dummy · 2×–6× tables</div>'+
-        '</button>'+
-        '<button class="tile" id="bxCentre">'+
-          '<div style="height:120px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("bag",false)+'</div>'+
-          '<div style="font-weight:800;font-size:17px">🥊 Boxing Centre</div>'+
-          '<div class="muted" style="font-size:12px">Punching bag · telling time</div>'+
-        '</button>'+
+      '<div class="grid three">'+
+        smallTile("wcCentre",
+          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("dummy",false)+'</div>'+
+          '<div style="font-weight:800;font-size:13px;margin-top:2px">🪵 Wing Chun</div>'+
+          '<div class="muted" style="font-size:11px">2×–6× · 🪙+20</div>')+
+        smallTile("bxCentre",
+          '<div style="height:62px;display:grid;place-items:center;overflow:hidden">'+trainGearSVG("bag",false)+'</div>'+
+          '<div style="font-weight:800;font-size:13px;margin-top:2px">🥊 Boxing</div>'+
+          '<div class="muted" style="font-size:11px">Time · 🪙+20</div>')+
+        smallTile("shopTile",
+          '<div style="height:62px;display:grid;place-items:center;font-size:48px">🛒</div>'+
+          '<div style="font-weight:800;font-size:13px;margin-top:2px">Shop</div>'+
+          '<div class="muted" style="font-size:11px">🩹 Kits · 🍕 Pizza</div>')+
       '</div>'+
     '</div>';
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="back">⬅ Map</button>'+
@@ -1630,16 +1634,13 @@ function screenIsland(){
   centresHTML +
   '<div class="card" style="margin-top:12px">'+
     (dry
-      ? '<div class="banner" style="background:#7f1d1d;color:#fecaca">💀 Out of lives! Visit the 🛒 Shop to buy a First Aid Kit or eat Pizza before fighting.</div>'
+      ? '<div class="banner" style="background:#7f1d1d;color:#fecaca">💀 Out of lives! Tap 🛒 Shop above for a First Aid Kit or Pizza before fighting.</div>'
       : '<p class="muted" style="font-size:13px;margin:0 0 12px">Pick a dojo. Beat all 9 to unlock the Final Boss. Lives carry between fights — win to refill.</p>')+
-    (dry?'<button class="btn green" id="goShop" style="width:100%;margin:8px 0">🛒 Go to Shop</button>':'')+
-    (hasWeak&&!dry?'<button class="btn red" id="practice" style="width:100%;margin-bottom:12px">🎯 Practice Weak Areas</button>':'')+
     '<div class="grid three">'+tiles+finalTile+'</div></div>';
   $("back").onclick=function(){view="map";render();};
   $("wcCentre").onclick=function(){startIslandTrain("wingchun");};
   $("bxCentre").onclick=function(){startIslandTrain("boxing");};
-  var gs=$("goShop"); if(gs)gs.onclick=function(){view="shop";render();};
-  var pr=$("practice");if(pr)pr.onclick=function(){startBattle(isl.n,-1);};
+  $("shopTile").onclick=function(){view="shop";render();};
   Array.prototype.forEach.call(document.querySelectorAll(".lvl"),function(b){
     if(b.disabled)return;
     b.onclick=function(){startBattle(isl.n,+b.getAttribute("data-i"));};});
