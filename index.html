@@ -252,58 +252,70 @@
    diff (1..5) scales the question difficulty for ALL 9 levels on that island.
    ========================================================================= */
 var ISLANDS=[
- {n:1,name:"Dragon Dojo Island",  emoji:"🐉",diff:1,req:0,  sky:"linear-gradient(160deg,#ffe2c2,#ffc9a3)"}
+ {n:1,name:"Dragon Island",  emoji:"🐲",diff:1,req:0,  sky:"linear-gradient(160deg,#ffe2c2,#ffc9a3)"}
 ];
 function diffLabel(d){return ["","Easy 🟢","Medium 🔵","Hard 🟡","Very Hard 🟠","Expert 🔴"][d];}
 
-/* The 9 levels (topics) — same on every island, all free to play. Each has a
-   themed cute boss that fights differently (mech). */
+/* The 13 dragon dojos. Each ties a maths topic to a dojo name, themed enemy,
+   and a battlestage background gradient. Every enemy: 5 HP, mech="basic"
+   (we apply 3 random shielded turns globally in startBattle). */
 var TOPICS=[
- {id:"Addition & Subtraction",emoji:"➕",boss:{nm:"Count Goblin",art:"goblin",mech:"basic"}},
- {id:"Multiplication",        emoji:"✖️",boss:{nm:"Multi Crab", art:"crab",mech:"shield"}},
- {id:"Weight Conversion",     emoji:"⚖️",boss:{nm:"Scale Slime",art:"slime",mech:"basic"}},
- {id:"Number Order",          emoji:"🔢",boss:{nm:"Jumble Jelly",art:"jelly",mech:"basic"}},
- {id:"Fractions",             emoji:"🍕",boss:{nm:"Slice Sprite",art:"imp",mech:"rage"}},
- {id:"Time",                  emoji:"🕐",boss:{nm:"Tick-Tock Owl",art:"owl",mech:"basic"}},
- {id:"3D Shapes",             emoji:"🧊",boss:{nm:"Block Bot",  art:"bot",mech:"shield"}},
- {id:"Right Angles",          emoji:"📐",boss:{nm:"Sharp Sphinx",art:"sphinx",mech:"basic"}},
- {id:"Word Problems",         emoji:"📖",boss:{nm:"Riddle Dragon",art:"dragon",mech:"regen"}}
+ {id:"Plus, Minus & Missing Numbers", emoji:"➕", boss:{nm:"Claw Goblin",  art:"goblin",  mech:"basic"}},
+ {id:"Ascending & Descending",        emoji:"🪜", boss:{nm:"Stair Sprite", art:"imp",     mech:"basic"}},
+ {id:"Division",                      emoji:"➗", boss:{nm:"Split Snake",   art:"snake",   mech:"basic"}},
+ {id:"Mass",                          emoji:"⚖️", boss:{nm:"Iron Bull",     art:"brute",   mech:"basic"}},
+ {id:"Length",                        emoji:"📏", boss:{nm:"Tail Tiger",    art:"tiger",   mech:"basic"}},
+ {id:"Capacity",                      emoji:"🫗", boss:{nm:"Water Serpent", art:"snake",   mech:"basic"}},
+ {id:"Money",                         emoji:"🪙", boss:{nm:"Coin Crab",     art:"crab",    mech:"basic"}},
+ {id:"2D Shapes",                     emoji:"🔷", boss:{nm:"Shield Bot",    art:"bot",     mech:"basic"}},
+ {id:"3D Shapes",                     emoji:"🧊", boss:{nm:"Stone Block",   art:"bot",     mech:"basic"}},
+ {id:"Right Angles",                  emoji:"📐", boss:{nm:"Corner Sphinx", art:"sphinx",  mech:"basic"}},
+ {id:"Even & Odd",                    emoji:"⚖️", boss:{nm:"Balance Owl",   art:"owl",     mech:"basic"}},
+ {id:"Add Fractions",                 emoji:"🍕", boss:{nm:"Slice Imp",     art:"imp",     mech:"basic"}},
+ {id:"Word Problems",                 emoji:"📖", boss:{nm:"Wisdom Dragon", art:"dragon",  mech:"basic"}}
 ];
 var SUBJECTS=TOPICS.map(function(t){return{id:t.id,nm:t.id,emoji:t.emoji};});
 
-/* Dojo display names per topic (same order as TOPICS). Shown on the
-   Island level grid instead of the bare topic title. */
+/* 13 dragon-themed dojos + their stage backgrounds. Order matches TOPICS. */
 var DOJOS=[
- {nm:"Plus & Minus Dojo", emoji:"➕"},
- {nm:"Tiger Times Dojo",  emoji:"✖️"},
- {nm:"Iron Scale Dojo",   emoji:"⚖️"},
- {nm:"Falling Leaf Dojo", emoji:"🔢"},
- {nm:"Half-Moon Dojo",    emoji:"🍕"},
- {nm:"Tick-Tock Dojo",    emoji:"🕐"},
- {nm:"Crystal Form Dojo", emoji:"🧊"},
- {nm:"Right Hand Dojo",   emoji:"📐"},
- {nm:"Wisdom Scroll Dojo",emoji:"📖"}
+ {nm:"Dragon Claw Dojo",     emoji:"🐲", bg:"linear-gradient(#7f1d1d 0%,#b91c1c 50%,#ea580c 50%,#c2410c 100%)"},
+ {nm:"Dragon Stair Dojo",    emoji:"🪜", bg:"linear-gradient(#1e293b 0%,#475569 50%,#94a3b8 50%,#64748b 100%)"},
+ {nm:"Dragon Split Dojo",    emoji:"➗", bg:"linear-gradient(#581c87 0%,#7c3aed 50%,#fbbf24 50%,#ca8a04 100%)"},
+ {nm:"Dragon Strength Dojo", emoji:"💪", bg:"linear-gradient(#0f172a 0%,#334155 50%,#78716c 50%,#57534e 100%)"},
+ {nm:"Dragon Tail Dojo",     emoji:"📏", bg:"linear-gradient(#14532d 0%,#16a34a 50%,#84cc16 50%,#65a30d 100%)"},
+ {nm:"Dragon Water Dojo",    emoji:"🌊", bg:"linear-gradient(#172554 0%,#1e40af 50%,#3b82f6 50%,#60a5fa 100%)"},
+ {nm:"Dragon Treasure Dojo", emoji:"💰", bg:"linear-gradient(#7c2d12 0%,#b45309 50%,#f59e0b 50%,#fcd34d 100%)"},
+ {nm:"Dragon Shield Dojo",   emoji:"🛡️", bg:"linear-gradient(#0c4a6e 0%,#075985 50%,#94a3b8 50%,#cbd5e1 100%)"},
+ {nm:"Dragon Stone Dojo",    emoji:"🪨", bg:"linear-gradient(#171717 0%,#404040 50%,#737373 50%,#a3a3a3 100%)"},
+ {nm:"Dragon Corner Dojo",   emoji:"📐", bg:"linear-gradient(#134e4a 0%,#0f766e 50%,#14b8a6 50%,#5eead4 100%)"},
+ {nm:"Dragon Balance Dojo",  emoji:"⚖️", bg:"linear-gradient(#1e3a8a 0%,#1d4ed8 50%,#facc15 50%,#fde047 100%)"},
+ {nm:"Dragon Slice Dojo",    emoji:"🍕", bg:"linear-gradient(#7f1d1d 0%,#be123c 50%,#f97316 50%,#fbbf24 100%)"},
+ {nm:"Dragon Wisdom Dojo",   emoji:"📖", bg:"linear-gradient(#3b0764 0%,#6b21a8 50%,#ca8a04 50%,#facc15 100%)"}
 ];
 
-/* Final boss per island — unlocked after all 9 dojos on that island are
-   cleared. 12 lives, 1-3 random shield turns, questions mixed from all
-   topics. Defeating the final boss is what unlocks the next island. */
+/* Dragon King — final boss arena. Unlocked once all 13 dojos are cleared.
+   8 HP + 3 random shielded turns, mixed questions from all 13 topics PLUS
+   the training-centre topics (Multiplication + Time), no per-question timer. */
 var FINAL_BOSSES={
- 1:{nm:"Crimson Sensei",     art:"samurai",col:"#b91c1c"}
+ 1:{nm:"Dragon King", art:"dragon", col:"#7f1d1d", bg:"linear-gradient(#450a0a 0%,#7f1d1d 50%,#fbbf24 50%,#f59e0b 100%)"}
 };
 var FINAL_IDX=99;
 
-/* 9 enemies — Dragon Dojo Island only. More islands TBD. */
+/* 13 enemies — one per dragon dojo. */
 var ENEMIES=[
- {nm:"Bamboo Bandit",art:"kungfu",col:"#65a30d"},
- {nm:"Shadow Ninja",art:"ninja",col:"#0b0b0b"},
- {nm:"Iron Claw",art:"brute",col:"#64748b"},
- {nm:"Red Dragon Guard",art:"dragon",col:"#dc2626"},
- {nm:"Stone Fist",art:"brute",col:"#78716c"},
- {nm:"Tiger Fang",art:"tiger",col:"#f97316"},
- {nm:"Cobra Kick",art:"snake",col:"#16a34a"},
- {nm:"Monkey Trickster",art:"monkey",col:"#a16207"},
- {nm:"Dark Samurai",art:"samurai",col:"#334155"}
+ {nm:"Claw Goblin",  art:"goblin", col:"#dc2626"},
+ {nm:"Stair Sprite", art:"imp",    col:"#64748b"},
+ {nm:"Split Snake",  art:"snake",  col:"#7c3aed"},
+ {nm:"Iron Bull",    art:"brute",  col:"#57534e"},
+ {nm:"Tail Tiger",   art:"tiger",  col:"#16a34a"},
+ {nm:"Water Serpent",art:"snake",  col:"#1d4ed8"},
+ {nm:"Coin Crab",    art:"crab",   col:"#f59e0b"},
+ {nm:"Shield Bot",   art:"bot",    col:"#94a3b8"},
+ {nm:"Stone Block",  art:"bot",    col:"#404040"},
+ {nm:"Corner Sphinx",art:"sphinx", col:"#14b8a6"},
+ {nm:"Balance Owl",  art:"owl",    col:"#facc15"},
+ {nm:"Slice Imp",    art:"imp",    col:"#ea580c"},
+ {nm:"Wisdom Dragon",art:"dragon", col:"#6b21a8"}
 ];
 function enemyFor(islandN,topicIdx){return ENEMIES[topicIdx]||{nm:"Fighter",art:"kungfu",col:"#dc2626"};}
 
@@ -329,19 +341,7 @@ var ITEMS=[
 ];
 
 var BADGES=[
- {id:"practice_win",nm:"Wing Chun Dummy",emoji:"🪵",desc:"Beat the Practice Dummy"},
- {id:"wins10",nm:"Wooden Dummy Master",emoji:"🥋",desc:"Win 10 fights"},
- {id:"flawless",nm:"Iron Palm",emoji:"✋",desc:"Win without losing a heart"},
- {id:"isl1",nm:"Snake Palm",emoji:"🐍",desc:"Win on Dragon Dojo Island"},
- {id:"final1",nm:"Crimson Sensei Slayer",emoji:"⚔️",desc:"Defeat the Crimson Sensei"},
- {id:"first_aid",nm:"Medic",emoji:"🩹",desc:"Buy your first First Aid Kit"},
- {id:"pizza",nm:"Pizza Power",emoji:"🍕",desc:"Eat the legendary pizza"},
- {id:"combo8",nm:"Shadow Kick",emoji:"🥷",desc:"8 correct answers in a row"},
- {id:"first_win",nm:"Little Dragon",emoji:"🐉",desc:"Win your very first fight"},
- {id:"ans100",nm:"Black Belt Mind",emoji:"🧠",desc:"Answer 100 questions"},
- {id:"rich",nm:"Golden Sash",emoji:"🟡",desc:"Collect 300 coins"},
- {id:"stylist",nm:"Dragon Scroll",emoji:"📜",desc:"Own 6 wardrobe items"},
- {id:"sweep",nm:"Grandmaster Trial",emoji:"🏆",desc:"Beat all 9 levels on one island"}
+ {id:"dragon_black_belt",nm:"Dragon Black Belt",emoji:"⚫",desc:"Defeat the Dragon King"}
 ];
 
 /* =========================================================================
@@ -360,16 +360,16 @@ function defaultState(){return{
   train:{mult:0,time:0}, trainMilestones:{}, bonusHearts:0,
   trainStats:{mult:{ans:0,ok:0,ms:0},time:{ans:0,ok:0,ms:0}},
   totalAnswered:0, totalWins:0, lastPlay:todayKey(), saved:0,
-  // Island life pool (Dragon Dojo Island mechanic). 3 base, +1 if pizza eaten.
   islandLives:3, islandMaxLives:3, pizzaEaten:false, firstAidKits:0,
   introSeen:false, victorySeen:false,
-  schemaVersion:3
+  scrolls:0,
+  schemaVersion:4
 };}
-// Migrate older profiles to the new single-island Dragon Dojo schema.
-// Per Wing's "3a" choice: clean slate on progress, keep coins.
+// Migrate older profiles to the Dragon Island schema. Coins kept, dojo
+// progress + badges + scrolls reset, new intro replayed once.
 function migrateState(s){
   if(!s)return s;
-  if(s.schemaVersion>=3)return s;
+  if(s.schemaVersion>=4)return s;
   s.equip = {Suit:(s.equip&&s.equip.Suit)||"sk_bare", Headband:(s.equip&&s.equip.Headband)||"hb_none"};
   s.owned = (s.owned||[]).filter(function(id){return /^(sk_|hb_)/.test(id);});
   if(s.owned.indexOf("sk_bare")<0)s.owned.push("sk_bare");
@@ -382,9 +382,11 @@ function migrateState(s){
   s.islandMaxLives = 3;
   s.pizzaEaten = false;
   s.firstAidKits = 0;
-  s.introSeen = false;
+  s.introSeen = false;       // replay the new Dragon Island intro
   s.victorySeen = false;
-  s.schemaVersion = 3;
+  s.scrolls = 0;
+  s.badges = [];             // Wing spec: only the Dragon Black Belt badge survives
+  s.schemaVersion = 4;
   return s;
 }
 function defaultRoot(){return{version:2,current:null,profiles:{}};}
@@ -1140,6 +1142,135 @@ function genWord(diff){
     answer:String(c),explain:"sharing 'each' → DIVIDE. "+Tt+" ÷ "+g+" = "+c+".",hint:"Sharing equally with 'each' → DIVIDE."};
 }
 /* =========================================================================
+   NEW DRAGON ISLAND GENERATORS — division, length, capacity, money, 2D
+   shapes, even/odd. (Mass uses the existing genWeight, ascending/descending
+   uses genOrder, missing numbers are inside genAddSub, fractions use
+   genFrac, word problems genWord, 3D shapes genShape, right angles genRight.)
+   ========================================================================= */
+function genDiv(diff){
+  // pick a divisor and quotient so result is whole
+  var R=[null,[2,5,2,9],[2,9,2,12],[3,12,2,12],[4,15,3,15],[5,20,4,20]][diff];
+  var d=rnd(R[0],R[1]), q=rnd(R[2],R[3]), n=d*q;
+  return {type:"direct",prompt:n+" ÷ "+d+" = ?",answer:String(q),
+    explain:n+" ÷ "+d+" = "+q+".",hint:"Think: "+d+" × ? = "+n+"."};
+}
+function genLength(diff){
+  if(Math.random()<0.5){ // m -> cm
+    var m=rnd(1,[0,5,8,12,20,40][diff]);
+    var fracSet=diff<=2?[0,0.5]:[0,0.25,0.5,0.75];
+    var frac=pick(fracSet); var val=m+frac; var cm=Math.round(val*100);
+    return {type:"direct",prompt:fracLabel(m,frac)+" m = ? cm",answer:String(cm),
+      explain:"m → cm: ×100. "+val+" m = "+cm+" cm.",hint:"1 m = 100 cm. ½ m = 50 cm, ¼ m = 25 cm."};
+  } else { // cm -> m
+    var step=[0,100,50,25,10,5][diff];
+    var units=rnd(2,[0,15,30,60,120,250][diff]);
+    var cm=units*step; if(cm<100)cm=100;
+    var mt=cm/100;
+    return {type:"direct",prompt:cm+" cm = ? m",answer:String(mt),accept:[String(mt.toFixed(2))],
+      explain:"cm → m: ÷100. "+cm+" ÷ 100 = "+mt+" m.",hint:"cm → m: ÷100 (move the dot 2 places left)."};
+  }
+}
+function genCap(diff){
+  if(Math.random()<0.5){ // L -> mL
+    var L=rnd(1,[0,5,9,15,25,40][diff]);
+    var fracSet=diff<=2?[0,0.5]:[0,0.25,0.5,0.75];
+    var frac=pick(fracSet); var val=L+frac; var ml=Math.round(val*1000);
+    return {type:"direct",prompt:fracLabel(L,frac)+" L = ? mL",answer:String(ml),
+      explain:"L → mL: ×1000. "+val+" L = "+ml+" mL.",hint:"1 L = 1000 mL. ½ L = 500 mL, ¼ L = 250 mL."};
+  } else { // mL -> L
+    var step=[0,500,250,100,50,10][diff];
+    var units=rnd(2,[0,18,30,50,120,300][diff]);
+    var ml=units*step; if(ml<1000)ml=1000;
+    var lt=ml/1000;
+    return {type:"direct",prompt:ml+" mL = ? L",answer:String(lt),accept:[String(lt.toFixed(2))],
+      explain:"mL → L: ÷1000. "+ml+" ÷ 1000 = "+lt+" L.",hint:"mL → L: ÷1000 (move the dot 3 places left)."};
+  }
+}
+function genMoney(diff){
+  var r=Math.random();
+  if(r<0.4){ // simple addition
+    var A=rnd(15,[0,80,150,300,500,900][diff]);
+    var B=rnd(15,[0,60,120,240,420,800][diff]);
+    var sum=A+B;
+    return {type:"direct",prompt:"You buy something for "+A+" cents and another for "+B+" cents. Total cents?",
+      answer:String(sum),explain:A+" + "+B+" = "+sum+" cents.",hint:"Just add the two prices."};
+  } else if(r<0.7){ // change from a note
+    var price=rnd(15,[0,80,150,300,500,900][diff]);
+    var note=pick([100,200,500,1000].filter(function(v){return v>price;}))||(price+100);
+    var change=note-price;
+    return {type:"direct",prompt:"An item costs "+price+" cents. You pay with "+note+" cents. How much change?",
+      answer:String(change),explain:note+" - "+price+" = "+change+" cents.",hint:"Change = money paid - price."};
+  } else { // dollars/cents conversion
+    if(Math.random()<0.5){
+      var d=rnd(1,[0,5,9,15,25,40][diff]);
+      var c=pick([0,25,50,75]);
+      var total=d*100+c;
+      return {type:"direct",prompt:"$"+d+"."+(c<10?"0":"")+c+" = ? cents",answer:String(total),
+        explain:"$1 = 100 cents. $"+d+"."+(c<10?"0":"")+c+" = "+total+" cents.",hint:"Dollars × 100, then add the cents."};
+    } else {
+      var cents=rnd(5,40)*25;
+      var dd=Math.floor(cents/100), cc=cents%100;
+      var ans="$"+dd+"."+(cc<10?"0":"")+cc;
+      return {type:"direct",prompt:cents+" cents = ? dollars",answer:ans,
+        explain:cents+" cents = $"+dd+"."+(cc<10?"0":"")+cc+".",hint:"100 cents = $1. Divide by 100."};
+    }
+  }
+}
+var SHAPES_2D=[
+ {nm:"Triangle",sides:3,corners:3},
+ {nm:"Square",sides:4,corners:4},
+ {nm:"Rectangle",sides:4,corners:4},
+ {nm:"Pentagon",sides:5,corners:5},
+ {nm:"Hexagon",sides:6,corners:6},
+ {nm:"Octagon",sides:8,corners:8},
+ {nm:"Circle",sides:0,corners:0}
+];
+function gen2D(diff){
+  var s=pick(SHAPES_2D), n=nOptsFor(diff);
+  var modes=diff<=1?["sides","name"]:diff<=2?["sides","corners","name"]:["sides","corners","name"];
+  var mode=pick(modes);
+  if(mode==="name"){
+    var qP="Which 2D shape has "+(s.sides===0?"NO straight sides (it is curved)":(s.sides+" straight sides and "+s.corners+" corners"))+"?";
+    return {type:"multiple",prompt:qP,answer:s.nm,
+      options:uniqOpts(s.nm,SHAPES_2D.filter(function(x){return x.nm!==s.nm;}).map(function(x){return x.nm;}),n),
+      explain:"A "+s.nm+" has "+(s.sides===0?"no straight sides — it's curved":(s.sides+" sides"))+".",hint:"Count the sides carefully."};
+  } else {
+    var label=mode==="sides"?"sides":"corners";
+    var val=s[mode];
+    var wrongs=[];for(var i=-3;i<=4;i++){if(i!==0&&val+i>=0)wrongs.push(val+i);}
+    return {type:"multiple",prompt:"How many "+label+" does a "+s.nm+" have?",
+      answer:String(val),options:uniqOpts(val,wrongs,n),
+      explain:"A "+s.nm+" has "+val+" "+label+".",hint:"Picture the shape and count."};
+  }
+}
+function genEvenOdd(diff){
+  var r=Math.random();
+  if(r<0.5){ // is N even or odd?
+    var d=digitsFor(diff), N=numD(d);
+    var isEven=(N%2===0);
+    return {type:"multiple",prompt:"Is "+N+" EVEN or ODD?",
+      answer:isEven?"Even":"Odd",options:["Even","Odd"],
+      explain:N+" ends in "+(N%10)+". "+(isEven?"Last digit is 0,2,4,6 or 8 → EVEN.":"Last digit is 1,3,5,7 or 9 → ODD."),
+      hint:"Look at the LAST digit. 0,2,4,6,8 = even. 1,3,5,7,9 = odd."};
+  } else { // pick the even/odd one
+    var d2=digitsFor(diff), pickEven=Math.random()<0.5, target=null, pool=[];
+    while(pool.length<4){
+      var x=numD(d2);
+      if(pool.indexOf(x)<0){
+        var ok=(x%2===0)===pickEven;
+        if(ok && !target){target=x;pool.push(x);}
+        else if(!ok)pool.push(x);
+      }
+    }
+    if(!target){target=numD(d2)*2-(pickEven?0:1); pool[0]=target;}
+    return {type:"multiple",prompt:"Pick the "+(pickEven?"EVEN":"ODD")+" number:",
+      answer:String(target),options:shuffle(pool.map(String)),
+      explain:target+" ends in "+(target%10)+" → "+(pickEven?"EVEN":"ODD")+".",
+      hint:"Even = last digit 0,2,4,6,8.  Odd = last digit 1,3,5,7,9."};
+  }
+}
+
+/* =========================================================================
    EXAM BANK — the child's REAL Year 3 exam questions (from the Knowledge
    worksheets). These get mixed into normal battles (~50% of questions on
    topics that appear in the exam) so the kid practises the actual paper.
@@ -1222,14 +1353,28 @@ function makeQ(topicId,diff){
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
   var q;
-  if(topicId==="Addition & Subtraction")q=genAddSub(diff);
+  // New Dragon Island topic IDs
+  if(topicId==="Plus, Minus & Missing Numbers")q=genAddSub(diff);
+  else if(topicId==="Ascending & Descending")q=genOrder(diff);
+  else if(topicId==="Division")q=genDiv(diff);
+  else if(topicId==="Mass")q=genWeight(diff);
+  else if(topicId==="Length")q=genLength(diff);
+  else if(topicId==="Capacity")q=genCap(diff);
+  else if(topicId==="Money")q=genMoney(diff);
+  else if(topicId==="2D Shapes")q=gen2D(diff);
+  else if(topicId==="3D Shapes")q=genShape(diff);
+  else if(topicId==="Right Angles")q=genRight(diff);
+  else if(topicId==="Even & Odd")q=genEvenOdd(diff);
+  else if(topicId==="Add Fractions")q=genFrac(diff);
+  else if(topicId==="Word Problems")q=genWord(diff);
+  // Training-centre topics that may show up in the Dragon King mix
   else if(topicId==="Multiplication")q=genMul(diff);
+  else if(topicId==="Time")q=genTime(diff);
+  // Legacy fallback (older saves/EXAM bank topic IDs)
+  else if(topicId==="Addition & Subtraction")q=genAddSub(diff);
   else if(topicId==="Weight Conversion")q=genWeight(diff);
   else if(topicId==="Number Order")q=genOrder(diff);
   else if(topicId==="Fractions")q=genFrac(diff);
-  else if(topicId==="Time")q=genTime(diff);
-  else if(topicId==="3D Shapes")q=genShape(diff);
-  else if(topicId==="Right Angles")q=genRight(diff);
   else q=genWord(diff);
   q.topic=topicId;
   return q;
@@ -1248,8 +1393,11 @@ function uniqueBatch(n,gen){
   return out;
 }
 function buildBattle(topicId,diff){return uniqueBatch(10,function(){return makeQ(topicId,diff);});}
-function buildFinalBattle(diff){var ids=TOPICS.map(function(t){return t.id;});
-  return uniqueBatch(15,function(){return makeQ(pick(ids),diff);});}
+function buildFinalBattle(diff){
+  // Dragon King arena: mix all 13 dojo topics + Multiplication + Time.
+  var ids=TOPICS.map(function(t){return t.id;}).concat(["Multiplication","Time"]);
+  return uniqueBatch(15,function(){return makeQ(pick(ids),diff);});
+}
 function weakTopics(){
   return SUBJECTS.map(function(s){var st=S.subjStats[s.id]||{tot:0,ok:0};
     return{topic:s.id,acc:st.tot?st.ok/st.tot:1,tot:st.tot};})
@@ -1637,14 +1785,14 @@ function screenMap(){
     var finalDone=!!(S.finalCleared&&S.finalCleared[isl.n]);
     return '<button class="island" data-n="'+isl.n+'" style="background:'+isl.sky+'">'+
       '<div class="big">'+isl.emoji+'</div><h3>'+esc(isl.name)+'</h3>'+
-      '<div class="meta">'+diffLabel(isl.diff)+' · 9 dojos + Final Boss</div>'+
-      '<div class="meta">'+clears+'/9 dojos beaten'+(finalDone?' · 🏆 Cleared':'')+'</div>'+
+      '<div class="meta">'+diffLabel(isl.diff)+' · 13 dojos + Dragon King</div>'+
+      '<div class="meta">'+clears+'/13 dojos beaten'+(finalDone?' · 🏆 Cleared':'')+'</div>'+
       '</button>';
   }).join("");
   // Future-islands teaser (locked, no click).
   var soon='<div class="island" style="background:linear-gradient(160deg,#475569,#1e293b);opacity:.6;cursor:default">'+
     '<div class="big">🔒</div><h3>More Islands Coming</h3>'+
-    '<div class="meta">Conquer Dragon Dojo to unlock</div></div>';
+    '<div class="meta">Conquer Dragon Island to unlock</div></div>';
   var lives=S.islandLives||0, max=S.islandMaxLives||3;
   var kits=S.firstAidKits||0;
   $("app").innerHTML='<div class="hud"><div class="row">'+
@@ -1652,9 +1800,10 @@ function screenMap(){
     '<div><div style="font-weight:800">'+esc(S.name)+'</div><div class="muted" style="font-size:12px">Maths Warrior</div></div></div>'+
     '<div class="wrap" style="justify-content:flex-end"><span class="pill star">⭐ '+S.stars+'</span><span class="pill coin">🪙 '+S.coins+'</span></div></div>'+
   '<div class="card" style="margin-top:12px;text-align:center">'+
-    '<div style="font-weight:800;font-size:18px">❤️ Island Lives: '+lives+' / '+max+
+    '<div style="font-weight:800;font-size:18px">❤️ '+lives+'/'+max+
+    '  ·  📜 '+(S.scrolls||0)+
     (kits>0?'  ·  🩹×'+kits:'')+(S.pizzaEaten?'  ·  🍕':'')+'</div>'+
-    '<div class="muted" style="font-size:12px;margin-top:3px">Lives carry between dojos. Win to refill, lose to keep them where they fell.</div>'+
+    '<div class="muted" style="font-size:12px;margin-top:3px">Lives carry between dojos. Win to refill +1 scroll. Lose to keep them where they fell (−5 scrolls, −50 coins).</div>'+
   '</div>'+
   '<div class="card" style="margin-top:12px"><div class="row" style="justify-content:space-between"><h2>🗺️ Islands</h2>'+
     '<button class="btn sm ghost" id="pf">👥 Switch</button></div>'+
@@ -1684,13 +1833,13 @@ function screenIsland(){
       '<div class="t">'+esc(d.nm)+'</div>'+
       '<div class="b">'+bossSVG(en.art,30,en.col)+' '+esc(en.nm)+(done?' · ✅':'')+'</div></button>';
   }).join("");
-  var fb=FINAL_BOSSES[isl.n]||{nm:"Final Boss",art:"dragon",col:"#dc2626"};
+  var fb=FINAL_BOSSES[isl.n]||{nm:"Dragon King",art:"dragon",col:"#7f1d1d"};
   var finalLocked=(!allDojos)||dry;
   var finalTile='<button class="lvl" '+(finalLocked?'disabled':'')+' data-i="'+FINAL_IDX+'" style="border:3px solid #facc15;background:#1f2433">'+
     '<div class="e">👑</div>'+
     '<div class="t" style="color:#fde047">'+esc(fb.nm)+'</div>'+
-    '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×12'+(finalDone?' · ✅':'')+'</div>'+
-    (allDojos?'':'<div style="margin-top:6px;color:#fcd34d;font-weight:800;font-size:12px">🔒 Beat all 9 dojos first</div>')+
+    '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×8'+(finalDone?' · ✅':'')+'</div>'+
+    (allDojos?'':'<div style="margin-top:6px;color:#fcd34d;font-weight:800;font-size:12px">🔒 Beat all 13 dojos first</div>')+
     '</button>';
   // Compact tiles row: 2 training centres + Shop, all small enough to sit on
   // one row even on phones. Tiles stay enabled when island lives are 0.
@@ -1716,12 +1865,15 @@ function screenIsland(){
     '</div>';
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="back">⬅ Map</button>'+
     '<b>'+isl.emoji+' '+esc(isl.name)+'</b>'+
-    '<div class="wrap" style="justify-content:flex-end;gap:6px"><span class="pill">❤️ '+lives+'/'+max+'</span><span class="pill coin">🪙 '+(S.coins||0)+'</span></div></div>'+
+    '<div class="wrap" style="justify-content:flex-end;gap:6px">'+
+      '<span class="pill">❤️ '+lives+'/'+max+'</span>'+
+      '<span class="pill">📜 '+(S.scrolls||0)+'</span>'+
+      '<span class="pill coin">🪙 '+(S.coins||0)+'</span></div></div>'+
   centresHTML +
   '<div class="card" style="margin-top:12px">'+
     (dry
       ? '<div class="banner" style="background:#7f1d1d;color:#fecaca">💀 Out of lives! Tap 🛒 Shop above for a First Aid Kit or Pizza before fighting.</div>'
-      : '<p class="muted" style="font-size:13px;margin:0 0 12px">Pick a dojo. Beat all 9 to unlock the Final Boss. Lives carry between fights — win to refill.</p>')+
+      : '<p class="muted" style="font-size:13px;margin:0 0 12px">Pick a dojo. Beat all 13 to unlock the Dragon King Arena. Win → +1 📜 and full lives. Lose → −5 📜, −50 🪙.</p>')+
     '<div class="grid three">'+tiles+finalTile+'</div></div>';
   $("back").onclick=function(){view="map";render();};
   $("wcCentre").onclick=function(){startIslandTrain("wingchun");};
@@ -1738,41 +1890,43 @@ function screenIsland(){
 var B=null,qTimer=null;
 function startBattle(islandN,topicIdx){
   var isl=ISLANDS[islandN-1],diff=isl.diff;
-  var topic,boss,qs,hp,timer=0;
+  var topic,boss,qs,hp,timer=0,dojoBg=null;
   if(topicIdx<0){
     topic={id:"Practice"}; boss={nm:"Practice Dummy",art:"dummy",col:"#b45309",mech:"basic"};
     qs=buildPractice(); hp=5;
   } else if(topicIdx===FINAL_IDX){
-    var fb=FINAL_BOSSES[isl.n]||{nm:"Final Boss",art:"dragon",col:"#dc2626"};
-    topic={id:"Final Boss"};
+    var fb=FINAL_BOSSES[isl.n]||{nm:"Dragon King",art:"dragon",col:"#7f1d1d"};
+    topic={id:"Dragon King Arena"};
     boss={nm:fb.nm,art:fb.art,col:fb.col,mech:"final"};
-    qs=buildFinalBattle(diff); hp=12;
+    qs=buildFinalBattle(diff); hp=8; // Wing spec: 8 lives for the Dragon King
+    dojoBg = fb.bg || null;
+    timer = 0; // Wing spec: no time limit on final boss
   } else {
     topic=TOPICS[topicIdx]; var en=enemyFor(islandN,topicIdx);
-    boss={nm:en.nm,art:en.art,col:en.col,mech:topic.boss.mech};
-    qs=buildBattle(topic.id,diff); hp=5;
-    timer=boss.mech==="timer"?Math.max(8,18-diff*2):0;
+    boss={nm:en.nm,art:en.art,col:en.col,mech:"basic"};
+    qs=buildBattle(topic.id,diff); hp=5; // Wing spec: 5 lives per dojo enemy
+    dojoBg = (DOJOS[topicIdx] && DOJOS[topicIdx].bg) || null;
   }
-  // New mechanic: hearts come from the island life pool (3, or 4 if pizza eaten).
-  // The pool persists across dojos; entering a dojo uses whatever you have left.
+  // Hearts come from the island life pool (3, or 4 if pizza eaten).
   var mh = S.islandMaxLives || 3;
   var startHearts = Math.max(1, Math.min(mh, S.islandLives||mh));
   B={isl:isl,diff:diff,topic:topic,boss:boss,topicIdx:topicIdx,qs:qs,qi:0,
      bossHP:hp,bossMax:hp,hearts:startHearts,maxHearts:mh,turn:0,locked:false,combo:0,perfect:true,
      correct:0,wrong:0,wrongStreak:0,subj:{},shieldUp:false,ragePending:false,intro:true,
-     timer:timer, shieldTurns:[]};
-  if(boss.mech==="final"){
-    var sCount=rnd(1,3), pool=[];
-    for(var k=2;k<qs.length;k++)pool.push(k);
-    B.shieldTurns=shuffle(pool).slice(0,sCount);
-  }
+     timer:timer, shieldTurns:[], dojoBg:dojoBg};
+  // Wing spec: EVERY enemy (regular + final) gets 3 random shielded turns.
+  // Pick from turns 2..end so the first turn is always landable.
+  var pool=[];
+  for(var k=2;k<=qs.length;k++)pool.push(k);
+  B.shieldTurns=shuffle(pool).slice(0,3);
   view="battle";render();
 }
 function screenBattle(){
   var b=B;
+  var stageStyle = "margin-top:12px" + (b.dojoBg ? ";background:"+b.dojoBg+" !important" : "");
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="flee">⬅ Flee</button>'+
     '<b>'+b.isl.emoji+' '+esc(b.topic.id)+'</b><span class="pill">'+diffLabel(b.diff)+'</span></div>'+
-  '<div class="stage" id="stage" style="margin-top:12px">'+
+  '<div class="stage" id="stage" style="'+stageStyle+'">'+
     '<div class="hpwrap"><div style="flex:1"><div>'+esc(S.name)+'</div><div class="hearts" id="hearts"></div></div>'+
       '<div style="flex:1;text-align:right"><div>'+esc(b.boss.nm)+'</div><div class="hearts" id="bhp" style="font-size:16px;letter-spacing:1px;line-height:1.2"></div></div></div>'+
     '<div class="floor"></div>'+
@@ -1810,14 +1964,8 @@ function nextQuestion(){
   clearInterval(qTimer);
   if(B.qi>=B.qs.length)return endBattle();
   B.turn++;B.locked=false;
-  // Enemies BLOCK: shield-type bosses guard every 3rd turn,
-  // all other enemies guard every 4th turn (never the first turn).
-  if(B.boss.mech==="final"){
-    B.shieldUp=(B.shieldTurns && B.shieldTurns.indexOf(B.turn)>=0);
-  } else {
-    B.shieldUp=(B.turn>1) && ( (B.boss.mech==="shield" && B.turn%3===0)
-                            || (B.boss.mech!=="shield" && B.turn%4===0) );
-  }
+  // Every enemy (regular + final) has 3 randomly-chosen shielded turns.
+  B.shieldUp = !!(B.shieldTurns && B.shieldTurns.indexOf(B.turn)>=0);
   var sbOld=$("shieldBadge"); if(sbOld)sbOld.remove();
   if(B.shieldUp){var sb=document.createElement("div");sb.id="shieldBadge";sb.textContent="🛡️";
     sb.style.cssText="position:absolute;right:13%;bottom:118px;font-size:34px;z-index:3;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))";
@@ -1825,8 +1973,6 @@ function nextQuestion(){
   var q=B.qs[B.qi];
   var note="";
   if(B.shieldUp)note='<div class="banner" style="background:#0c4a6e;color:#bae6fd">🛡️ '+esc(B.boss.nm)+' is BLOCKING this turn — your hit won\'t land, just answer to carry on.</div>';
-  if(B.boss.mech==="rage"&&B.ragePending)note='<div class="banner" style="background:#7f1d1d;color:#fecaca">😡 ENRAGED! A wrong answer now costs 2 hearts (a correct one hits twice as hard)!</div>';
-  if(B.boss.mech==="regen")note='<div class="banner" style="background:#7f1d1d;color:#fde68a">🐉 The dragon slowly repairs itself…</div>';
   var visual="";
   if(q.type==="clock")visual='<div class="qpic">'+clockSVG(q.clock.hour,q.clock.minute)+'</div>';
   else if(q.type==="shape")visual='<div class="qpic">'+shapeSVG(q.shape)+'</div>';
@@ -1896,19 +2042,15 @@ function answer(given,btn){
       fxText("boss","🛡️ Blocked!","#93c5fd");
     }else{
       setTimeout(function(){anim("boss","doBossHurt");},200);
-      var dmg=(B.boss.mech==="rage"&&B.ragePending)?2:1;B.bossHP=Math.max(0,B.bossHP-dmg);
-      fxText("boss","-"+dmg,"#fca5a5");S.coins+=2;fxText("hero","🪙+2","#fde047");
+      B.bossHP=Math.max(0,B.bossHP-1);
+      fxText("boss","-1","#fca5a5");
     }
-    B.ragePending=false;
   }else{
     B.combo=0;S.combo=0;B.perfect=false;B.wrong++;B.wrongStreak++;
     sfx("miss");anim("boss",bossHitClass());setTimeout(function(){anim("hero","doHeroHurt");},180);
-    var loss=(B.boss.mech==="rage"&&B.ragePending)?2:1;B.hearts=Math.max(0,B.hearts-loss);
-    fxText("hero","-"+loss+"❤️","#fca5a5");
-    if(B.boss.mech==="rage")B.ragePending=true;
-    if(B.boss.mech==="regen"){B.bossHP=Math.min(B.bossMax,B.bossHP+2);fxText("boss","+2","#86efac");}
+    B.hearts=Math.max(0,B.hearts-1);
+    fxText("hero","-1❤️","#fca5a5");
   }
-  if(B.boss.mech==="regen"&&B.bossHP>0&&B.turn%3===0){B.bossHP=Math.min(B.bossMax,B.bossHP+1);fxText("boss","+1","#86efac");}
   save();paintHP();
   if(B.bossHP<=0){setTimeout(function(){var e=$("boss");if(e){e.className="fighter boss";void e.offsetWidth;e.classList.add("koBoss");}},520);}
   else if(B.hearts<=0){setTimeout(function(){var e=$("hero");if(e){e.className="fighter hero";void e.offsetWidth;e.classList.add("koHero");}},520);}
@@ -1926,71 +2068,48 @@ function answer(given,btn){
   cont.onclick=function(){if(done)endBattle();else nextQuestion();};
   $("qcard").appendChild(cont);cont.focus();
 }
-// Find the N cleared dojos the player is weakest at (lowest accuracy).
-// Used to pick which cleared dojos get reset when the player loses a fight.
-function weakestClearedDojos(n){
-  var cleared = TOPICS.filter(function(t){return S.cleared["1:"+t.id];});
-  var withAcc = cleared.map(function(t){
-    var s = (S.subjStats&&S.subjStats[t.id])||{tot:0,ok:0};
-    return {topic:t, acc: s.tot? (s.ok/s.tot) : 0};
-  });
-  withAcc.sort(function(a,b){return a.acc - b.acc;});
-  return withAcc.slice(0, n).map(function(x){return x.topic;});
-}
 function endBattle(){
   clearInterval(qTimer);
   var isFinal=(B.boss.mech==="final");
   var won = isFinal ? (B.bossHP<=0) : ((B.bossHP<=0)||(B.hearts>0&&B.correct>=6));
   if(B.hearts<=0&&B.bossHP>0)won=false;
-  var stars=0,coins=0,nb=[],resetDojos=[];
+  var stars=0,coins=0,nb=[],scrollsDelta=0;
   if(won){
     S.totalWins=(S.totalWins||0)+1;
     stars=B.diff*4+(B.perfect?2:0);
-    coins=30;                                  // new mechanic: flat +30 per win
+    coins=30;                                  // Wing spec: flat +30 per win
     if(isFinal){ stars+=10; coins+=40; }
     S.stars+=stars;S.coins+=coins;
     // Replenish island life pool on every win.
     S.islandLives = S.islandMaxLives || 3;
-    addBadge("first_win",nb);
-    if(S.totalWins>=10)addBadge("wins10",nb);
-    if(B.topicIdx<0)addBadge("practice_win",nb);
+    // Wing spec: each dojo win earns a scroll. Final boss too.
+    scrollsDelta = +1;
+    S.scrolls = (S.scrolls||0) + 1;
     if(B.topicIdx>=0 && !isFinal){
       S.cleared[B.isl.n+":"+B.topic.id]=true;
       S.islandWins[B.isl.n]=(S.islandWins[B.isl.n]||0)+1;
-      addBadge("isl"+B.isl.n,nb);
-      var allDone=TOPICS.every(function(t){return S.cleared[B.isl.n+":"+t.id];});
-      if(allDone)addBadge("sweep",nb);
     }
     if(isFinal){
       S.finalCleared=S.finalCleared||{}; S.finalCleared[B.isl.n]=true;
-      addBadge("isl"+B.isl.n,nb);
-      addBadge("final1",nb);
+      addBadge("dragon_black_belt",nb);
     }
-    if(B.perfect)addBadge("flawless",nb);
   } else {
-    // LOSE: pay coin penalty, reset 5 weakest cleared dojos, carry current
-    // hearts (likely 0) back to the island life pool. Final-boss losses
-    // don't reset dojos (you can just re-challenge him).
+    // LOSE: −50 coins, −5 scrolls (min 0). Carry current hearts (likely 0)
+    // back to the island life pool. Cleared dojos stay cleared.
     coins = -50;
     S.coins = Math.max(0, (S.coins||0) - 50);
+    scrollsDelta = -5;
+    S.scrolls = Math.max(0, (S.scrolls||0) - 5);
     S.islandLives = Math.max(0, B.hearts|0);
-    if(B.topicIdx>=0 && !isFinal){
-      resetDojos = weakestClearedDojos(5);
-      resetDojos.forEach(function(t){ delete S.cleared[B.isl.n+":"+t.id]; });
-    }
   }
-  if((S.bestCombo||0)>=8)addBadge("combo8",nb);
-  if(S.coins>=300)addBadge("rich",nb);
-  if(S.owned.length>=6)addBadge("stylist",nb);
-  if(S.totalAnswered>=100)addBadge("ans100",nb);
   S.history.unshift({when:Date.now(),island:B.isl.name,topic:B.topic.id,won:won,correct:B.correct,wrong:B.wrong});
   S.history=S.history.slice(0,20);S.lastPlay=todayKey();save();
   sfx(won?"win":"lose");
   RESULT={won:won,isl:B.isl,topic:B.topic,boss:B.boss,topicIdx:B.topicIdx,stars:stars,coins:coins,
     correct:B.correct,wrong:B.wrong,perfect:B.perfect,badges:nb,subj:B.subj,
-    resetDojos:resetDojos, livesLeft:S.islandLives, maxLives:S.islandMaxLives, isFinal:isFinal};
-  // First-island Crimson Sensei win: queue the victory screen instead of
-  // the normal result. Victory screen flows into the result on continue.
+    livesLeft:S.islandLives, maxLives:S.islandMaxLives, isFinal:isFinal,
+    scrollsDelta:scrollsDelta, scrolls:S.scrolls};
+  // Dragon King falls: show the victory screen the first time only.
   if(won && isFinal && !S.victorySeen){ S.victorySeen=true; save(); view="victory"; render(); return; }
   view="result";render();
 }
@@ -2003,10 +2122,11 @@ function screenResult(){
     .slice(0,2).map(function(w){return w.nm+" ("+Math.round(w.acc*100)+"%)";}).join(", ");
   var bHTML=r.badges.length?'<div class="banner" style="margin-top:10px">🏅 New badges: '+
     r.badges.map(function(id){var b=BADGES.filter(function(x){return x.id===id;})[0];return b?b.emoji+" "+b.nm:id;}).join(" · ")+'</div>':'';
-  var resetHTML="";
-  if(!r.won && r.resetDojos && r.resetDojos.length){
-    resetHTML='<div class="banner" style="background:#7f1d1d;color:#fecaca;margin-top:10px">📉 5 weakest dojos reset:<br>'+
-      r.resetDojos.map(function(t){return esc(t.id);}).join(" · ")+'</div>';
+  var scrollHTML = "";
+  if(r.scrollsDelta){
+    scrollHTML='<div class="banner" style="background:'+(r.scrollsDelta>0?'#15803d':'#7f1d1d')+';color:#fff;margin-top:10px">📜 '+
+      (r.scrollsDelta>0?'+1 scroll':(r.scrollsDelta+' scrolls'))+
+      ' · Total scrolls: '+(r.scrolls||0)+'</div>';
   }
   var livesHTML='<div class="banner" style="background:#0c4a6e;color:#bae6fd;margin-top:10px">'+
     '❤️ Island lives: '+(r.livesLeft||0)+'/'+(r.maxLives||3)+
@@ -2021,7 +2141,7 @@ function screenResult(){
       (r.perfect&&r.won?'<span>💎 No scratch</span>':'')+'</div>'+
     livesHTML +
     (weak?'<div class="banner" style="background:#7c2d12">📚 Topics to practise: '+esc(weak)+'</div>':'')+
-    resetHTML + bHTML +
+    scrollHTML + bHTML +
     '<div class="wrap" style="justify-content:center;margin-top:16px">'+
       ((r.livesLeft>0)?'<button class="btn green" id="again">🔁 Fight Again</button>':'')+
       '<button class="btn dark" id="isl">🗺️ '+esc(r.isl.name)+'</button>'+
@@ -2034,25 +2154,30 @@ function screenResult(){
 // ---------- Intro shown once per profile on first map entry ----------
 function screenIntro(){
   $("app").innerHTML='<div class="center" style="min-height:90vh;padding:18px">'+
-    '<div class="card" style="max-width:540px;width:100%;text-align:center">'+
-    '<div style="font-size:68px;margin-bottom:6px">🥋</div>'+
-    '<h1 style="margin:0 0 6px">Welcome to Maths Battle Island!</h1>'+
-    '<p style="font-weight:700;text-align:left;line-height:1.5;margin:14px 0">'+
-      'You have arrived on a mysterious island where maths and martial arts come together. '+
-      'Across the island, powerful Maths Masters are waiting to challenge you.'+
+    '<div class="card" style="max-width:560px;width:100%;text-align:left">'+
+    '<div style="font-size:68px;margin-bottom:6px;text-align:center">🐲</div>'+
+    '<h1 style="margin:0 0 12px;text-align:center">Welcome to Maths Battle World!</h1>'+
+    '<p style="font-weight:700;line-height:1.5;margin:0 0 12px">'+
+      'Long ago, the greatest warriors trained not only their bodies, but also their minds. '+
+      'To become a true martial arts champion, a warrior must be strong, focused, and quick at solving challenges.'+
     '</p>'+
-    '<p style="font-weight:700;text-align:left;line-height:1.5;margin:0 0 14px">'+
-      'To move from one place to another, you must enter the training grounds, answer maths questions, '+
-      'and win battle challenges. Each correct answer makes your skills stronger. Each victory brings '+
-      'you closer to becoming the island\'s greatest Maths Warrior.'+
+    '<p style="font-weight:700;line-height:1.5;margin:0 0 12px">'+
+      'You are a young Maths Warrior beginning your first journey. Ahead of you lies '+
+      '<b>Dragon Island</b>, a mysterious training land filled with powerful dojos, '+
+      'hidden trials, and maths masters waiting to test your skills.'+
     '</p>'+
-    '<p style="font-weight:800;text-align:center;color:#fcd34d;margin:0 0 14px">'+
-      'Train your mind. Sharpen your focus. Defeat the Maths Masters.'+
+    '<p style="font-weight:700;line-height:1.5;margin:0 0 12px">'+
+      'Each dojo will challenge you with a different maths skill. Win the battles, earn badges, '+
+      'unlock new techniques, and grow stronger with every victory.'+
     '</p>'+
-    '<p style="font-weight:800;text-align:center;margin:0 0 18px">'+
-      'Your journey to become the Maths Battle Island Champion starts now!'+
+    '<p style="font-weight:700;line-height:1.5;margin:0 0 12px">'+
+      'But be warned — at the end of Dragon Island waits the final boss, the <b>Dragon King</b>. '+
+      'Only a warrior with courage, focus, and sharp maths skills can defeat him.'+
     '</p>'+
-    '<button class="btn" id="introGo" style="font-size:18px;padding:14px 28px">⚔️ Begin Quest</button>'+
+    '<p style="font-weight:800;line-height:1.5;text-align:center;color:#fcd34d;margin:14px 0">'+
+      'Step forward, Maths Warrior.<br>Your training begins now.'+
+    '</p>'+
+    '<div style="text-align:center"><button class="btn" id="introGo" style="font-size:18px;padding:14px 28px;margin-top:8px">⚔️ Begin Training</button></div>'+
     '</div></div>';
   $("introGo").onclick=function(){
     S.introSeen=true; save();
@@ -2065,16 +2190,11 @@ function screenVictory(){
     '<div class="card pop" style="max-width:540px;width:100%;text-align:center">'+
     '<div style="font-size:74px">🏆</div>'+
     '<h1 style="margin:0 0 6px;color:#fcd34d">Victory!</h1>'+
-    '<p style="font-weight:700;text-align:left;line-height:1.5;margin:14px 0">'+
-      'You have defeated the Last Boss of the First Island. The Maths Masters bow in respect '+
-      'as the gates to the next island open.'+
+    '<p style="font-weight:700;line-height:1.5;text-align:left;margin:14px 0">'+
+      'You have defeated the <b>Dragon King</b> and earned the <b>Dragon Black Belt Badge</b>. '+
+      'You are now recognised as a true Maths Martial Arts Champion of Dragon Island!'+
     '</p>'+
-    '<p style="font-weight:700;text-align:left;line-height:1.5;margin:0 0 14px">'+
-      'Your maths skills and warrior spirit have grown stronger.'+
-    '</p>'+
-    '<p style="font-weight:800;text-align:center;color:#fcd34d;margin:0 0 18px">'+
-      'Congratulations, Maths Warrior — you have conquered the First Island!'+
-    '</p>'+
+    '<div style="font-size:54px;margin:18px 0">⚫</div>'+
     '<button class="btn" id="vGo" style="font-size:18px;padding:14px 28px">Continue ▶</button>'+
     '</div></div>';
   $("vGo").onclick=function(){view="result"; render();};
@@ -2120,7 +2240,7 @@ function screenShop(){
   $("buyKit").onclick=function(){
     if((S.coins||0)<KIT_PRICE){toast("Not enough coins");return;}
     S.coins-=KIT_PRICE; S.firstAidKits=(S.firstAidKits||0)+1;
-    addBadge("first_aid",[]); save(); sfx("coin"); toast("🩹 Bought a First Aid Kit"); render();
+    save(); sfx("coin"); toast("🩹 Bought a First Aid Kit"); render();
   };
   $("useKit").onclick=function(){
     if((S.firstAidKits||0)<=0){toast("No kits in inventory");return;}
@@ -2134,7 +2254,7 @@ function screenShop(){
     S.coins-=PIZZA_PRICE; S.pizzaEaten=true;
     S.islandMaxLives=Math.max(S.islandMaxLives||3, 4);
     S.islandLives=Math.min(S.islandMaxLives, (S.islandLives||0)+1);
-    addBadge("pizza",[]); save(); sfx("coin"); toast("🍕 Yum! Max lives now "+S.islandMaxLives); render();
+    save(); sfx("coin"); toast("🍕 Yum! Max lives now "+S.islandMaxLives); render();
   };
   $("wdLink").onclick=function(){view="wardrobe";render();};
 }
@@ -2163,7 +2283,6 @@ function screenWardrobe(){
     var it=itemById(b.getAttribute("data-buy"));
     if(S.coins<it.price){toast("Not enough coins — win more fights!");return;}
     S.coins-=it.price;S.owned.push(it.id);S.equip[it.cat]=it.id;
-    if(S.owned.length>=6)addBadge("stylist",[]);
     save();sfx("coin");toast("Bought & worn: "+it.nm);render();};});
 }
 function screenBadges(){
