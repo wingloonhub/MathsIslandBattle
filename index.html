@@ -2205,6 +2205,39 @@ function screenReport(){
     $("ccAuto").onclick=function(){var c=getCloud();c.auto=(c.auto===false);setCloud(c);toast("Auto-sync "+(c.auto!==false?"ON":"OFF"));render();};
   }
 }
+// Hardware back button: navigate views instead of closing the app/tab.
+// Wraps render() so every view change pushes a history entry, then listens
+// for popstate to restore the previous view. Mid-battle back behaves like
+// the Flee button so kids can't dodge the penalty by tapping back.
+(function(){
+  var _origRender = render;
+  var _fromPop = false;
+  var _lastPushed = null;
+  render = function(){
+    _origRender();
+    if(_fromPop) return;
+    if(view === _lastPushed) return;
+    try { history.pushState({view:view}, ''); _lastPushed = view; } catch(e){}
+  };
+  window.addEventListener('popstate', function(e){
+    // Mid-battle back = Flee (penalty + carry remaining hearts to island pool).
+    if(view==="battle" && B){
+      try { clearInterval(qTimer); } catch(_){}
+      S.islandLives = Math.max(0, B.hearts|0);
+      S.coins = Math.max(0, (S.coins||0) - 10);
+      save();
+      toast("🏳️ Fled — 🪙-10, lives now "+S.islandLives+"/"+(S.islandMaxLives||3));
+    }
+    _fromPop = true;
+    if(e.state && e.state.view){ view = e.state.view; _lastPushed = view; }
+    render();
+    _fromPop = false;
+  });
+  // Seed the initial history entry so the very first back press has somewhere
+  // to land instead of closing the PWA.
+  try { history.replaceState({view: view||'boot'}, ''); _lastPushed = view||'boot'; } catch(e){}
+})();
+
 fbInit();
 render();
 // Wait for Firebase Auth to resolve (it persists previous sessions) before
