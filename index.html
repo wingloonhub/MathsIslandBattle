@@ -1626,7 +1626,8 @@ function screenIsland(){
       '</div>'+
     '</div>';
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="back">⬅ Map</button>'+
-    '<b>'+isl.emoji+' '+esc(isl.name)+'</b><span class="pill">❤️ '+lives+'/'+max+'</span></div>'+
+    '<b>'+isl.emoji+' '+esc(isl.name)+'</b>'+
+    '<div class="wrap" style="justify-content:flex-end;gap:6px"><span class="pill">❤️ '+lives+'/'+max+'</span><span class="pill coin">🪙 '+(S.coins||0)+'</span></div></div>'+
   centresHTML +
   '<div class="card" style="margin-top:12px">'+
     (dry
