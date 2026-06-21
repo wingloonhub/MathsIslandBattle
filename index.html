@@ -1408,6 +1408,83 @@ function clawExplain(cl){
   // For "X + Y = ?" or "X - Y = ?" just replace the "?" with the answer.
   return cl.p.replace("?", cl.a);
 }
+/* Wing's Year 3 Dragon Stair Dojo bank: 80 mixed-type questions covering
+   place value / ordering / comparing. Stored compactly per question type;
+   stairMakeQ() picks a bucket then builds the live question object. */
+var STAIR_DATA={
+  // Q1-20 — arrange the 6 numbers in ascending order
+  asc:[
+    [123,448,321,886,215,667],[126,446,322,882,220,664],[129,444,323,878,225,661],
+    [132,442,324,874,230,658],[135,440,325,870,235,655],[138,438,326,866,240,652],
+    [141,436,327,862,245,649],[144,434,328,858,250,646],[147,432,329,854,255,643],
+    [150,430,330,850,260,640],[153,428,331,846,265,637],[156,426,332,842,270,634],
+    [159,424,333,838,275,631],[162,422,334,834,280,628],[165,420,335,830,285,625],
+    [168,418,336,826,290,622],[171,416,337,822,295,619],[174,414,338,818,300,616],
+    [177,412,339,814,305,613],[180,410,340,810,310,610]
+  ],
+  // Q21-40 — arrange the 6 numbers in descending order
+  desc:[
+    [154,518,343,925,262,706],[158,516,346,920,264,702],[162,514,349,915,266,698],
+    [166,512,352,910,268,694],[170,510,355,905,270,690],[174,508,358,900,272,686],
+    [178,506,361,895,274,682],[182,504,364,890,276,678],[186,502,367,885,278,674],
+    [190,500,370,880,280,670],[194,498,373,875,282,666],[198,496,376,870,284,662],
+    [202,494,379,865,286,658],[206,492,382,860,288,654],[210,490,385,855,290,650],
+    [214,488,388,850,292,646],[218,486,391,845,294,642],[222,484,394,840,296,638],
+    [226,482,397,835,298,634],[230,480,400,830,300,630]
+  ],
+  // Q41-60 — pick the comparator: <, >, or =
+  cmp:[
+    [651,619],[662,628],[673,637],[684,646],[695,655],
+    [706,664],[717,673],[728,682],[739,691],[750,700],
+    [761,709],[772,718],[783,727],[794,736],[805,745],
+    [816,754],[827,763],[838,772],[849,781],[860,790]
+  ],
+  // Q61-80 — number-pattern: 4 terms shown, kid types the 5th
+  seq:[
+    [[710,730,750,770],790],[[720,750,780,810],840],[[730,770,810,850],890],
+    [[740,750,760,770],780],[[750,770,790,810],830],[[760,790,820,850],880],
+    [[770,810,850,890],930],[[780,790,800,810],820],[[790,810,830,850],870],
+    [[800,830,860,890],920],[[810,850,890,930],970],[[820,830,840,850],860],
+    [[830,850,870,890],910],[[840,870,900,930],960],[[850,890,930,970],1010],
+    [[860,870,880,890],900],[[870,890,910,930],950],[[880,910,940,970],1000],
+    [[890,930,970,1010],1050],[[900,910,920,930],940]
+  ]
+};
+function stairMakeQ(){
+  var bucket = pick(["asc","desc","cmp","seq"]);
+  if(bucket==="asc" || bucket==="desc"){
+    var asc = (bucket==="asc");
+    var raw = pick(STAIR_DATA[bucket]).map(String);
+    var sorted = raw.slice().sort(function(x,y){return asc ? (+x - +y) : (+y - +x);});
+    var items = shuffle(raw);
+    if(items.join(",")===sorted.join(","))items=shuffle(items); // never present pre-sorted
+    return {type:"ordering",
+      prompt:"Tap the numbers in "+(asc?"ASCENDING order":"DESCENDING order")+".",
+      items:items, answer:sorted.join(","),
+      explain:"Correct order: "+sorted.join(", ")+".",
+      hint:asc?"Smallest first, then go up. Compare hundreds, then tens, then ones."
+             :"Biggest first, then go down. Compare hundreds, then tens, then ones."};
+  }
+  if(bucket==="cmp"){
+    var pair = pick(STAIR_DATA.cmp);
+    var sym = pair[0]>pair[1] ? ">" : (pair[0]<pair[1] ? "<" : "=");
+    return {type:"multiple",
+      prompt:pair[0]+" ___ "+pair[1]+"   (Which sign goes in the blank?)",
+      options:["<", ">", "="],
+      answer:sym,
+      explain:pair[0]+" "+sym+" "+pair[1]+".",
+      hint:"The bigger number's hundreds digit usually wins. Use < for less, > for greater, = for equal."};
+  }
+  // seq
+  var entry = pick(STAIR_DATA.seq);
+  var terms = entry[0], next = entry[1];
+  var step = terms[1]-terms[0];
+  return {type:"direct",
+    prompt:terms.join(", ")+", ___",
+    answer:String(next),
+    explain:"Each step adds "+step+". After "+terms[terms.length-1]+" comes "+next+".",
+    hint:"Find the difference between consecutive numbers, then add it once more."};
+}
 function makeQ(topicId,diff){
   // Wing's curated Dragon Claw Dojo bank — overrides procedural generation
   // and the EXAM bank for this topic entirely.
@@ -1416,6 +1493,11 @@ function makeQ(topicId,diff){
     return {type:"direct", topic:topicId,
       prompt: cl.p, answer: String(cl.a),
       explain: clawExplain(cl), hint: clawHint(cl.p)};
+  }
+  // Wing's curated Dragon Stair Dojo bank (Year 3 place value / ordering /
+  // comparing). Stair questions mix typed and tap-chip input.
+  if(topicId==="Ascending & Descending"){
+    var sq = stairMakeQ(); sq.topic = topicId; return sq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
