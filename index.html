@@ -1485,6 +1485,31 @@ function stairMakeQ(){
     explain:"Each step adds "+step+". After "+terms[terms.length-1]+" comes "+next+".",
     hint:"Find the difference between consecutive numbers, then add it once more."};
 }
+/* Wing's Year 3 Dragon Split Dojo bank: 90 division facts covering the
+   2x-10x tables (some duplicated near the end for extra repetition of
+   harder facts). All single typed-answer questions. */
+var SPLIT_QUESTIONS=[
+ // ÷2
+ [4,2],[6,2],[8,2],[10,2],[12,2],[14,2],[16,2],[18,2],[20,2],[24,2],
+ // ÷3
+ [6,3],[9,3],[12,3],[15,3],[18,3],[21,3],[24,3],[27,3],[30,3],[36,3],
+ // ÷4
+ [8,4],[12,4],[16,4],[20,4],[24,4],[28,4],[32,4],[36,4],[40,4],[48,4],
+ // ÷5
+ [10,5],[15,5],[20,5],[25,5],[30,5],[35,5],[40,5],[45,5],[50,5],[60,5],
+ // ÷6
+ [12,6],[18,6],[24,6],[30,6],[36,6],[42,6],[48,6],[54,6],[60,6],[72,6],
+ // ÷7
+ [14,7],[21,7],[28,7],[35,7],[42,7],[49,7],[56,7],[63,7],[70,7],[84,7],
+ // ÷8
+ [16,8],[24,8],[32,8],[40,8],[48,8],[56,8],[64,8],[72,8],[80,8],[96,8],
+ // ÷9 (subset)
+ [18,9],[27,9],[36,9],[45,9],[54,9],
+ // ÷10 (subset)
+ [20,10],[30,10],[40,10],[50,10],[60,10],
+ // Harder-table repeats (Q81-90 in the worksheet)
+ [81,9],[90,10],[64,8],[42,6],[35,5],[49,7],[72,9],[80,10],[56,7],[48,6]
+];
 function makeQ(topicId,diff){
   // Wing's curated Dragon Claw Dojo bank — overrides procedural generation
   // and the EXAM bank for this topic entirely.
@@ -1498,6 +1523,16 @@ function makeQ(topicId,diff){
   // comparing). Stair questions mix typed and tap-chip input.
   if(topicId==="Ascending & Descending"){
     var sq = stairMakeQ(); sq.topic = topicId; return sq;
+  }
+  // Wing's curated Dragon Split Dojo bank (Year 3 division facts, 2x-10x).
+  if(topicId==="Division"){
+    var sp = pick(SPLIT_QUESTIONS);
+    var dividend = sp[0], divisor = sp[1], quotient = dividend/divisor;
+    return {type:"direct", topic:topicId,
+      prompt: dividend+" ÷ "+divisor+" = ?",
+      answer: String(quotient),
+      explain: dividend+" ÷ "+divisor+" = "+quotient+".",
+      hint: "Ask yourself: "+divisor+" × ? = "+dividend+"."};
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
