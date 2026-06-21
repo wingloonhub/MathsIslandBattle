@@ -961,6 +961,107 @@ function rightSVG(k){
   return '<svg viewBox="0 0 220 200" width="190" height="173"><g fill="none" stroke="'+L+'" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">'+g+'</g></svg>';
 }
 
+/* ----------------- Visual SVGs for Dragon Shield / Stone / Corner ---------- */
+function shape2DSVG(k){
+  var st="#4338ca", f="#c7d2fe";
+  function regular(n, r, rot){
+    var pts=[]; for(var i=0;i<n;i++){var a=((i*360/n)+rot-90)*Math.PI/180;pts.push((100+r*Math.cos(a)).toFixed(1)+","+(100+r*Math.sin(a)).toFixed(1));}
+    return pts.join(" ");
+  }
+  var inner="";
+  if(k==="triangle"||k==="equilateral_triangle") inner='<polygon points="100,30 30,170 170,170" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="isosceles_triangle") inner='<polygon points="100,20 50,170 150,170" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="square") inner='<rect x="50" y="50" width="100" height="100" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="rectangle") inner='<rect x="20" y="65" width="160" height="80" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="circle") inner='<circle cx="100" cy="100" r="65" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="oval") inner='<ellipse cx="100" cy="100" rx="80" ry="50" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="rhombus") inner='<polygon points="100,25 175,100 100,175 25,100" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="trapezium") inner='<polygon points="60,55 140,55 180,160 20,160" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="pentagon"||k==="regular_pentagon") inner='<polygon points="'+regular(5,70,0)+'" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="hexagon") inner='<polygon points="'+regular(6,70,30)+'" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  else if(k==="octagon") inner='<polygon points="'+regular(8,70,22.5)+'" fill="'+f+'" stroke="'+st+'" stroke-width="4"/>';
+  return '<svg viewBox="0 0 200 200" width="170" height="170">'+inner+'</svg>';
+}
+function shape3DSVG(k){
+  var st="#4338ca",f="#c7d2fe",fd="#a5b4fc",ds='stroke-dasharray="4 4"';
+  if(k==="cube") return '<svg viewBox="0 0 200 200" width="170" height="170"><g stroke-width="3" stroke-linejoin="round">'+
+    '<polygon points="40,80 130,80 130,170 40,170" fill="'+f+'" stroke="'+st+'"/>'+
+    '<polygon points="40,80 70,50 160,50 130,80" fill="'+fd+'" stroke="'+st+'"/>'+
+    '<polygon points="130,80 160,50 160,140 130,170" fill="'+fd+'" stroke="'+st+'"/>'+
+    '<line x1="40" y1="170" x2="70" y2="140" stroke="'+st+'" '+ds+'/>'+
+    '<line x1="70" y1="140" x2="160" y2="140" stroke="'+st+'" '+ds+'/>'+
+    '<line x1="70" y1="140" x2="70" y2="50" stroke="'+st+'" '+ds+'/></g></svg>';
+  if(k==="cuboid") return '<svg viewBox="0 0 200 200" width="170" height="170"><g stroke-width="3" stroke-linejoin="round">'+
+    '<polygon points="30,90 150,90 150,170 30,170" fill="'+f+'" stroke="'+st+'"/>'+
+    '<polygon points="30,90 60,60 180,60 150,90" fill="'+fd+'" stroke="'+st+'"/>'+
+    '<polygon points="150,90 180,60 180,140 150,170" fill="'+fd+'" stroke="'+st+'"/>'+
+    '<line x1="30" y1="170" x2="60" y2="140" stroke="'+st+'" '+ds+'/>'+
+    '<line x1="60" y1="140" x2="180" y2="140" stroke="'+st+'" '+ds+'/>'+
+    '<line x1="60" y1="140" x2="60" y2="60" stroke="'+st+'" '+ds+'/></g></svg>';
+  if(k==="sphere") return '<svg viewBox="0 0 200 200" width="170" height="170">'+
+    '<defs><radialGradient id="sphG" cx="40%" cy="40%"><stop offset="0%" stop-color="#e0e7ff"/><stop offset="100%" stop-color="'+f+'"/></radialGradient></defs>'+
+    '<circle cx="100" cy="100" r="68" fill="url(#sphG)" stroke="'+st+'" stroke-width="3"/>'+
+    '<ellipse cx="100" cy="100" rx="68" ry="22" fill="none" stroke="'+st+'" stroke-width="2" '+ds+'/></svg>';
+  if(k==="cone") return '<svg viewBox="0 0 200 200" width="170" height="170"><g stroke="'+st+'" stroke-width="3" stroke-linejoin="round">'+
+    '<polygon points="100,25 35,155 165,155" fill="'+f+'"/>'+
+    '<ellipse cx="100" cy="155" rx="65" ry="16" fill="'+fd+'"/>'+
+    '<line x1="100" y1="25" x2="100" y2="155" '+ds+'/></g></svg>';
+  if(k==="cylinder") return '<svg viewBox="0 0 200 200" width="170" height="170"><g stroke="'+st+'" stroke-width="3">'+
+    '<rect x="55" y="50" width="90" height="105" fill="'+f+'"/>'+
+    '<ellipse cx="100" cy="50" rx="45" ry="14" fill="'+fd+'"/>'+
+    '<ellipse cx="100" cy="155" rx="45" ry="14" fill="'+f+'"/>'+
+    '<path d="M55 155 A 45 14 0 0 0 145 155" fill="none" '+ds+'/></g></svg>';
+  if(k==="pyramid") return '<svg viewBox="0 0 200 200" width="170" height="170"><g stroke="'+st+'" stroke-width="3" stroke-linejoin="round">'+
+    '<polygon points="100,25 30,155 170,155" fill="'+f+'"/>'+
+    '<polygon points="100,25 170,155 135,170" fill="'+fd+'"/>'+
+    '<line x1="30" y1="155" x2="135" y2="170" '+ds+'/>'+
+    '<line x1="100" y1="25" x2="135" y2="170" '+ds+'/></g></svg>';
+  return '';
+}
+function angleViewSVG(deg){
+  var cx=60, cy=140, L=110;
+  var rad = deg * Math.PI / 180;
+  var x2 = cx + L*Math.cos(-rad);
+  var y2 = cy + L*Math.sin(-rad);
+  var ar = 32;
+  var arX = cx + ar*Math.cos(-rad);
+  var arY = cy + ar*Math.sin(-rad);
+  var largeArc = deg>180 ? 1 : 0;
+  // Tiny square marker for an exact right angle
+  var rightMark = (deg===90)
+    ? '<rect x="'+(cx+1)+'" y="'+(cy-21)+'" width="20" height="20" fill="none" stroke="#dc2626" stroke-width="2"/>'
+    : '';
+  return '<svg viewBox="0 0 200 180" width="190" height="170">'+
+    '<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+L)+'" y2="'+cy+'" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>'+
+    '<line x1="'+cx+'" y1="'+cy+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/>'+
+    '<path d="M '+(cx+ar)+' '+cy+' A '+ar+' '+ar+' 0 '+largeArc+' 0 '+arX.toFixed(1)+' '+arY.toFixed(1)+'" fill="none" stroke="#dc2626" stroke-width="4"/>'+
+    rightMark +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#0f172a"/></svg>';
+}
+function angleCompareSVG(d1, d2){
+  return '<div style="display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap">'+
+    '<div style="text-align:center"><div>'+angleViewSVG(d1)+'</div><div style="font-weight:800;font-size:18px;margin-top:4px">'+d1+'°</div></div>'+
+    '<div style="text-align:center"><div>'+angleViewSVG(d2)+'</div><div style="font-weight:800;font-size:18px;margin-top:4px">'+d2+'°</div></div>'+
+    '</div>';
+}
+function objectIconSVG(emoji){
+  return '<div style="font-size:120px;line-height:1;padding:10px 0;text-align:center">'+emoji+'</div>';
+}
+// Resolve a visual key like "shape2d:triangle" / "shape3d:cube" / "angle:90"
+// / "anglecmp:45,90" / "obj:🎲" to the matching inline HTML.
+function resolveVisual(key){
+  if(!key) return "";
+  var i = key.indexOf(":"); if(i<0) return "";
+  var kind = key.slice(0,i), val = key.slice(i+1);
+  if(kind==="shape2d") return shape2DSVG(val);
+  if(kind==="shape3d") return shape3DSVG(val);
+  if(kind==="angle")   return angleViewSVG(+val);
+  if(kind==="anglecmp"){var p = val.split(","); return angleCompareSVG(+p[0], +p[1]);}
+  if(kind==="obj")     return objectIconSVG(val);
+  return "";
+}
+
+
 /* =========================================================================
    QUESTION GENERATORS — difficulty `diff` (1..5) scales every topic.
    Edit the number ranges here to make a topic easier/harder.
@@ -1623,6 +1724,114 @@ function tailMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
 }
 
+/* Wing's Year 3 Dragon Shield / Stone / Corner dojo banks. Each entry:
+   p = prompt, o = options (shuffled at draw time), a = correct answer,
+   v = visual key resolved by resolveVisual(), or empty string for none. */
+var SHIELD_QUESTIONS=[
+ {p:"What shape is this?",o:["Square","Rectangle","Triangle","Pentagon"],a:"Triangle",v:"shape2d:triangle"},
+ {p:"What shape is this?",o:["Triangle","Square","Circle","Hexagon"],a:"Square",v:"shape2d:square"},
+ {p:"What shape is this?",o:["Rectangle","Square","Oval","Pentagon"],a:"Rectangle",v:"shape2d:rectangle"},
+ {p:"What shape is this?",o:["Circle","Oval","Triangle","Square"],a:"Circle",v:"shape2d:circle"},
+ {p:"What shape is this?",o:["Hexagon","Pentagon","Octagon","Rectangle"],a:"Pentagon",v:"shape2d:pentagon"},
+ {p:"What shape is this?",o:["Pentagon","Triangle","Hexagon","Circle"],a:"Hexagon",v:"shape2d:hexagon"},
+ {p:"What shape is this?",o:["Square","Hexagon","Octagon","Pentagon"],a:"Octagon",v:"shape2d:octagon"},
+ {p:"What shape is this?",o:["Circle","Oval","Rectangle","Triangle"],a:"Oval",v:"shape2d:oval"},
+ {p:"What shape is this?",o:["Rhombus","Square","Rectangle","Circle"],a:"Rhombus",v:"shape2d:rhombus"},
+ {p:"What shape is this?",o:["Triangle","Trapezium","Pentagon","Oval"],a:"Trapezium",v:"shape2d:trapezium"},
+ {p:"How many sides does this shape have?",o:["2","3","4","5"],a:"3",v:"shape2d:triangle"},
+ {p:"How many corners does this shape have?",o:["2","3","4","5"],a:"3",v:"shape2d:triangle"},
+ {p:"How many sides does this shape have?",o:["3","4","5","6"],a:"4",v:"shape2d:square"},
+ {p:"How many corners does this shape have?",o:["2","3","4","5"],a:"4",v:"shape2d:rectangle"},
+ {p:"How many sides does this shape have?",o:["4","5","6","8"],a:"5",v:"shape2d:pentagon"},
+ {p:"How many corners does this shape have?",o:["4","5","6","8"],a:"5",v:"shape2d:pentagon"},
+ {p:"How many sides does this shape have?",o:["4","5","6","8"],a:"6",v:"shape2d:hexagon"},
+ {p:"How many sides does this shape have?",o:["5","6","7","8"],a:"8",v:"shape2d:octagon"},
+ {p:"Which shape has no corners?",o:["Triangle","Square","Circle","Pentagon"],a:"Circle",v:"shape2d:circle"},
+ {p:"Which shape has 4 equal sides?",o:["Rectangle","Square","Triangle","Oval"],a:"Square",v:"shape2d:square"},
+ {p:"How many lines of symmetry does this shape have?",o:["1","2","3","4"],a:"4",v:"shape2d:square"},
+ {p:"How many lines of symmetry does this shape have?",o:["1","2","3","4"],a:"2",v:"shape2d:rectangle"},
+ {p:"How many lines of symmetry does this shape have?",o:["1","2","3","4"],a:"3",v:"shape2d:equilateral_triangle"},
+ {p:"Which shape has the most lines of symmetry?",o:["Triangle","Rectangle","Circle","Pentagon"],a:"Circle",v:"shape2d:circle"},
+ {p:"Does this shape have symmetry?",o:["Yes","No","Only one side","Only corners"],a:"Yes",v:"shape2d:circle"},
+ {p:"Which shape has 1 line of symmetry?",o:["Isosceles Triangle","Square","Circle","Rectangle"],a:"Isosceles Triangle",v:"shape2d:isosceles_triangle"},
+ {p:"Which shape has 2 lines of symmetry?",o:["Triangle","Rectangle","Pentagon","Octagon"],a:"Rectangle",v:"shape2d:rectangle"},
+ {p:"Which shape has 4 lines of symmetry?",o:["Square","Rectangle","Triangle","Oval"],a:"Square",v:"shape2d:square"},
+ {p:"Which shape is symmetrical?",o:["Square","Random Shape","Broken Shape","Uneven Shape"],a:"Square",v:"shape2d:square"},
+ {p:"Which shape is not perfectly symmetrical?",o:["Square","Circle","Rectangle","Trapezium"],a:"Trapezium",v:"shape2d:trapezium"}
+];
+var STONE_QUESTIONS=[
+ {p:"What 3D shape is this?",o:["Cone","Cylinder","Cube","Sphere"],a:"Cube",v:"shape3d:cube"},
+ {p:"What 3D shape is this?",o:["Sphere","Cube","Cone","Cuboid"],a:"Sphere",v:"shape3d:sphere"},
+ {p:"What 3D shape is this?",o:["Cylinder","Cone","Cube","Pyramid"],a:"Cone",v:"shape3d:cone"},
+ {p:"What 3D shape is this?",o:["Cylinder","Sphere","Cone","Cube"],a:"Cylinder",v:"shape3d:cylinder"},
+ {p:"What 3D shape is this?",o:["Cube","Cuboid","Sphere","Cone"],a:"Cuboid",v:"shape3d:cuboid"},
+ {p:"What 3D shape is this?",o:["Pyramid","Cone","Cylinder","Sphere"],a:"Pyramid",v:"shape3d:pyramid"},
+ {p:"Which shape has equal square faces?",o:["Cube","Sphere","Cone","Cylinder"],a:"Cube",v:"shape3d:cube"},
+ {p:"Which shape rolls easily?",o:["Cube","Cuboid","Sphere","Pyramid"],a:"Sphere",v:"shape3d:sphere"},
+ {p:"Which shape has one point?",o:["Cube","Cone","Cylinder","Cuboid"],a:"Cone",v:"shape3d:cone"},
+ {p:"Which shape has two flat circular faces?",o:["Cylinder","Cone","Sphere","Pyramid"],a:"Cylinder",v:"shape3d:cylinder"},
+ {p:"A dice is shaped like a...",o:["Cube","Sphere","Cone","Cylinder"],a:"Cube",v:"obj:🎲"},
+ {p:"A football is shaped like a...",o:["Cube","Sphere","Cylinder","Cuboid"],a:"Sphere",v:"obj:⚽"},
+ {p:"A soft drink can is shaped like a...",o:["Cylinder","Cone","Cube","Sphere"],a:"Cylinder",v:"obj:🥫"},
+ {p:"An ice cream cone is shaped like a...",o:["Sphere","Cone","Cube","Cuboid"],a:"Cone",v:"obj:🍦"},
+ {p:"A gift box is shaped like a...",o:["Cuboid","Sphere","Cone","Cylinder"],a:"Cuboid",v:"obj:🎁"},
+ {p:"A pyramid building is shaped like a...",o:["Pyramid","Cone","Cube","Sphere"],a:"Pyramid",v:"obj:🗼"},
+ {p:"A tennis ball is shaped like a...",o:["Sphere","Cube","Cylinder","Pyramid"],a:"Sphere",v:"obj:🎾"},
+ {p:"A tissue box is shaped like a...",o:["Cuboid","Cone","Sphere","Cylinder"],a:"Cuboid",v:"obj:📦"},
+ {p:"A party hat is shaped like a...",o:["Cone","Cube","Sphere","Cuboid"],a:"Cone",v:"obj:🎉"},
+ {p:"A soup can is shaped like a...",o:["Cylinder","Cone","Sphere","Pyramid"],a:"Cylinder",v:"obj:🥫"},
+ {p:"How many faces does a cube have?",o:["4","5","6","8"],a:"6",v:"shape3d:cube"},
+ {p:"How many vertices does a cube have?",o:["6","8","10","12"],a:"8",v:"shape3d:cube"},
+ {p:"How many edges does a cube have?",o:["6","8","10","12"],a:"12",v:"shape3d:cube"},
+ {p:"How many vertices does a cone have?",o:["0","1","2","4"],a:"1",v:"shape3d:cone"},
+ {p:"Which shape has no vertices?",o:["Cube","Cuboid","Sphere","Pyramid"],a:"Sphere",v:"shape3d:sphere"},
+ {p:"Which shape can roll?",o:["Sphere","Cube","Cuboid","Pyramid"],a:"Sphere",v:"shape3d:sphere"},
+ {p:"Which shape has a curved surface?",o:["Cylinder","Cube","Cuboid","Pyramid"],a:"Cylinder",v:"shape3d:cylinder"},
+ {p:"Which shape has 6 rectangular faces?",o:["Cuboid","Sphere","Cone","Cylinder"],a:"Cuboid",v:"shape3d:cuboid"},
+ {p:"Which shape has a square base and triangular sides?",o:["Pyramid","Cone","Cube","Sphere"],a:"Pyramid",v:"shape3d:pyramid"},
+ {p:"Which shape has no flat faces?",o:["Sphere","Cube","Cuboid","Cylinder"],a:"Sphere",v:"shape3d:sphere"}
+];
+var CORNER_QUESTIONS=[
+ {p:"What type of angle is this?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Right Angle",v:"angle:90"},
+ {p:"What type of angle is this?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Acute Angle",v:"angle:45"},
+ {p:"What type of angle is this?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Obtuse Angle",v:"angle:120"},
+ {p:"What type of angle is this?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Acute Angle",v:"angle:80"},
+ {p:"What type of angle is this?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Obtuse Angle",v:"angle:150"},
+ {p:"Is this a right angle?",o:["Yes","No","It is acute","It is obtuse"],a:"Yes",v:"angle:90"},
+ {p:"Is this acute or obtuse?",o:["Acute","Obtuse","Right","Straight"],a:"Acute",v:"angle:30"},
+ {p:"Is this acute or obtuse?",o:["Acute","Obtuse","Right","Straight"],a:"Obtuse",v:"angle:130"},
+ {p:"Which angle is smaller than 90 degrees?",o:["Acute","Right","Obtuse","Straight"],a:"Acute",v:"angle:45"},
+ {p:"Which angle is larger than 90 degrees?",o:["Acute","Right","Obtuse","Small"],a:"Obtuse",v:"angle:130"},
+ {p:"Which is larger?",o:["45 degrees","90 degrees","Both same","None"],a:"90 degrees",v:"anglecmp:45,90"},
+ {p:"Which is smaller?",o:["120 degrees","90 degrees","Both same","None"],a:"90 degrees",v:"anglecmp:120,90"},
+ {p:"Which angle is a right angle?",o:["30 degrees","60 degrees","90 degrees","120 degrees"],a:"90 degrees",v:"angle:90"},
+ {p:"Which angle is acute?",o:["60 degrees","90 degrees","120 degrees","180 degrees"],a:"60 degrees",v:"angle:60"},
+ {p:"Which angle is obtuse?",o:["45 degrees","60 degrees","90 degrees","120 degrees"],a:"120 degrees",v:"angle:120"},
+ {p:"Which angle opens wider?",o:["45 degrees","120 degrees","Both same","None"],a:"120 degrees",v:"anglecmp:45,120"},
+ {p:"Which angle is closest to a square corner?",o:["30 degrees","60 degrees","90 degrees","120 degrees"],a:"90 degrees",v:"angle:90"},
+ {p:"Which angle is less than 90 degrees?",o:["Acute","Right","Obtuse","Straight"],a:"Acute",v:"angle:45"},
+ {p:"Which angle is more than 90 degrees?",o:["Acute","Right","Obtuse","Small"],a:"Obtuse",v:"angle:130"},
+ {p:"Which angle is exactly 90 degrees?",o:["Acute Angle","Right Angle","Obtuse Angle","Straight Angle"],a:"Right Angle",v:"angle:90"},
+ {p:"How many right angles does a square have?",o:["1","2","3","4"],a:"4",v:"shape2d:square"},
+ {p:"How many right angles does a rectangle have?",o:["1","2","3","4"],a:"4",v:"shape2d:rectangle"},
+ {p:"Does a circle have any angles?",o:["Yes","No","Only one","Only two"],a:"No",v:"shape2d:circle"},
+ {p:"Does a triangle always have a right angle?",o:["Yes","No","Always 4","Always 2"],a:"No",v:"shape2d:triangle"},
+ {p:"Which shape has 4 right angles?",o:["Square","Circle","Triangle","Pentagon"],a:"Square",v:"shape2d:square"},
+ {p:"Which shape has no corners?",o:["Circle","Square","Rectangle","Triangle"],a:"Circle",v:"shape2d:circle"},
+ {p:"Which shape usually has 4 right angles?",o:["Rectangle","Circle","Triangle","Oval"],a:"Rectangle",v:"shape2d:rectangle"},
+ {p:"Which shape has more than 4 sides?",o:["Triangle","Square","Rectangle","Pentagon"],a:"Pentagon",v:"shape2d:pentagon"},
+ {p:"Can a regular pentagon have a right angle?",o:["Yes","No","Always","Only one"],a:"No",v:"shape2d:pentagon"},
+ {p:"Which shape is most like a door?",o:["Circle","Triangle","Rectangle","Sphere"],a:"Rectangle",v:"obj:🚪"}
+];
+function visualMCQ(bank, topicId, hint){
+  var q = pick(bank);
+  return {type:"multiple", topic:topicId,
+    prompt:q.p, options:q.o.slice(), answer:q.a,
+    visualHTML: resolveVisual(q.v),
+    explain:"The answer is "+q.a+".",
+    hint:hint};
+}
+
 /* Wing's Year 3 Dragon Treasure Dojo bank: 80 RM-currency word problems.
    Q1-40 are total-cost stories (sum of 2 or 3 items). Q41-80 are
    change-from-payment stories. All typed-answer questions; isCorrect()
@@ -1860,6 +2069,18 @@ function makeQ(topicId,diff){
   // RM currency, total-cost + change-from-payment).
   if(topicId==="Money"){
     var tq = treasureMakeQ(); tq.topic = topicId; return tq;
+  }
+  // Wing's curated visual-MCQ banks — Dragon Shield (2D), Dragon Stone (3D),
+  // Dragon Corner (Angles). All render inline SVG so they work without any
+  // image files on the deployed site.
+  if(topicId==="2D Shapes"){
+    return visualMCQ(SHIELD_QUESTIONS, topicId, "Look at the shape carefully. Count sides and corners.");
+  }
+  if(topicId==="3D Shapes"){
+    return visualMCQ(STONE_QUESTIONS, topicId, "Think about which everyday object has that shape.");
+  }
+  if(topicId==="Right Angles"){
+    return visualMCQ(CORNER_QUESTIONS, topicId, "Right = 90°. Acute < 90°. Obtuse > 90°.");
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
@@ -2501,6 +2722,7 @@ function nextQuestion(){
   if(q.type==="clock")visual='<div class="qpic">'+clockSVG(q.clock.hour,q.clock.minute)+'</div>';
   else if(q.type==="shape")visual='<div class="qpic">'+shapeSVG(q.shape)+'</div>';
   else if(q.type==="right")visual='<div class="qpic">'+rightSVG(q.picture)+'</div>';
+  else if(q.visualHTML)visual='<div class="qpic">'+q.visualHTML+'</div>';
   var promptHTML=(q.topic==="Word Problems")?kw(q.prompt):esc(q.prompt);
   var timerHTML=B.timer?'<div class="timerbar"><i id="tbar"></i></div>':'';
   var input;
