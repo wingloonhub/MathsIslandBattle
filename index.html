@@ -1623,6 +1623,106 @@ function tailMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
 }
 
+/* Wing's Year 3 Dragon Treasure Dojo bank: 80 RM-currency word problems.
+   Q1-40 are total-cost stories (sum of 2 or 3 items). Q41-80 are
+   change-from-payment stories. All typed-answer questions; isCorrect()
+   strips "RM" / spaces so the kid can type either "RM5" or "5". */
+var TREASURE_QUESTIONS=[
+ // Q1-35 — total cost of 2 items
+ ["Ali buys an apple for RM3 and a banana for RM2. How much does he spend altogether?","RM5"],
+ ["Mei buys a burger for RM8 and a drink for RM3. What is the total cost?","RM11"],
+ ["Amir buys a notebook for RM6 and a pencil for RM2. How much does he pay altogether?","RM8"],
+ ["Sarah buys nasi lemak for RM5 and orange juice for RM4. How much is the total?","RM9"],
+ ["Ben buys a sandwich for RM7 and milk for RM3. How much does he spend?","RM10"],
+ ["A mango costs RM4 and a packet of grapes costs RM9. How much do they cost altogether?","RM13"],
+ ["Lina buys fried rice for RM9 and soup for RM6. What is the total cost?","RM15"],
+ ["A ruler costs RM2 and a colour pencil set costs RM12. How much are they altogether?","RM14"],
+ ["Jason buys a football for RM25 and a water bottle for RM10. How much does he pay altogether?","RM35"],
+ ["A T-shirt costs RM18 and a cap costs RM12. What is the total cost?","RM30"],
+ ["A chicken rice meal costs RM10 and a dessert costs RM6. How much does it cost altogether?","RM16"],
+ ["A watermelon costs RM15 and apples cost RM8. How much are they altogether?","RM23"],
+ ["A storybook costs RM14 and a bookmark costs RM3. What is the total cost?","RM17"],
+ ["A toy car costs RM16 and a toy ball costs RM9. How much does the customer pay?","RM25"],
+ ["A lunch set costs RM12 and a cup of Milo costs RM4. How much is the total?","RM16"],
+ ["A school bag costs RM35 and a pencil case costs RM15. What is the total cost?","RM50"],
+ ["A pizza costs RM22 and fries cost RM7. How much do they cost altogether?","RM29"],
+ ["A pair of socks costs RM6 and a towel costs RM11. How much does it cost in total?","RM17"],
+ ["A comic book costs RM13 and stickers cost RM5. How much are they altogether?","RM18"],
+ ["A packet of biscuits costs RM4 and a bottle of water costs RM2. How much is the total?","RM6"],
+ ["Nora buys noodles for RM8 and tea for RM3. How much does she spend altogether?","RM11"],
+ ["A dragon badge costs RM9 and a training band costs RM11. What is the total cost?","RM20"],
+ ["A small cake costs RM12 and candles cost RM5. How much do they cost altogether?","RM17"],
+ ["A box of crayons costs RM10 and drawing paper costs RM6. How much does it cost in total?","RM16"],
+ ["A toy robot costs RM28 and batteries cost RM8. What is the total cost?","RM36"],
+ ["A plate of spaghetti costs RM14 and a drink costs RM4. How much does it cost altogether?","RM18"],
+ ["A packet of oranges costs RM7 and pears cost RM9. How much are they altogether?","RM16"],
+ ["A pair of gloves costs RM19 and a belt costs RM21. What is the total cost?","RM40"],
+ ["A burger costs RM9 and fries cost RM6. How much does the meal cost?","RM15"],
+ ["A swimming cap costs RM12 and goggles cost RM18. How much are they altogether?","RM30"],
+ ["A kite costs RM17 and string costs RM6. What is the total cost?","RM23"],
+ ["A bowl of laksa costs RM11 and a drink costs RM4. How much does it cost altogether?","RM15"],
+ ["A plant costs RM20 and a pot costs RM15. How much does the customer pay?","RM35"],
+ ["A watch strap costs RM24 and a small pouch costs RM13. What is the total cost?","RM37"],
+ ["A muffin costs RM5 and a sandwich costs RM8. How much are they altogether?","RM13"],
+ // Q36-40 — total cost of 3 items
+ ["A pencil costs RM2, an eraser costs RM1, and a ruler costs RM3. How much is the total?","RM6"],
+ ["A burger costs RM8, fries cost RM6, and a drink costs RM4. How much is the total cost?","RM18"],
+ ["A book costs RM15, a pen costs RM4, and a file costs RM6. How much does it cost altogether?","RM25"],
+ ["A dragon mask costs RM18, a cape costs RM22, and gloves cost RM10. What is the total cost?","RM50"],
+ ["A lunch box costs RM16, a bottle costs RM12, and a spoon set costs RM7. How much is the total?","RM35"],
+ // Q41-80 — change from a payment
+ ["A banana costs RM2. You pay RM5. How much change do you get?","RM3"],
+ ["A burger costs RM8. You pay RM10. How much change do you receive?","RM2"],
+ ["A notebook costs RM12. You pay RM20. How much change will you get?","RM8"],
+ ["A watermelon costs RM15. You pay RM20. What is your change?","RM5"],
+ ["A football costs RM25. You pay RM50. How much change do you receive?","RM25"],
+ ["A drink costs RM4. You pay RM10. How much change do you get?","RM6"],
+ ["A pencil case costs RM18. You pay RM20. What is the change?","RM2"],
+ ["A toy car costs RM16. You pay RM20. How much change do you get?","RM4"],
+ ["A pizza costs RM32. You pay RM50. How much change do you receive?","RM18"],
+ ["A school bag costs RM45. You pay RM50. What is your change?","RM5"],
+ ["A packet of apples costs RM7. You pay RM10. How much change do you get?","RM3"],
+ ["A chicken rice meal costs RM10. You pay RM20. How much change do you receive?","RM10"],
+ ["A storybook costs RM14. You pay RM20. What is the change?","RM6"],
+ ["A T-shirt costs RM27. You pay RM50. How much change will you get?","RM23"],
+ ["A cap costs RM12. You pay RM20. How much change do you get?","RM8"],
+ ["A lunch set costs RM18. You pay RM20. What is your change?","RM2"],
+ ["A toy robot costs RM38. You pay RM50. How much change do you receive?","RM12"],
+ ["A pair of socks costs RM6. You pay RM10. How much change do you get?","RM4"],
+ ["A box of crayons costs RM10. You pay RM20. What is the change?","RM10"],
+ ["A kite costs RM17. You pay RM20. How much change will you get?","RM3"],
+ ["A bowl of noodles costs RM9. You pay RM10. How much change do you get?","RM1"],
+ ["A plant costs RM22. You pay RM50. How much change do you receive?","RM28"],
+ ["A watch strap costs RM24. You pay RM50. What is your change?","RM26"],
+ ["A muffin costs RM5. You pay RM10. How much change do you get?","RM5"],
+ ["A bottle of water costs RM3. You pay RM5. How much change do you receive?","RM2"],
+ ["A drawing book costs RM11. You pay RM20. What is the change?","RM9"],
+ ["A training belt costs RM35. You pay RM50. How much change do you get?","RM15"],
+ ["A dragon badge costs RM9. You pay RM20. How much change do you receive?","RM11"],
+ ["A small cake costs RM28. You pay RM50. What is your change?","RM22"],
+ ["A sandwich costs RM13. You pay RM20. How much change will you get?","RM7"],
+ ["A pair of goggles costs RM18. You pay RM20. How much change do you get?","RM2"],
+ ["A pack of grapes costs RM21. You pay RM50. How much change do you receive?","RM29"],
+ ["A bowl of laksa costs RM11. You pay RM20. What is your change?","RM9"],
+ ["A toy ball costs RM19. You pay RM20. How much change do you get?","RM1"],
+ ["A file costs RM6. You pay RM10. How much change do you receive?","RM4"],
+ ["A dragon mask costs RM42. You pay RM50. What is the change?","RM8"],
+ ["A water bottle costs RM23. You pay RM50. How much change will you get?","RM27"],
+ ["A packet of biscuits costs RM4. You pay RM5. How much change do you get?","RM1"],
+ ["A pencil set costs RM26. You pay RM50. How much change do you receive?","RM24"],
+ ["A comic book costs RM31. You pay RM50. What is your change?","RM19"]
+];
+function treasureMakeQ(){
+  var t = pick(TREASURE_QUESTIONS);
+  var isChange = (t[0].indexOf("change")>=0 || /You pay/.test(t[0]));
+  return {type:"direct",
+    prompt:t[0], answer:t[1],
+    explain:"Answer: "+t[1]+".",
+    hint: isChange
+      ? "Change = money paid − cost of the item."
+      : "Add the prices together to find the total."};
+}
+
 /* Wing's Year 3 Dragon Water Dojo bank: 80 capacity questions in four
    buckets — pick-the-larger MCQ, L↔ml conversions, and a mixed
    arithmetic/conversion set. Same shape as STRENGTH_DATA / TAIL_DATA. */
@@ -1755,6 +1855,11 @@ function makeQ(topicId,diff){
   // L↔ml conversion + simple arithmetic/conversion mix).
   if(topicId==="Capacity"){
     var wq = waterMakeQ(); wq.topic = topicId; return wq;
+  }
+  // Wing's curated Dragon Treasure Dojo bank (Year 3 money word problems,
+  // RM currency, total-cost + change-from-payment).
+  if(topicId==="Money"){
+    var tq = treasureMakeQ(); tq.topic = topicId; return tq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
