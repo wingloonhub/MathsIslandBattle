@@ -270,7 +270,7 @@ var TOPICS=[
  {id:"2D Shapes",                     emoji:"🔷", boss:{nm:"Shield Bot",    art:"bot",     mech:"basic"}},
  {id:"3D Shapes",                     emoji:"🧊", boss:{nm:"Stone Block",   art:"bot",     mech:"basic"}},
  {id:"Right Angles",                  emoji:"📐", boss:{nm:"Corner Sphinx", art:"sphinx",  mech:"basic"}},
- {id:"Even & Odd",                    emoji:"⚖️", boss:{nm:"Balance Owl",   art:"owl",     mech:"basic"}},
+ {id:"Time",                          emoji:"🕐", boss:{nm:"Time Keeper",    art:"monk",    mech:"basic"}},
  {id:"Add Fractions",                 emoji:"🍕", boss:{nm:"Slice Imp",     art:"imp",     mech:"basic"}},
  {id:"Word Problems",                 emoji:"📖", boss:{nm:"Wisdom Dragon", art:"dragon",  mech:"basic"}}
 ];
@@ -288,7 +288,7 @@ var DOJOS=[
  {nm:"Dragon Shield Dojo",   emoji:"🛡️", bg:"linear-gradient(#0c4a6e 0%,#075985 50%,#94a3b8 50%,#cbd5e1 100%)"},
  {nm:"Dragon Stone Dojo",    emoji:"🪨", bg:"linear-gradient(#171717 0%,#404040 50%,#737373 50%,#a3a3a3 100%)"},
  {nm:"Dragon Corner Dojo",   emoji:"📐", bg:"linear-gradient(#134e4a 0%,#0f766e 50%,#14b8a6 50%,#5eead4 100%)"},
- {nm:"Dragon Balance Dojo",  emoji:"⚖️", bg:"linear-gradient(#1e3a8a 0%,#1d4ed8 50%,#facc15 50%,#fde047 100%)"},
+ {nm:"Dragon Timekeeper Dojo", emoji:"🕐", bg:"linear-gradient(#1e293b 0%,#3730a3 50%,#fde68a 50%,#facc15 100%)"},
  {nm:"Dragon Slice Dojo",    emoji:"🍕", bg:"linear-gradient(#7f1d1d 0%,#be123c 50%,#f97316 50%,#fbbf24 100%)"},
  {nm:"Dragon Wisdom Dojo",   emoji:"📖", bg:"linear-gradient(#3b0764 0%,#6b21a8 50%,#ca8a04 50%,#facc15 100%)"}
 ];
@@ -314,7 +314,7 @@ var ENEMIES=[
  {nm:"Shield Samurai",    art:"samurai", col:"#94a3b8"},
  {nm:"Stone Fist",        art:"brute",   col:"#404040"},
  {nm:"Corner Master",     art:"monk",    col:"#14b8a6"},
- {nm:"Balance Sensei",    art:"kungfu",  col:"#facc15"},
+ {nm:"Time Keeper",       art:"monk",    col:"#facc15"},
  {nm:"Slice Striker",     art:"ninja",   col:"#ea580c"},
  {nm:"Wisdom Sensei",     art:"kungfu",  col:"#6b21a8"}
 ];
@@ -364,13 +364,25 @@ function defaultState(){return{
   islandLives:3, islandMaxLives:3, pizzaEaten:false, firstAidKits:0,
   introSeen:false, victorySeen:false,
   scrolls:0,
-  schemaVersion:4
+  schemaVersion:5
 };}
 // Migrate older profiles to the Dragon Island schema. Coins kept, dojo
 // progress + badges + scrolls reset, new intro replayed once.
 function migrateState(s){
   if(!s)return s;
-  if(s.schemaVersion>=4)return s;
+  if(s.schemaVersion>=5)return s;
+  // v4 -> v5: "Even & Odd" dojo became "Time" (Dragon Timekeeper). Carry
+  // any cleared/win progress forward under the new topic key so existing
+  // players keep their badge progress.
+  if(s.schemaVersion===4){
+    if(s.cleared && s.cleared["1:Even & Odd"]){
+      s.cleared["1:Time"] = true;
+      delete s.cleared["1:Even & Odd"];
+    }
+    s.schemaVersion = 5;
+    return s;
+  }
+  // v1-v3 -> v5: full Dragon Island reset path (matches the v4 migration)
   s.equip = {Suit:(s.equip&&s.equip.Suit)||"sk_bare", Headband:(s.equip&&s.equip.Headband)||"hb_none"};
   s.owned = (s.owned||[]).filter(function(id){return /^(sk_|hb_)/.test(id);});
   if(s.owned.indexOf("sk_bare")<0)s.owned.push("sk_bare");
@@ -387,7 +399,7 @@ function migrateState(s){
   s.victorySeen = false;
   s.scrolls = 0;
   s.badges = [];             // Wing spec: only the Dragon Black Belt badge survives
-  s.schemaVersion = 4;
+  s.schemaVersion = 5;
   return s;
 }
 function defaultRoot(){return{version:2,current:null,profiles:{}};}
@@ -1724,6 +1736,56 @@ function tailMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
 }
 
+/* Wing's Year 3 Dragon Timekeeper Dojo bank: 50 visual clock MCQs.
+   Stored as [hour, minute] pairs — the game's existing clockSVG()
+   renderer draws the analog clock face, and the option set + answer
+   are derived from the minute:
+     m === 0  -> options [H:00, H:15, H:30, H:45], answer "H:00"
+     m === 15 -> word options ["Quarter past H", "Quarter to H",
+                  "Half past H", "H o'clock"], answer "Quarter past H"
+     m === 30 -> options [H:00, H:15, H:30, H:45], answer "H:30"
+     m === 45 -> word options ["Quarter past H", "Quarter to nextH",
+                  "Half past H", "nextH o'clock"], answer
+                  "Quarter to nextH" (nextH wraps 12 -> 1)
+   No PNG files needed — clockSVG renders the visual inline. */
+var TIME_QUESTIONS=[
+ // o'clock (5)
+ [1,0],[3,0],[5,0],[8,0],[10,0],
+ // half past (5)
+ [2,30],[4,30],[6,30],[9,30],[11,30],
+ // quarter past — Q11-22 cover hours 1..12, then Q23-25 repeat 2,5,9
+ [1,15],[2,15],[3,15],[4,15],[5,15],[6,15],[7,15],[8,15],[9,15],[10,15],[11,15],[12,15],
+ [2,15],[5,15],[9,15],
+ // quarter to — Q26-37 cover hours 1..12, then Q38-40 repeat 2,5,9
+ [1,45],[2,45],[3,45],[4,45],[5,45],[6,45],[7,45],[8,45],[9,45],[10,45],[11,45],[12,45],
+ [2,45],[5,45],[9,45],
+ // mixed (10) — Q41-50
+ [1,15],[3,45],[6,30],[8,0],[10,15],[12,45],[4,15],[7,45],[9,30],[11,0]
+];
+function timeKeeperMakeQ(){
+  var qp = pick(TIME_QUESTIONS);
+  var h = qp[0], m = qp[1];
+  var options, answer;
+  if(m===0 || m===30){
+    options = [h+":00", h+":15", h+":30", h+":45"];
+    answer = h+":"+(m===0?"00":"30");
+  } else if(m===15){
+    options = ["Quarter past "+h, "Quarter to "+h, "Half past "+h, h+" o'clock"];
+    answer = "Quarter past "+h;
+  } else { // m === 45
+    var nh = (h%12)+1;
+    options = ["Quarter past "+h, "Quarter to "+nh, "Half past "+h, nh+" o'clock"];
+    answer = "Quarter to "+nh;
+  }
+  return {type:"multiple", topic:"Time",
+    prompt:"What time is shown?",
+    options:options,
+    answer:answer,
+    visualHTML: clockSVG(h, m),
+    explain:"The clock shows "+answer+".",
+    hint:"Short hand = hour. Long hand = minute. Long hand at 12 = o'clock, at 3 = quarter past, at 6 = half past, at 9 = quarter to."};
+}
+
 /* Wing's Year 3 Dragon Slice Dojo bank: 80 same-denominator fraction
    addition questions. Stored as compact [a1, a2, d] triplets — the
    prompt and accepted answer set are computed at draw time so we accept
@@ -2134,6 +2196,12 @@ function makeQ(topicId,diff){
   if(topicId==="Add Fractions"){
     var fq = sliceMakeQ(); fq.topic = topicId; return fq;
   }
+  // Wing's curated Dragon Timekeeper Dojo bank (Year 3 telling time —
+  // o'clock / half past / quarter past / quarter to). The clock is rendered
+  // inline by clockSVG so no external image files are required.
+  if(topicId==="Time"){
+    return timeKeeperMakeQ();
+  }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
   var q;
@@ -2177,8 +2245,9 @@ function uniqueBatch(n,gen){
 }
 function buildBattle(topicId,diff){return uniqueBatch(10,function(){return makeQ(topicId,diff);});}
 function buildFinalBattle(diff){
-  // Dragon King arena: mix all 13 dojo topics + Multiplication + Time.
-  var ids=TOPICS.map(function(t){return t.id;}).concat(["Multiplication","Time"]);
+  // Dragon King arena: mix all 13 dojo topics + Multiplication (Time is
+  // already in TOPICS via Dragon Timekeeper Dojo).
+  var ids=TOPICS.map(function(t){return t.id;}).concat(["Multiplication"]);
   return uniqueBatch(15,function(){return makeQ(pick(ids),diff);});
 }
 function weakTopics(){
