@@ -1623,6 +1623,75 @@ function tailMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
 }
 
+/* Wing's Year 3 Dragon Water Dojo bank: 80 capacity questions in four
+   buckets — pick-the-larger MCQ, L↔ml conversions, and a mixed
+   arithmetic/conversion set. Same shape as STRENGTH_DATA / TAIL_DATA. */
+var WATER_DATA={
+  // Q1-20 — "Which holds more: A L or B L?" — answer is the bigger one.
+  cmp:[
+    [1,2],[3,1],[5,8],[10,7],[12,15],[20,18],[25,30],[40,35],[50,60],[75,70],
+    [2,4],[6,5],[9,11],[14,12],[16,20],[24,22],[28,35],[45,40],[55,65],[80,75]
+  ],
+  // Q21-40 — Convert N L to ml (×1000)
+  lToMl:[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,40,50,60,75,100],
+  // Q41-60 — Convert N ml to L (÷1000)
+  mlToL:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,
+         12000,15000,20000,25000,30000,40000,50000,60000,75000,100000],
+  // Q61-80 — mixed arithmetic + conversion problems (prompt, answer)
+  mixed:[
+    ["500 ml + 500 ml","1000 ml"], ["2 L + 3 L","5 L"],
+    ["10 L - 4 L","6 L"],          ["800 ml + 200 ml","1000 ml"],
+    ["7 L - 2 L","5 L"],           ["1500 ml = ? L","1.5 L"],
+    ["2500 ml = ? L","2.5 L"],     ["5 L = ? ml","5000 ml"],
+    ["12 L = ? ml","12000 ml"],    ["9000 ml = ? L","9 L"],
+    ["4 L + 6 L","10 L"],          ["15 L - 5 L","10 L"],
+    ["3000 ml + 2000 ml","5000 ml"],["20 L - 8 L","12 L"],
+    ["1 L + 1000 ml","2 L"],       ["14 L + 6 L","20 L"],
+    ["18 L - 9 L","9 L"],          ["7000 ml = ? L","7 L"],
+    ["11 L = ? ml","11000 ml"],    ["16 L - 6 L","10 L"]
+  ]
+};
+function waterMakeQ(){
+  var bucket = pick(["cmp","lToMl","mlToL","mixed"]);
+  if(bucket==="cmp"){
+    var pair = pick(WATER_DATA.cmp);
+    var more = Math.max(pair[0], pair[1]);
+    var less = Math.min(pair[0], pair[1]);
+    var a = pair[0]+" L", b = pair[1]+" L";
+    return {type:"multiple",
+      prompt:"Which holds more: "+a+" or "+b+"?",
+      options:[a, b], answer:more+" L",
+      explain:more+" L holds more than "+less+" L.",
+      hint:"More litres = more capacity. Compare the numbers."};
+  }
+  if(bucket==="lToMl"){
+    var L = pick(WATER_DATA.lToMl);
+    return {type:"direct",
+      prompt:"Convert "+L+" L to ml.",
+      answer:(L*1000)+" ml",
+      explain:L+" L × 1000 = "+(L*1000)+" ml.",
+      hint:"1 L = 1000 ml. Multiply litres by 1000."};
+  }
+  if(bucket==="mlToL"){
+    var ml = pick(WATER_DATA.mlToL);
+    return {type:"direct",
+      prompt:"Convert "+ml+" ml to L.",
+      answer:(ml/1000)+" L",
+      explain:ml+" ml ÷ 1000 = "+(ml/1000)+" L.",
+      hint:"1000 ml = 1 L. Divide millilitres by 1000."};
+  }
+  // mixed
+  var m = pick(WATER_DATA.mixed);
+  var prompt = (m[0].indexOf("?")>=0) ? m[0] : m[0]+" = ?";
+  var explain = (m[0].indexOf("?")>=0)
+    ? m[0].replace("?", m[1].split(" ")[0])
+    : m[0]+" = "+m[1];
+  return {type:"direct",
+    prompt:prompt, answer:m[1],
+    explain:explain+".",
+    hint:"Same units? Add or subtract. Different units? Convert first (1 L = 1000 ml)."};
+}
+
 /* Wing's Year 3 Dragon Split Dojo bank: 90 division facts covering the
    2x-10x tables (some duplicated near the end for extra repetition of
    harder facts). All single typed-answer questions. */
@@ -1681,6 +1750,11 @@ function makeQ(topicId,diff){
   // m↔cm conversion + simple arithmetic/conversion mix).
   if(topicId==="Length"){
     var lq = tailMakeQ(); lq.topic = topicId; return lq;
+  }
+  // Wing's curated Dragon Water Dojo bank (Year 3 capacity: comparison +
+  // L↔ml conversion + simple arithmetic/conversion mix).
+  if(topicId==="Capacity"){
+    var wq = waterMakeQ(); wq.topic = topicId; return wq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
