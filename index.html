@@ -2920,12 +2920,11 @@ function screenBattle(){
   '<div class="card" id="qcard" style="margin-top:12px"></div>';
   $("flee").onclick=function(){
     clearInterval(qTimer);
-    // Flee: carry damage from this fight back into the island life pool,
-    // and pay a small coin penalty. Lives never replenish on flee.
+    // Flee: carry damage from this fight back into the island life pool.
+    // Wing spec: no coin penalty for fleeing. Lives never replenish on flee.
     S.islandLives = Math.max(0, B.hearts|0);
-    S.coins = Math.max(0, (S.coins||0) - 10);
     save();
-    toast("🏳️ Fled — 🪙-10, lives now "+S.islandLives+"/"+S.islandMaxLives);
+    toast("🏳️ Fled — lives now "+S.islandLives+"/"+S.islandMaxLives);
     view="island";render();
   };
   paintHP();
@@ -3482,7 +3481,7 @@ function screenReport(){
 // Hardware back button: navigate views instead of closing the app/tab.
 // Wraps render() so every view change pushes a history entry, then listens
 // for popstate to restore the previous view. Mid-battle back behaves like
-// the Flee button so kids can't dodge the penalty by tapping back.
+// the Flee button so remaining hearts carry to the island life pool.
 (function(){
   var _origRender = render;
   var _fromPop = false;
@@ -3494,13 +3493,13 @@ function screenReport(){
     try { history.pushState({view:view}, ''); _lastPushed = view; } catch(e){}
   };
   window.addEventListener('popstate', function(e){
-    // Mid-battle back = Flee (penalty + carry remaining hearts to island pool).
+    // Mid-battle back = Flee (carry remaining hearts to island pool, no coin
+    // penalty per Wing's current spec).
     if(view==="battle" && B){
       try { clearInterval(qTimer); } catch(_){}
       S.islandLives = Math.max(0, B.hearts|0);
-      S.coins = Math.max(0, (S.coins||0) - 10);
       save();
-      toast("🏳️ Fled — 🪙-10, lives now "+S.islandLives+"/"+(S.islandMaxLives||3));
+      toast("🏳️ Fled — lives now "+S.islandLives+"/"+(S.islandMaxLives||3));
     }
     _fromPop = true;
     if(e.state && e.state.view){ view = e.state.view; _lastPushed = view; }
