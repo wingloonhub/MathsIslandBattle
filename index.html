@@ -2702,7 +2702,7 @@ function screenIsland(){
   var finalTile='<button class="lvl" '+(finalLocked?'disabled':'')+' data-i="'+FINAL_IDX+'" style="border:3px solid #facc15;background:#1f2433">'+
     '<div class="e">👑</div>'+
     '<div class="t" style="color:#fde047">'+esc(fb.nm)+'</div>'+
-    '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×8'+(finalDone?' · ✅':'')+'</div>'+
+    '<div class="b">'+bossSVG(fb.art,30,fb.col)+' Final Boss · 💜×10'+(finalDone?' · ✅':'')+'</div>'+
     (allDojos?'':'<div style="margin-top:6px;color:#fcd34d;font-weight:800;font-size:12px">🔒 Beat all 13 dojos first</div>')+
     '</button>';
   // Compact tiles row: 2 training centres + Shop, all small enough to sit on
@@ -2764,7 +2764,7 @@ function startBattle(islandN,topicIdx){
     var fb=FINAL_BOSSES[isl.n]||{nm:"Dragon King",art:"dragon",col:"#7f1d1d"};
     topic={id:"Dragon King Arena"};
     boss={nm:fb.nm,art:fb.art,col:fb.col,mech:"final"};
-    qs=buildFinalBattle(diff); hp=8; // Wing spec: 8 lives for the Dragon King
+    qs=buildFinalBattle(diff); hp=10; // Wing spec: 10 lives for the Dragon King
     dojoBg = fb.bg || null;
     timer = 0; // Wing spec: no time limit on final boss
   } else {
