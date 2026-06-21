@@ -2933,7 +2933,7 @@ function screenBattle(){
       '<div style="flex:1;text-align:right"><div>'+esc(b.boss.nm)+'</div><div class="hearts" id="bhp" style="font-size:16px;letter-spacing:1px;line-height:1.2"></div></div></div>'+
     '<div class="floor"></div>'+
     '<div class="fighter hero idle" id="hero" style="width:96px;height:128px">'+heroSVG()+'</div>'+
-    '<div class="fighter boss idle" id="boss">'+bossSVG(b.boss.art,122,b.boss.col)+'</div></div>'+
+    '<div class="fighter boss idle" id="boss">'+bossSVG(b.boss.art,140,b.boss.col)+'</div></div>'+
   '<div class="card" id="qcard" style="margin-top:12px"></div>';
   $("flee").onclick=function(){
     clearInterval(qTimer);
@@ -3096,13 +3096,13 @@ function endBattle(){
       addBadge("dragon_black_belt",nb);
     }
   } else {
-    // LOSE: −50 coins, −5 scrolls (min 0). Carry current hearts (likely 0)
-    // back to the island life pool. Cleared dojos stay cleared.
+    // LOSE: −50 coins, −5 scrolls (min 0). Lives refill to max so the kid
+    // can immediately try again (Wing spec). Cleared dojos stay cleared.
     coins = -50;
     S.coins = Math.max(0, (S.coins||0) - 50);
     scrollsDelta = -5;
     S.scrolls = Math.max(0, (S.scrolls||0) - 5);
-    S.islandLives = Math.max(0, B.hearts|0);
+    S.islandLives = S.islandMaxLives || 3;
   }
   S.history.unshift({when:Date.now(),island:B.isl.name,topic:B.topic.id,won:won,correct:B.correct,wrong:B.wrong});
   S.history=S.history.slice(0,20);S.lastPlay=todayKey();save();
@@ -3607,8 +3607,7 @@ function screenReport(){
     try { history.pushState({view:view}, ''); _lastPushed = view; } catch(e){}
   };
   window.addEventListener('popstate', function(e){
-    // Mid-battle back = Flee (carry remaining hearts to island pool, no coin
-    // penalty per Wing's current spec).
+    // Mid-battle back = Flee (carry remaining hearts to island pool).
     if(view==="battle" && B){
       try { clearInterval(qTimer); } catch(_){}
       S.islandLives = Math.max(0, B.hearts|0);
@@ -3616,7 +3615,16 @@ function screenReport(){
       toast("🏳️ Fled — lives now "+S.islandLives+"/"+(S.islandMaxLives||3));
     }
     _fromPop = true;
-    if(e.state && e.state.view){ view = e.state.view; _lastPushed = view; }
+    // Wing spec: hardware back jumps straight to the menu (map) from any
+    // gameplay screen — not the previous view in history. Auth / intro
+    // screens are exempt so back closes the app on a fresh device.
+    if(view==="auth" || view==="intro" || view==="map"){
+      if(e.state && e.state.view){ view = e.state.view; _lastPushed = view; }
+    } else {
+      view = "map";
+      _lastPushed = "map";
+      try { history.replaceState({view:"map"}, ""); } catch(_){}
+    }
     render();
     _fromPop = false;
   });
