@@ -1554,6 +1554,75 @@ function strengthMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 kg = 1000 g)."};
 }
 
+/* Wing's Year 3 Dragon Tail Dojo bank: 80 length questions in four
+   buckets — pick-the-longer MCQ, m→cm and cm→m conversions, and a
+   mixed arithmetic + conversion set. Same shape as STRENGTH_DATA. */
+var TAIL_DATA={
+  // Q1-20 — "Which is longer: A cm or B cm?" — answer is the bigger one.
+  cmp:[
+    [12,18],[25,20],[30,45],[50,35],[60,75],[80,70],[90,100],[120,110],[150,175],[200,180],
+    [15,22],[28,24],[33,39],[44,41],[55,65],[72,68],[84,96],[105,95],[130,145],[170,160]
+  ],
+  // Q21-40 — Convert N m to cm (×100)
+  mToCm:[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,40,50,60,75,100],
+  // Q41-60 — Convert N cm to m (÷100)
+  cmToM:[100,200,300,400,500,600,700,800,900,1000,
+         1200,1500,2000,2500,3000,4000,5000,6000,7500,10000],
+  // Q61-80 — mixed arithmetic + conversion problems (prompt, answer)
+  mixed:[
+    ["50 cm + 50 cm","100 cm"],["2 m + 3 m","5 m"],
+    ["10 m - 4 m","6 m"],     ["80 cm + 20 cm","100 cm"],
+    ["7 m - 2 m","5 m"],      ["150 cm = ? m","1.5 m"],
+    ["250 cm = ? m","2.5 m"], ["5 m = ? cm","500 cm"],
+    ["12 m = ? cm","1200 cm"],["900 cm = ? m","9 m"],
+    ["4 m + 6 m","10 m"],     ["15 m - 5 m","10 m"],
+    ["300 cm + 200 cm","500 cm"], ["20 m - 8 m","12 m"],
+    ["1 m + 100 cm","2 m"],   ["14 m + 6 m","20 m"],
+    ["18 m - 9 m","9 m"],     ["700 cm = ? m","7 m"],
+    ["11 m = ? cm","1100 cm"],["16 m - 6 m","10 m"]
+  ]
+};
+function tailMakeQ(){
+  var bucket = pick(["cmp","mToCm","cmToM","mixed"]);
+  if(bucket==="cmp"){
+    var pair = pick(TAIL_DATA.cmp);
+    var longer = Math.max(pair[0], pair[1]);
+    var shorter = Math.min(pair[0], pair[1]);
+    var a = pair[0]+" cm", b = pair[1]+" cm";
+    return {type:"multiple",
+      prompt:"Which is longer: "+a+" or "+b+"?",
+      options:[a, b], answer:longer+" cm",
+      explain:longer+" cm is longer than "+shorter+" cm.",
+      hint:"More centimetres = greater length. Compare the numbers."};
+  }
+  if(bucket==="mToCm"){
+    var m = pick(TAIL_DATA.mToCm);
+    return {type:"direct",
+      prompt:"Convert "+m+" m to cm.",
+      answer:(m*100)+" cm",
+      explain:m+" m × 100 = "+(m*100)+" cm.",
+      hint:"1 m = 100 cm. Multiply metres by 100."};
+  }
+  if(bucket==="cmToM"){
+    var c = pick(TAIL_DATA.cmToM);
+    return {type:"direct",
+      prompt:"Convert "+c+" cm to m.",
+      answer:(c/100)+" m",
+      explain:c+" cm ÷ 100 = "+(c/100)+" m.",
+      hint:"100 cm = 1 m. Divide centimetres by 100."};
+  }
+  // mixed
+  var m2 = pick(TAIL_DATA.mixed);
+  var prompt = (m2[0].indexOf("?")>=0) ? m2[0] : m2[0]+" = ?";
+  var explain = (m2[0].indexOf("?")>=0)
+    ? m2[0].replace("?", m2[1].split(" ")[0])
+    : m2[0]+" = "+m2[1];
+  return {type:"direct",
+    prompt:prompt, answer:m2[1],
+    explain:explain+".",
+    hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
+}
+
 /* Wing's Year 3 Dragon Split Dojo bank: 90 division facts covering the
    2x-10x tables (some duplicated near the end for extra repetition of
    harder facts). All single typed-answer questions. */
@@ -1607,6 +1676,11 @@ function makeQ(topicId,diff){
   // unit conversion + simple arithmetic/conversion mix).
   if(topicId==="Mass"){
     var mq = strengthMakeQ(); mq.topic = topicId; return mq;
+  }
+  // Wing's curated Dragon Tail Dojo bank (Year 3 length: comparison +
+  // m↔cm conversion + simple arithmetic/conversion mix).
+  if(topicId==="Length"){
+    var lq = tailMakeQ(); lq.topic = topicId; return lq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
