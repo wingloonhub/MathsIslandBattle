@@ -1485,6 +1485,75 @@ function stairMakeQ(){
     explain:"Each step adds "+step+". After "+terms[terms.length-1]+" comes "+next+".",
     hint:"Find the difference between consecutive numbers, then add it once more."};
 }
+/* Wing's Year 3 Dragon Strength Dojo bank: 80 mass questions in four
+   buckets — pick-the-heavier MCQ, kg→g conversions, g→kg conversions,
+   and simple mass arithmetic + mixed-unit conversion problems. */
+var STRENGTH_DATA={
+  // Q1-20 — "Which is heavier: A kg or B kg?" — answer is the bigger one.
+  cmp:[
+    [2,5],[7,3],[1,4],[9,6],[8,10],[12,9],[15,20],[18,14],[25,30],[40,35],
+    [6,11],[13,8],[17,19],[22,16],[28,24],[32,36],[45,50],[55,48],[60,70],[75,65]
+  ],
+  // Q21-40 — Convert N kg to g (×1000)
+  kgToG:[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,40,50,60,75,100],
+  // Q41-60 — Convert N g to kg (÷1000)
+  gToKg:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,
+         12000,15000,20000,25000,30000,40000,50000,60000,75000,100000],
+  // Q61-80 — mixed arithmetic + conversion problems (prompt, answer)
+  mixed:[
+    ["500 g + 500 g","1000 g"], ["2 kg + 3 kg","5 kg"],
+    ["10 kg - 4 kg","6 kg"],   ["800 g + 200 g","1000 g"],
+    ["7 kg - 2 kg","5 kg"],    ["1500 g = ? kg","1.5 kg"],
+    ["2500 g = ? kg","2.5 kg"],["5 kg = ? g","5000 g"],
+    ["12 kg = ? g","12000 g"], ["9000 g = ? kg","9 kg"],
+    ["4 kg + 6 kg","10 kg"],   ["15 kg - 5 kg","10 kg"],
+    ["3000 g + 2000 g","5000 g"], ["20 kg - 8 kg","12 kg"],
+    ["1 kg + 1000 g","2 kg"],  ["14 kg + 6 kg","20 kg"],
+    ["18 kg - 9 kg","9 kg"],   ["7000 g = ? kg","7 kg"],
+    ["11 kg = ? g","11000 g"], ["16 kg - 6 kg","10 kg"]
+  ]
+};
+function strengthMakeQ(){
+  var bucket = pick(["cmp","kgToG","gToKg","mixed"]);
+  if(bucket==="cmp"){
+    var pair = pick(STRENGTH_DATA.cmp);
+    var heavier = Math.max(pair[0], pair[1]);
+    var lighter = Math.min(pair[0], pair[1]);
+    var a = pair[0]+" kg", b = pair[1]+" kg";
+    return {type:"multiple",
+      prompt:"Which is heavier: "+a+" or "+b+"?",
+      options:[a, b], answer:heavier+" kg",
+      explain:heavier+" kg is heavier than "+lighter+" kg.",
+      hint:"More kilograms = more mass. Compare the numbers."};
+  }
+  if(bucket==="kgToG"){
+    var kg = pick(STRENGTH_DATA.kgToG);
+    return {type:"direct",
+      prompt:"Convert "+kg+" kg to g.",
+      answer:(kg*1000)+" g",
+      explain:kg+" kg × 1000 = "+(kg*1000)+" g.",
+      hint:"1 kg = 1000 g. Multiply kilograms by 1000."};
+  }
+  if(bucket==="gToKg"){
+    var g = pick(STRENGTH_DATA.gToKg);
+    return {type:"direct",
+      prompt:"Convert "+g+" g to kg.",
+      answer:(g/1000)+" kg",
+      explain:g+" g ÷ 1000 = "+(g/1000)+" kg.",
+      hint:"1000 g = 1 kg. Divide grams by 1000."};
+  }
+  // mixed
+  var m = pick(STRENGTH_DATA.mixed);
+  var prompt = (m[0].indexOf("?")>=0) ? m[0] : m[0]+" = ?";
+  var explain = (m[0].indexOf("?")>=0)
+    ? m[0].replace("?", m[1].split(" ")[0])
+    : m[0]+" = "+m[1];
+  return {type:"direct",
+    prompt:prompt, answer:m[1],
+    explain:explain+".",
+    hint:"Same units? Add or subtract. Different units? Convert first (1 kg = 1000 g)."};
+}
+
 /* Wing's Year 3 Dragon Split Dojo bank: 90 division facts covering the
    2x-10x tables (some duplicated near the end for extra repetition of
    harder facts). All single typed-answer questions. */
@@ -1533,6 +1602,11 @@ function makeQ(topicId,diff){
       answer: String(quotient),
       explain: dividend+" ÷ "+divisor+" = "+quotient+".",
       hint: "Ask yourself: "+divisor+" × ? = "+dividend+"."};
+  }
+  // Wing's curated Dragon Strength Dojo bank (Year 3 mass: comparison +
+  // unit conversion + simple arithmetic/conversion mix).
+  if(topicId==="Mass"){
+    var mq = strengthMakeQ(); mq.topic = topicId; return mq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
