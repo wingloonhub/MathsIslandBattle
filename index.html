@@ -1724,6 +1724,53 @@ function tailMakeQ(){
     hint:"Same units? Add or subtract. Different units? Convert first (1 m = 100 cm)."};
 }
 
+/* Wing's Year 3 Dragon Slice Dojo bank: 80 same-denominator fraction
+   addition questions. Stored as compact [a1, a2, d] triplets — the
+   prompt and accepted answer set are computed at draw time so we accept
+   both the unsimplified ("2/4") and simplified ("1/2") forms, plus the
+   whole-number form when the sum equals the denominator. */
+var SLICE_QUESTIONS=[
+ [1,1,4],[1,2,4],[2,1,4],[2,2,4],[1,3,4],[3,1,4],
+ [1,1,5],[1,2,5],[2,1,5],[2,2,5],[1,3,5],[3,1,5],
+ [2,3,5],[3,2,5],[4,1,5],[1,4,5],
+ [1,1,6],[1,2,6],[2,1,6],[2,2,6],[1,3,6],[3,1,6],
+ [2,3,6],[3,2,6],[4,1,6],[1,4,6],
+ [1,1,8],[1,2,8],[2,1,8],[2,2,8],[1,3,8],[3,1,8],
+ [2,3,8],[3,2,8],[4,1,8],[1,4,8],
+ [1,1,10],[1,2,10],[2,1,10],[2,2,10],[1,3,10],[3,1,10],
+ [2,3,10],[3,2,10],[4,1,10],[1,4,10],
+ [1,1,3],[1,2,3],[2,1,3],
+ [1,1,12],[1,2,12],[2,1,12],[2,2,12],[1,3,12],[3,1,12],
+ [2,3,12],[3,2,12],[4,1,12],[1,4,12],
+ [1,1,9],[1,2,9],[2,1,9],[2,2,9],[1,3,9],[3,1,9],
+ [2,3,9],[3,2,9],[4,1,9],[1,4,9],
+ [1,1,7],[1,2,7],[1,3,7],[1,4,7],[1,5,7],[1,6,7],
+ [2,1,7],[2,2,7],[2,3,7],[2,4,7],[2,5,7]
+];
+function sliceMakeQ(){
+  var q = pick(SLICE_QUESTIONS);
+  var a1=q[0], a2=q[1], d=q[2], sum=a1+a2;
+  var prompt = a1+"/"+d+" + "+a2+"/"+d+" = ?";
+  var primary, accept=[], simplified="";
+  if(sum === d){
+    primary = "1";                  // whole-number result
+    accept.push(sum+"/"+d);          // accept the unsimplified e.g. "4/4"
+  } else {
+    primary = sum+"/"+d;             // unsimplified — matches worksheet's first form
+    var g = gcd(sum, d);
+    if(g>1){
+      simplified = (sum/g)+"/"+(d/g);
+      accept.push(simplified);       // also accept the simplified form
+    }
+  }
+  return {type:"direct",
+    prompt:prompt, answer:primary, accept:accept,
+    explain:"Same bottom number — add the tops: "+a1+" + "+a2+" = "+sum+
+            ", so the answer is "+primary+(simplified?(" (or "+simplified+")"):"")+
+            (sum===d?(" (which is the same as "+sum+"/"+d+")"):"")+".",
+    hint:"Same denominator? Add the top numbers (numerators). Keep the bottom number (denominator) the same."};
+}
+
 /* Wing's Year 3 Dragon Shield / Stone / Corner dojo banks. Each entry:
    p = prompt, o = options (shuffled at draw time), a = correct answer,
    v = visual key resolved by resolveVisual(), or empty string for none. */
@@ -2081,6 +2128,11 @@ function makeQ(topicId,diff){
   }
   if(topicId==="Right Angles"){
     return visualMCQ(CORNER_QUESTIONS, topicId, "Right = 90°. Acute < 90°. Obtuse > 90°.");
+  }
+  // Wing's curated Dragon Slice Dojo bank (Year 3 add-fractions with the
+  // same denominator). Accepts unsimplified and simplified forms.
+  if(topicId==="Add Fractions"){
+    var fq = sliceMakeQ(); fq.topic = topicId; return fq;
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
