@@ -1786,6 +1786,120 @@ function timeKeeperMakeQ(){
     hint:"Short hand = hour. Long hand = minute. Long hand at 12 = o'clock, at 3 = quarter past, at 6 = half past, at 9 = quarter to."};
 }
 
+/* Wing's Year 3 Dragon Wisdom Dojo bank: 80 mixed-operation word problems
+   covering addition, subtraction, division, money, length, mass, capacity,
+   time duration, and fraction addition. Stored as [prompt, answer]. */
+var WISDOM_QUESTIONS=[
+ // Q1-10: addition stories
+ ["Sarah has 28 stickers. Her friend gives her 15 more stickers. How many stickers does she have now?","43"],
+ ["Tom has 35 marbles. He finds 12 more. How many marbles does he have?","47"],
+ ["Emma reads 24 pages on Monday and 18 pages on Tuesday. How many pages did she read?","42"],
+ ["A class collected 16 cans in Week 1 and 27 cans in Week 2. How many cans were collected?","43"],
+ ["Ali scored 14 points in one game and 19 in another. What is his total score?","33"],
+ ["Mia has 32 crayons. She buys 11 more. How many crayons does she have?","43"],
+ ["There are 21 boys and 18 girls in a class. How many students are there?","39"],
+ ["A farmer picked 25 mangoes and 17 bananas. How many fruits did he pick?","42"],
+ ["John has RM15 and receives RM20. How much money does he have now?","RM35"],
+ ["A library bought 23 books and then 16 more books. How many books are there?","39"],
+ // Q11-20: subtraction stories
+ ["There are 54 cookies. 21 are eaten. How many are left?","33"],
+ ["A shop has 70 balloons. It sells 28. How many remain?","42"],
+ ["Lily has 45 stickers and gives away 17. How many does she have left?","28"],
+ ["There are 62 apples in a basket. 24 are used. How many remain?","38"],
+ ["A bus carries 58 passengers. 16 get off. How many are left?","42"],
+ ["Ben had RM50 and spent RM18. How much is left?","RM32"],
+ ["There are 80 pencils. 35 are given away. How many remain?","45"],
+ ["A baker made 72 cupcakes and sold 29. How many are left?","43"],
+ ["There are 64 fish in a pond. 22 are moved. How many remain?","42"],
+ ["A teacher prepared 48 worksheets and used 19. How many are left?","29"],
+ // Q21-30: division stories
+ ["24 oranges are shared equally among 4 children. How many each?","6"],
+ ["36 rabbits are shared equally among 6 cages. How many per cage?","6"],
+ ["40 pencils are packed into 5 boxes equally. How many per box?","8"],
+ ["54 cookies are shared among 6 children. How many each?","9"],
+ ["28 books are placed on 4 shelves equally. How many per shelf?","7"],
+ ["63 flowers are arranged into 7 vases equally. How many per vase?","9"],
+ ["72 eggs are packed into 8 trays equally. How many per tray?","9"],
+ ["45 sweets are shared among 5 friends. How many each?","9"],
+ ["30 apples are shared among 3 baskets equally. How many per basket?","10"],
+ ["56 cards are divided into 7 piles equally. How many per pile?","8"],
+ // Q31-40: money (total + change)
+ ["A burger costs RM8 and a drink costs RM4. How much altogether?","RM12"],
+ ["A notebook costs RM12 and a pencil costs RM3. Total cost?","RM15"],
+ ["A football costs RM25 and a water bottle costs RM10. Total cost?","RM35"],
+ ["An apple costs RM2 and grapes cost RM7. Total cost?","RM9"],
+ ["A toy costs RM18 and a book costs RM12. Total cost?","RM30"],
+ ["A cake costs RM15. You pay RM20. Change?","RM5"],
+ ["A shirt costs RM28. You pay RM50. Change?","RM22"],
+ ["A cap costs RM16. You pay RM20. Change?","RM4"],
+ ["A school bag costs RM42. You pay RM50. Change?","RM8"],
+ ["A pair of shoes costs RM65. You pay RM100. Change?","RM35"],
+ // Q41-45: length
+ ["A rope is 3 m long and another is 5 m long. Total length?","8 m"],
+ ["A ribbon is 7 m long. Another ribbon is 4 m long. Total length?","11 m"],
+ ["A snake is 2 m long and another is 6 m long. Total length?","8 m"],
+ ["A plank is 9 m long. Another is 3 m long. Total length?","12 m"],
+ ["A path is 10 m and another path is 5 m. Total length?","15 m"],
+ // Q46-50: mass
+ ["A watermelon weighs 4 kg and a pumpkin weighs 6 kg. Total mass?","10 kg"],
+ ["A bag weighs 8 kg and another weighs 5 kg. Total mass?","13 kg"],
+ ["A dog weighs 12 kg and a cat weighs 4 kg. Total mass?","16 kg"],
+ ["A box weighs 7 kg and another weighs 9 kg. Total mass?","16 kg"],
+ ["A suitcase weighs 15 kg and a backpack weighs 5 kg. Total mass?","20 kg"],
+ // Q51-55: capacity
+ ["A bottle contains 2 L of water and another contains 3 L. Total?","5 L"],
+ ["A tank has 5 L and another has 4 L. Total?","9 L"],
+ ["A jug contains 6 L and another 2 L. Total?","8 L"],
+ ["A bucket holds 7 L and another 5 L. Total?","12 L"],
+ ["A container holds 10 L and another 3 L. Total?","13 L"],
+ // Q56-60: time duration
+ ["Football practice starts at 3:00 pm and ends at 4:00 pm. Duration?","1 hour"],
+ ["A movie starts at 2:00 pm and ends at 4:00 pm. Duration?","2 hours"],
+ ["School starts at 8:00 am and ends at 1:00 pm. Duration?","5 hours"],
+ ["A lesson starts at 9:00 am and ends at 10:00 am. Duration?","1 hour"],
+ ["A game starts at 6:00 pm and ends at 8:00 pm. Duration?","2 hours"],
+ // Q61-65: fraction addition
+ ["John ate 1/4 of a pizza and Mary ate 1/4. How much eaten?","1/2"],
+ ["Tom drank 1/3 of a bottle and later another 1/3. Total?","2/3"],
+ ["Ali ate 2/4 of a cake and 1/4 more. Total?","3/4"],
+ ["Emma coloured 1/5 and then 2/5. Total?","3/5"],
+ ["Ben walked 1/2 km and another 1/2 km. Total?","1 km"],
+ // Q66-80: mixed
+ ["A zoo has 18 lions and 24 tigers. Total animals?","42"],
+ ["There are 12 red balls, 15 blue balls and 13 green balls. Total?","40"],
+ ["Mum bought 14 apples, 12 oranges and 10 bananas. Total fruits?","36"],
+ ["A train carried 35 passengers. 7 got off and 10 got on. How many now?","38"],
+ ["A classroom has 40 chairs. 8 are removed. How many remain?","32"],
+ ["A baker made 25 muffins in the morning and 18 in the afternoon. Total?","43"],
+ ["There are 48 students. They are divided into 6 groups. Students per group?","8"],
+ ["A shop sold 15 toys on Saturday and 22 on Sunday. Total?","37"],
+ ["A cyclist rode 12 km on Monday and 18 km on Tuesday. Total distance?","30 km"],
+ ["A gardener planted 20 flowers and later planted 15 more. Total flowers?","35"],
+ ["A fish tank has 50 fish. 8 are moved out and 5 new fish are added. How many now?","47"],
+ ["A family bought 3 pizzas. Each pizza has 8 slices. How many slices altogether?","24"],
+ ["There are 27 cupcakes arranged equally on 3 trays. How many per tray?","9"],
+ ["A farmer has 45 eggs and packs them equally into 5 boxes. How many eggs per box?","9"],
+ ["A child saves RM10 each week for 4 weeks. How much saved?","RM40"]
+];
+function wisdomMakeQ(){
+  var w = pick(WISDOM_QUESTIONS);
+  var prompt = w[0], answer = w[1];
+  // Light keyword detection to pick a relevant hint.
+  var hint;
+  if(/divided|shared|equally|per tray|per box|per shelf|per vase|per pile|per cage|per group|per basket|each\??$/i.test(prompt))
+    hint = "Sharing equally? Use division: total ÷ number of groups.";
+  else if(/each .* has|each pizza|each week/i.test(prompt))
+    hint = "Equal groups? Use multiplication: groups × value per group.";
+  else if(/left|remain|change|gave away|spent|sold|moved|removed|used|get off|got off/i.test(prompt))
+    hint = "Something taken away? Use subtraction.";
+  else
+    hint = "Bringing things together? Use addition: read the numbers, add them up.";
+  return {type:"direct", topic:"Word Problems",
+    prompt:prompt, answer:answer,
+    explain:"Answer: "+answer+".",
+    hint:hint};
+}
+
 /* Wing's Year 3 Dragon Slice Dojo bank: 80 same-denominator fraction
    addition questions. Stored as compact [a1, a2, d] triplets — the
    prompt and accepted answer set are computed at draw time so we accept
@@ -2201,6 +2315,11 @@ function makeQ(topicId,diff){
   // inline by clockSVG so no external image files are required.
   if(topicId==="Time"){
     return timeKeeperMakeQ();
+  }
+  // Wing's curated Dragon Wisdom Dojo bank (Year 3 mixed word problems
+  // across +, -, ÷, ×, money, length, mass, capacity, time, fractions).
+  if(topicId==="Word Problems"){
+    return wisdomMakeQ();
   }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
