@@ -1350,13 +1350,78 @@ var EXAM={
   {type:"direct",prompt:"Every student has 4 English Books. There are 8 students in the class. How many English Books are there altogether?",answer:"32",explain:"'every / each' → MULTIPLY. 4 × 8 = 32.",hint:"'every student has 4' → MULTIPLY."}
  ]
 };
+/* Wing's Year 4 Dragon Claw Dojo question bank: 80 curated subjective
+   (typed-answer) questions from his uploaded worksheet. Replaces the
+   procedural genAddSub() output for the Plus/Minus/Missing Numbers dojo.
+   isCorrect() strips commas for the numeric comparison, so the kid can
+   type "1677" or "1,677" — both accepted. */
+var CLAW_QUESTIONS=[
+ // Addition (3-digit)
+ {p:"245 + 123 = ?",a:"368"},{p:"314 + 252 = ?",a:"566"},{p:"427 + 162 = ?",a:"589"},
+ {p:"186 + 234 = ?",a:"420"},{p:"523 + 176 = ?",a:"699"},{p:"356 + 243 = ?",a:"599"},
+ {p:"478 + 111 = ?",a:"589"},{p:"645 + 132 = ?",a:"777"},{p:"289 + 321 = ?",a:"610"},
+ {p:"415 + 284 = ?",a:"699"},
+ // Addition (4-digit)
+ {p:"1,245 + 432 = ?",a:"1,677"},{p:"2,134 + 625 = ?",a:"2,759"},{p:"1,789 + 543 = ?",a:"2,332"},
+ {p:"2,456 + 1,123 = ?",a:"3,579"},{p:"3,214 + 845 = ?",a:"4,059"},{p:"1,678 + 945 = ?",a:"2,623"},
+ {p:"2,345 + 876 = ?",a:"3,221"},{p:"1,456 + 1,789 = ?",a:"3,245"},{p:"3,567 + 1,234 = ?",a:"4,801"},
+ {p:"2,789 + 2,111 = ?",a:"4,900"},
+ {p:"3,456 + 2,789 = ?",a:"6,245"},{p:"4,678 + 3,245 = ?",a:"7,923"},{p:"5,123 + 2,987 = ?",a:"8,110"},
+ {p:"2,999 + 4,567 = ?",a:"7,566"},{p:"6,111 + 2,222 = ?",a:"8,333"},{p:"4,321 + 1,678 = ?",a:"5,999"},
+ {p:"5,890 + 2,109 = ?",a:"7,999"},{p:"7,234 + 1,567 = ?",a:"8,801"},{p:"4,688 + 3,201 = ?",a:"7,889"},
+ {p:"8,754 + 1,145 = ?",a:"9,899"},
+ // Subtraction (3-digit)
+ {p:"643 - 121 = ?",a:"522"},{p:"578 - 234 = ?",a:"344"},{p:"712 - 321 = ?",a:"391"},
+ {p:"654 - 143 = ?",a:"511"},{p:"801 - 256 = ?",a:"545"},{p:"930 - 145 = ?",a:"785"},
+ {p:"867 - 432 = ?",a:"435"},{p:"745 - 321 = ?",a:"424"},{p:"999 - 456 = ?",a:"543"},
+ {p:"650 - 225 = ?",a:"425"},
+ // Subtraction (4-digit)
+ {p:"1,876 - 523 = ?",a:"1,353"},{p:"2,340 - 785 = ?",a:"1,555"},{p:"3,001 - 456 = ?",a:"2,545"},
+ {p:"2,678 - 1,234 = ?",a:"1,444"},{p:"4,000 - 1,568 = ?",a:"2,432"},{p:"5,234 - 1,789 = ?",a:"3,445"},
+ {p:"6,789 - 2,345 = ?",a:"4,444"},{p:"4,321 - 1,456 = ?",a:"2,865"},{p:"7,654 - 2,789 = ?",a:"4,865"},
+ {p:"9,000 - 3,456 = ?",a:"5,544"},
+ {p:"6,345 - 2,178 = ?",a:"4,167"},{p:"7,654 - 3,289 = ?",a:"4,365"},{p:"8,000 - 3,456 = ?",a:"4,544"},
+ {p:"5,987 - 2,876 = ?",a:"3,111"},{p:"9,001 - 4,789 = ?",a:"4,212"},{p:"7,777 - 2,222 = ?",a:"5,555"},
+ {p:"8,642 - 3,211 = ?",a:"5,431"},{p:"9,500 - 4,123 = ?",a:"5,377"},{p:"6,888 - 2,456 = ?",a:"4,432"},
+ {p:"8,123 - 3,789 = ?",a:"4,334"},
+ // Missing numbers — small (□ marks the unknown, matches the worksheet)
+ {p:"□ + 125 = 300",a:"175"},{p:"□ + 150 = 450",a:"300"},
+ {p:"250 + □ = 500",a:"250"},{p:"325 + □ = 600",a:"275"},
+ {p:"□ + 210 = 700",a:"490"},
+ {p:"500 - □ = 250",a:"250"},{p:"700 - □ = 400",a:"300"},
+ {p:"650 - □ = 200",a:"450"},{p:"900 - □ = 350",a:"550"},
+ {p:"800 - □ = 150",a:"650"},
+ // Missing numbers — large
+ {p:"□ + 875 = 2,000",a:"1,125"},{p:"□ + 1,245 = 3,000",a:"1,755"},
+ {p:"1,350 + □ = 2,500",a:"1,150"},{p:"□ + 1,560 = 4,000",a:"2,440"},
+ {p:"2,500 - □ = 1,250",a:"1,250"},{p:"3,000 - □ = 1,875",a:"1,125"},
+ {p:"4,500 - □ = 2,200",a:"2,300"},{p:"2,345 - □ = 1,100",a:"1,245"},
+ {p:"5,000 - □ = 2,345",a:"2,655"},{p:"4,321 + □ = 7,500",a:"3,179"}
+];
+function clawHint(p){
+  if(p.indexOf("□")>=0) return "Find the number that makes the equation balance.";
+  if(p.indexOf("+")>=0) return "Add place by place: ones, tens, hundreds. Watch for carrying.";
+  return "Subtract place by place: ones, tens, hundreds. Watch for borrowing.";
+}
+function clawExplain(cl){
+  if(cl.p.indexOf("□")>=0) return "The missing number is "+cl.a+".";
+  // For "X + Y = ?" or "X - Y = ?" just replace the "?" with the answer.
+  return cl.p.replace("?", cl.a);
+}
 function makeQ(topicId,diff){
+  // Wing's curated Dragon Claw Dojo bank — overrides procedural generation
+  // and the EXAM bank for this topic entirely.
+  if(topicId==="Plus, Minus & Missing Numbers"){
+    var cl = pick(CLAW_QUESTIONS);
+    return {type:"direct", topic:topicId,
+      prompt: cl.p, answer: String(cl.a),
+      explain: clawExplain(cl), hint: clawHint(cl.p)};
+  }
   var ex=EXAM[topicId];
   if(ex && ex.length && Math.random()<0.5){ var e=Object.assign({},pick(ex)); e.topic=topicId; return e; }
   var q;
   // New Dragon Island topic IDs
-  if(topicId==="Plus, Minus & Missing Numbers")q=genAddSub(diff);
-  else if(topicId==="Ascending & Descending")q=genOrder(diff);
+  if(topicId==="Ascending & Descending")q=genOrder(diff);
   else if(topicId==="Division")q=genDiv(diff);
   else if(topicId==="Mass")q=genWeight(diff);
   else if(topicId==="Length")q=genLength(diff);
