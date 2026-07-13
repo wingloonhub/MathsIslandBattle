@@ -2532,11 +2532,35 @@ function trainPaint(){
   $("tqi").textContent=Math.min(TP.qi+1,TP.total);
   $("tdur").style.width=Math.max(0,((TP.total-TP.qi)/TP.total)*100)+"%";
 }
+// Normalized key for training-question dedup within a session. For
+// multiplication (wingchun / mult) we treat "3 × 4" and "4 × 3" as the
+// same question — commutative pair. Everything else falls back to a
+// prompt+answer string key so no exact duplicates appear either.
+function trainQKey(kind, q){
+  if(kind==="wingchun" || kind==="mult"){
+    var m = (q && q.prompt || "").match(/(\d+)\s*×\s*(\d+)/);
+    if(m){ var a=+m[1], b=+m[2]; return "mult:"+Math.min(a,b)+"x"+Math.max(a,b); }
+  }
+  return String(q && q.prompt || "")+"|"+String(q && q.answer || "");
+}
 function trainNext(){
   clearInterval(tpTimer);
   if(TP.qi>=TP.total)return trainEnd(true);
   if(TP.lives<=0)return trainEnd(false);
-  TP.locked=false;TP.q=trainMakeQ(TP.kind,TP.level);var q=TP.q;
+  TP.locked=false;
+  // Redraw until we get a question that hasn't been asked in this session.
+  // 40 retries is well above the theoretical dedup ceiling for any current
+  // training kind (Wing Chun has 15 unique commutative pairs in {2..6}).
+  TP.seen = TP.seen || {};
+  var tries=0, cand;
+  do {
+    cand = trainMakeQ(TP.kind, TP.level);
+    var key = trainQKey(TP.kind, cand);
+    tries++;
+  } while(TP.seen[key] && tries<40);
+  if(key) TP.seen[key] = true;
+  TP.q = cand;
+  var q = TP.q;
   var visual=q.clock?'<div class="qpic">'+clockSVG(q.clock.hour,q.clock.minute)+'</div>':'';
   $("tcard").innerHTML=visual+'<div class="qtext">'+esc(q.prompt)+'</div>'+
     '<div class="timerbar"><i id="tbar" style="width:100%"></i></div>'+
