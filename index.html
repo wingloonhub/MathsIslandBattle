@@ -359,7 +359,7 @@ function defaultState(){return{
   owned:["sk_bare","hb_none"],
   cleared:{}, // "islandN:topicId" -> true
   finalCleared:{}, // islandN -> true (final boss defeated)
-  islandWins:{}, badges:[], subjStats:{}, mistakes:[], history:[],
+  islandWins:{}, badges:[], subjStats:{}, subjSessions:{}, mistakes:[], history:[],
   train:{mult:0,time:0}, trainMilestones:{}, bonusHearts:0,
   trainStats:{mult:{ans:0,ok:0,ms:0},time:{ans:0,ok:0,ms:0}},
   totalAnswered:0, totalWins:0, lastPlay:todayKey(), saved:0,
@@ -2597,6 +2597,22 @@ function trainAnswer(given,btn){
 }
 function trainEnd(won){
   clearInterval(tpTimer);
+  // Log this training session under a Parent Report subject so the trend
+  // indicator picks it up. Wing Chun / mult -> "Multiplication",
+  // Boxing / time -> "Time" (matches Dragon Timekeeper Dojo).
+  if(TP && TP.total > 0){
+    var subjId = (TP.kind==="wingchun"||TP.kind==="mult") ? "Multiplication"
+               : (TP.kind==="boxing"  ||TP.kind==="time") ? "Time" : null;
+    if(subjId){
+      if(!S.subjSessions) S.subjSessions = {};
+      var arr = S.subjSessions[subjId] = S.subjSessions[subjId] || [];
+      var answered = Math.min(TP.qi|0, TP.total|0);
+      if(answered > 0){
+        arr.push({ok:TP.correct|0, tot:answered, when:Date.now()});
+        if(arr.length>10) arr.splice(0, arr.length-10);
+      }
+    }
+  }
   var ms=[], coinsEarned=0, perfect=false, badgeEarned=null;
   if(won){
     if(TP.isIslandCentre){
@@ -3158,6 +3174,16 @@ function endBattle(){
     S.scrolls = Math.max(0, (S.scrolls||0) - 5);
     S.islandLives = S.islandMaxLives || 3;
   }
+  // Roll each per-topic slice of this battle into subjSessions so the
+  // Parent Report can show a "improving / steady / slipping" trend on
+  // each subject (last session vs previous rolling average).
+  if(!S.subjSessions)S.subjSessions={};
+  Object.keys(B.subj||{}).forEach(function(tid){
+    var s=B.subj[tid]; if(!s || !s.tot)return;
+    var arr = S.subjSessions[tid] = S.subjSessions[tid] || [];
+    arr.push({ok:s.ok, tot:s.tot, when:Date.now()});
+    if(arr.length>10) arr.splice(0, arr.length-10); // keep last 10
+  });
   S.history.unshift({when:Date.now(),island:B.isl.name,topic:B.topic.id,won:won,correct:B.correct,wrong:B.wrong});
   S.history=S.history.slice(0,20);S.lastPlay=todayKey();save();
   sfx(won?"win":"lose");
@@ -3526,11 +3552,34 @@ function screenBadges(){
     '</div>';
   $("back").onclick=function(){view="map";render();};
 }
+  // Compare the kid's latest session on this subject against the rolling
+  // average of previous sessions. Needs >= 2 recorded sessions to have
+  // anything to say — one is just "first attempt", not a trend.
+  function topicTrend(subjId){
+    var sess = (S.subjSessions && S.subjSessions[subjId]) || [];
+    if(sess.length < 2) return null;
+    var last = sess[sess.length-1];
+    if(!last.tot) return null;
+    var latestAcc = last.ok / last.tot;
+    var prev = sess.slice(0, sess.length-1);
+    var okSum = 0, totSum = 0;
+    prev.forEach(function(x){ okSum+=x.ok; totSum+=x.tot; });
+    if(!totSum) return null;
+    var prevAcc = okSum / totSum;
+    var delta = latestAcc - prevAcc;
+    if(delta >=  0.10) return {arrow:"⬆", label:"Improving", color:"#22c55e", delta:delta};
+    if(delta <= -0.10) return {arrow:"⬇", label:"Slipping",  color:"#ef4444", delta:delta};
+    return                    {arrow:"➡", label:"Steady",     color:"#9aa6b8", delta:delta};
+  }
 function screenReport(){
   var rows=SUBJECTS.map(function(sub){var s=S.subjStats[sub.id]||{tot:0,ok:0};
     var acc=s.tot?Math.round(s.ok/s.tot*100):0,col=s.tot===0?'#cbd5e1':acc>=75?'#16a34a':acc>=50?'#f59e0b':'#ef4444';
+    var tr = topicTrend(sub.id);
+    var trHTML = tr
+      ? ' <span style="color:'+tr.color+';font-weight:800;font-size:12px;margin-left:6px">'+tr.arrow+' '+tr.label+' '+(tr.delta>=0?'+':'')+Math.round(tr.delta*100)+'%</span>'
+      : (s.tot ? ' <span class="muted" style="font-size:12px;margin-left:6px">first attempt</span>' : '');
     return '<div style="margin-bottom:12px"><div class="row" style="justify-content:space-between;font-weight:800;font-size:14px">'+
-      '<span>'+sub.emoji+' '+esc(sub.nm)+'</span><span>'+(s.tot?acc+'% ('+s.ok+'/'+s.tot+')':'not played')+'</span></div>'+
+      '<span>'+sub.emoji+' '+esc(sub.nm)+trHTML+'</span><span>'+(s.tot?acc+'% ('+s.ok+'/'+s.tot+')':'not played')+'</span></div>'+
       '<div class="bar"><i style="width:'+(s.tot?acc:0)+'%;background:'+col+'"></i></div></div>';}).join("");
   var att=SUBJECTS.map(function(sub){var s=S.subjStats[sub.id]||{tot:0,ok:0};return{nm:sub.nm,acc:s.tot?s.ok/s.tot:1,tot:s.tot};})
     .filter(function(x){return x.tot>=3;}).sort(function(a,b){return a.acc-b.acc;});
