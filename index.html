@@ -2953,13 +2953,16 @@ function screenBattle(){
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="flee">⬅ Flee</button>'+
     '<b>'+b.isl.emoji+' '+esc(b.topic.id)+'</b><span class="pill">'+diffLabel(b.diff)+'</span></div>'+
   '<div class="stage" id="stage" style="'+stageStyle+'">'+
-    '<div class="hpwrap"><div style="flex:1"><div>'+esc(S.name)+'</div><div class="hearts" id="hearts"></div>'+
-      ((S.firstAidKits||0)>0 ? '<button class="btn sm" id="useKit" style="margin-top:6px;padding:4px 10px;font-size:12px;background:#16a34a;color:#fff;font-weight:800">🩹 Use Kit ('+(S.firstAidKits||0)+')</button>' : '')+
-      '</div>'+
+    '<div class="hpwrap"><div style="flex:1"><div>'+esc(S.name)+'</div><div class="hearts" id="hearts"></div></div>'+
       '<div style="flex:1;text-align:right"><div>'+esc(b.boss.nm)+'</div><div class="hearts" id="bhp" style="font-size:16px;letter-spacing:1px;line-height:1.2"></div></div></div>'+
     '<div class="floor"></div>'+
     '<div class="fighter hero idle" id="hero" style="width:96px;height:128px">'+heroSVG()+'</div>'+
     '<div class="fighter boss idle" id="boss">'+bossSVG(b.boss.art,140,b.boss.col)+'</div></div>'+
+  // Dedicated action strip between the stage and the question card so the
+  // Use Kit button stays visible instead of hiding behind the fighter SVGs.
+  ((S.firstAidKits||0)>0
+    ? '<div style="margin-top:10px;text-align:center"><button class="btn sm" id="useKit" style="padding:8px 16px;font-size:14px;background:#16a34a;color:#fff;font-weight:800;box-shadow:0 3px 6px rgba(0,0,0,.25)">🩹 Use First Aid Kit ('+(S.firstAidKits||0)+')</button></div>'
+    : '')+
   '<div class="card" id="qcard" style="margin-top:12px"></div>';
   $("flee").onclick=function(){
     clearInterval(qTimer);
@@ -3006,7 +3009,7 @@ function paintHP(){var mh=B.maxHearts||3;
   if(uk){
     var kits=S.firstAidKits||0;
     if(kits<=0){uk.style.display="none";return;}
-    uk.textContent="🩹 Use Kit ("+kits+")";
+    uk.textContent="🩹 Use First Aid Kit ("+kits+")";
     var canHeal = B.hearts < mh;
     uk.disabled = !canHeal;
     uk.style.opacity = canHeal ? "1" : "0.45";
