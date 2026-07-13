@@ -3538,11 +3538,11 @@ function screenReport(){
     :'<p class="muted">Play a few fights to see recommendations.</p>';
   var totOk=Object.keys(S.subjStats).reduce(function(a,k){return a+S.subjStats[k].ok;},0);
   var mist=S.mistakes.length?S.mistakes.slice(0,10).map(function(m){
-    return '<div style="background:#f8fafc;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
+    return '<div style="background:#2a3346;color:#eef2f7;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
       '<div style="font-weight:700">['+esc(m.topic)+'] '+esc(m.prompt)+'</div>'+
-      '<div class="muted">Answered: <b style="color:#ef4444">'+esc(m.given||"(blank)")+'</b> · Correct: <b style="color:#16a34a">'+esc(m.correct)+'</b></div></div>';}).join(""):'<p class="muted">No mistakes recorded.</p>';
+      '<div class="muted">Answered: <b style="color:#fca5a5">'+esc(m.given||"(blank)")+'</b> · Correct: <b style="color:#86efac">'+esc(m.correct)+'</b></div></div>';}).join(""):'<p class="muted">No mistakes recorded.</p>';
   var hist=S.history.length?S.history.slice(0,8).map(function(h){var dt=new Date(h.when),ds=dt.getDate()+"/"+(dt.getMonth()+1)+" "+dt.getHours()+":"+("0"+dt.getMinutes()).slice(-2);
-    return '<div class="row" style="justify-content:space-between;font-size:13px;background:#f8fafc;border-radius:10px;padding:7px 10px;margin-bottom:5px">'+
+    return '<div class="row" style="justify-content:space-between;font-size:13px;background:#2a3346;color:#eef2f7;border-radius:10px;padding:7px 10px;margin-bottom:5px">'+
       '<span>'+(h.won?'🏆':'💪')+' '+esc(h.topic||h.island)+'</span><span class="muted">✅'+h.correct+' ❌'+h.wrong+' · '+ds+'</span></div>';}).join(""):'<p class="muted">No fights yet.</p>';
   var TRN=S.trainStats||{};
   function tCard(label,icon,kind){
@@ -3550,7 +3550,7 @@ function screenReport(){
     var acc=x.ans?Math.round(x.ok/x.ans*100):0;
     var avg=x.ans?(x.ms/x.ans/1000).toFixed(1):"0.0";
     var col=x.ans===0?'#cbd5e1':acc>=75?'#16a34a':acc>=50?'#f59e0b':'#ef4444';
-    return '<div style="background:#f8fafc;border-radius:14px;padding:12px;margin-bottom:8px">'+
+    return '<div style="background:#2a3346;color:#eef2f7;border-radius:14px;padding:12px;margin-bottom:8px">'+
       '<div style="font-weight:800;font-size:15px;margin-bottom:6px">'+icon+' '+label+' · best Level '+best+'/10</div>'+
       '<div class="row" style="justify-content:space-between;font-size:13px;font-weight:700">'+
         '<span>'+x.ans+' answered</span><span>⏱️ avg '+avg+'s</span>'+
