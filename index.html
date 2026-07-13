@@ -2929,7 +2929,9 @@ function screenBattle(){
   $("app").innerHTML='<div class="hud"><button class="btn sm ghost" id="flee">⬅ Flee</button>'+
     '<b>'+b.isl.emoji+' '+esc(b.topic.id)+'</b><span class="pill">'+diffLabel(b.diff)+'</span></div>'+
   '<div class="stage" id="stage" style="'+stageStyle+'">'+
-    '<div class="hpwrap"><div style="flex:1"><div>'+esc(S.name)+'</div><div class="hearts" id="hearts"></div></div>'+
+    '<div class="hpwrap"><div style="flex:1"><div>'+esc(S.name)+'</div><div class="hearts" id="hearts"></div>'+
+      ((S.firstAidKits||0)>0 ? '<button class="btn sm" id="useKit" style="margin-top:6px;padding:4px 10px;font-size:12px;background:#16a34a;color:#fff;font-weight:800">🩹 Use Kit ('+(S.firstAidKits||0)+')</button>' : '')+
+      '</div>'+
       '<div style="flex:1;text-align:right"><div>'+esc(b.boss.nm)+'</div><div class="hearts" id="bhp" style="font-size:16px;letter-spacing:1px;line-height:1.2"></div></div></div>'+
     '<div class="floor"></div>'+
     '<div class="fighter hero idle" id="hero" style="width:96px;height:128px">'+heroSVG()+'</div>'+
@@ -2943,6 +2945,19 @@ function screenBattle(){
     save();
     toast("🏳️ Fled — lives now "+S.islandLives+"/"+S.islandMaxLives);
     view="island";render();
+  };
+  // Mid-fight healing: spend one First Aid Kit for +1 heart on the hero.
+  // Wing spec: kits can be used during a fight or from the shop.
+  var uk = $("useKit");
+  if(uk) uk.onclick = function(){
+    if((S.firstAidKits||0) <= 0){ toast("No First Aid Kits left"); return; }
+    if(B.hearts >= B.maxHearts){ toast("Already at max hearts"); return; }
+    S.firstAidKits -= 1;
+    B.hearts = Math.min(B.maxHearts, B.hearts + 1);
+    save(); sfx("coin");
+    fxText("hero","+1❤️","#22c55e");
+    paintHP();
+    toast("🩹 Healed +1 heart");
   };
   paintHP();
   if(b.intro){b.intro=false;
@@ -2960,7 +2975,19 @@ function screenBattle(){
 }
 function paintHP(){var mh=B.maxHearts||3;
   $("hearts").textContent="❤️".repeat(B.hearts)+"🖤".repeat(Math.max(0,mh-B.hearts));
-  $("bhp").textContent="💜".repeat(Math.max(0,B.bossHP))+"🖤".repeat(Math.max(0,B.bossMax-B.bossHP));}
+  $("bhp").textContent="💜".repeat(Math.max(0,B.bossHP))+"🖤".repeat(Math.max(0,B.bossMax-B.bossHP));
+  // Keep the in-fight First Aid Kit button in sync with the current count
+  // and whether the hero has room to heal.
+  var uk=document.getElementById("useKit");
+  if(uk){
+    var kits=S.firstAidKits||0;
+    if(kits<=0){uk.style.display="none";return;}
+    uk.textContent="🩹 Use Kit ("+kits+")";
+    var canHeal = B.hearts < mh;
+    uk.disabled = !canHeal;
+    uk.style.opacity = canHeal ? "1" : "0.45";
+  }
+}
 function nextQuestion(){
   clearInterval(qTimer);
   if(B.qi>=B.qs.length)return endBattle();
