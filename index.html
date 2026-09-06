@@ -1759,7 +1759,7 @@ var EXAM_PREP=[{
     {id:"y3s2_missing_fraction",  label:"Missing Fraction"},
     {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres", sessionSize:20},
     {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms"},
-    {id:"y3s2_word_problems",     label:"Word Problems"},
+    {id:"y3s2_word_problems",     label:"Word Problems", sessionSize:20},
     // Mix-all "Challenge Test" — samples questions from every other topic
     // in this set. No bank of its own; unlocked once at least one other
     // topic has a bank wired in.
@@ -1868,6 +1868,113 @@ EXAM_QUESTIONS["y3s2_measuring_cm"]=(function(){
     ["Four paper strips are each 12 cm long. They are placed end to end. What is the total length? ___ cm","48 cm","WORD"],
     ["A ribbon is 100 cm long. 38 cm is used for one gift and 27 cm for another. How much ribbon is left? ___ cm","35 cm","WORD"],
     ["Track A is 45 cm long. Track B is 18 cm longer than Track A. What is the total length of both tracks? ___ cm","108 cm","WORD"]
+  ];
+  return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
+})();
+
+// Wing's Year 3 Mixed Word Problems worksheet — 90 typed-answer questions
+// across 6 sections. Session picks 20 at random. Answers keep the unit
+// (£, cm, etc.) so the results screen reads naturally; isCorrect strips
+// non-numeric chars and compares as Numbers, so "£71" / "71" / "£1.20" /
+// "1.2" all match.
+EXAM_QUESTIONS["y3s2_word_problems"]=(function(){
+  var raw=[
+    // Section A – Addition & Subtraction (15)
+    ["A farm collected 128 eggs on Monday and 146 eggs on Tuesday. How many eggs were collected altogether?","274 eggs","ADD_SUB"],
+    ["A library had 365 storybooks. It bought 127 more. How many storybooks does it have now?","492 storybooks","ADD_SUB"],
+    ["There were 482 people at a school fair. 159 went home before lunch. How many people were still there?","323 people","ADD_SUB"],
+    ["A fruit stall had 275 oranges and received another 198. How many oranges did it have altogether?","473 oranges","ADD_SUB"],
+    ["A class collected 540 bottle caps. They used 216 for an art project. How many bottle caps were left?","324 bottle caps","ADD_SUB"],
+    ["A train carried 238 passengers. At the next station, 74 more got on. How many passengers were on the train then?","312 passengers","ADD_SUB"],
+    ["A baker made 450 buns. By noon, 287 had been sold. How many buns were left?","163 buns","ADD_SUB"],
+    ["Maya has 186 stickers and her brother gives her 95 more. How many stickers does Maya have now?","281 stickers","ADD_SUB"],
+    ["There were 600 seats in a hall. 438 seats were filled. How many seats were empty?","162 seats","ADD_SUB"],
+    ["A school planted 249 flowers in the front garden and 173 in the back garden. How many flowers were planted altogether?","422 flowers","ADD_SUB"],
+    ["A toy shop had 725 toy cars. It sold 346. How many toy cars were left?","379 toy cars","ADD_SUB"],
+    ["Ben read 137 pages on Saturday and 168 pages on Sunday. How many pages did he read over the weekend?","305 pages","ADD_SUB"],
+    ["A tank held 800 litres of water. 265 litres were used. How many litres remained?","535 litres","ADD_SUB"],
+    ["A museum had 356 visitors in the morning and 289 in the afternoon. How many visitors came that day?","645 visitors","ADD_SUB"],
+    ["A charity wanted to collect 900 cans. It has collected 684 so far. How many more cans does it need?","216 cans","ADD_SUB"],
+    // Section B – Multiplication & Division (15)
+    ["There are 8 apples in each bag. How many apples are in 6 bags?","48 apples","MUL_DIV"],
+    ["A teacher puts 36 pencils equally into 4 pots. How many pencils go in each pot?","9 pencils","MUL_DIV"],
+    ["There are 7 days in a week. How many days are there in 8 weeks?","56 days","MUL_DIV"],
+    ["A baker packs 45 cookies equally into 5 boxes. How many cookies are in each box?","9 cookies","MUL_DIV"],
+    ["Each football team has 9 players. How many players are there in 4 teams?","36 players","MUL_DIV"],
+    ["A shop has 64 balloons and makes bunches of 8. How many bunches can it make?","8 bunches","MUL_DIV"],
+    ["A spider has 8 legs. How many legs do 5 spiders have altogether?","40 legs","MUL_DIV"],
+    ["There are 30 children. They form groups of 3. How many groups are there?","10 groups","MUL_DIV"],
+    ["A cinema has 6 rows with 8 seats in each row. How many seats are there?","48 seats","MUL_DIV"],
+    ["Forty-two cupcakes are shared equally among 6 tables. How many cupcakes does each table get?","7 cupcakes","MUL_DIV"],
+    ["A gardener plants 5 rows of 9 flowers. How many flowers does she plant?","45 flowers","MUL_DIV"],
+    ["Seventy-two beads are divided equally among 9 children. How many beads does each child get?","8 beads","MUL_DIV"],
+    ["There are 4 wheels on each toy car. How many wheels are needed for 10 toy cars?","40 wheels","MUL_DIV"],
+    ["A farmer puts 56 eggs into boxes of 7. How many boxes are needed?","8 boxes","MUL_DIV"],
+    ["Each tray holds 6 muffins. How many muffins are on 7 trays?","42 muffins","MUL_DIV"],
+    // Section C – Money Problems (15)
+    ["A football costs £43 and a pair of gloves costs £28. How much do they cost altogether?","£71","MONEY"],
+    ["Emma has £100. She buys a board game for £36. How much money does she have left?","£64","MONEY"],
+    ["A school buys 3 basketballs at £24 each. How much do they cost altogether?","£72","MONEY"],
+    ["A book costs £18. Noah has £50. How much change will he get after buying the book?","£32","MONEY"],
+    ["A tennis racket costs £68 and trainers cost £90. How much does Oliver spend altogether?","£158","MONEY"],
+    ["Laura has £200. She buys a scooter for £125. How much money does she have left?","£75","MONEY"],
+    ["One set of tennis balls costs £12. How much do 5 sets cost?","£60","MONEY"],
+    ["A tablet costs £278. Louis has £500. How much change will he get?","£222","MONEY"],
+    ["A bookcase costs £76 and a CD player costs £80. How much do they cost together?","£156","MONEY"],
+    ["Mina has £200 and wants a bench costing £236. How much more money does she need?","£36","MONEY"],
+    ["Four hockey sticks cost £35 each. What is the total cost?","£140","MONEY"],
+    ["A sports shop sold 8 footballs at £43 each. How much money did it receive?","£344","MONEY"],
+    ["A helmet and a skateboard cost £479 altogether. The skateboard costs £348. How much does the helmet cost?","£131","MONEY"],
+    ["A family has £500. They spend £136 on a bench and £278 on a laptop. How much money is left?","£86","MONEY"],
+    ["Three identical water bottles cost £27 altogether. How much does one bottle cost?","£9","MONEY"],
+    // Section D – Missing Numbers & Inverse (15)
+    ["A box had some pencils. After 37 more pencils were added, there were 85 pencils. How many pencils were in the box at first?","48 pencils","MISS"],
+    ["There were 94 birds in a park. Some flew away and 58 remained. How many birds flew away?","36 birds","MISS"],
+    ["A shop sold 125 cakes in the morning. By the end of the day it had sold 300 cakes altogether. How many cakes were sold in the afternoon?","175 cakes","MISS"],
+    ["Sam had some marbles. He gave away 46 and had 72 left. How many marbles did he have at first?","118 marbles","MISS"],
+    ["A school needs 450 exercise books. It already has 328. How many more books does it need?","122 books","MISS"],
+    ["A bus had some passengers. At a stop, 28 got on and then there were 76 passengers. How many passengers were on the bus before the stop?","48 passengers","MISS"],
+    ["After 63 stickers were given away, 145 stickers remained. How many stickers were there before any were given away?","208 stickers","MISS"],
+    ["A farmer had 240 carrots. After selling some, 97 were left. How many carrots did he sell?","143 carrots","MISS"],
+    ["A jar contains 8 equal groups of sweets. There are 56 sweets altogether. How many sweets are in each group?","7 sweets","MISS"],
+    ["Some boxes each contain 6 oranges. There are 42 oranges altogether. How many boxes are there?","7 boxes","MISS"],
+    ["A number multiplied by 5 gives 40. What is the number?","8","MISS"],
+    ["A number divided by 4 gives 9. What is the number?","36","MISS"],
+    ["A toy costs £35. Mia had some money and had £17 left after buying it. How much money did she have at first?","£52","MISS"],
+    ["A class collected some cans on Monday and 86 cans on Tuesday. They collected 203 cans altogether. How many cans did they collect on Monday?","117 cans","MISS"],
+    ["A baker put the same number of rolls into 9 baskets. There were 72 rolls altogether. How many rolls were in each basket?","8 rolls","MISS"],
+    // Section E – Two-Step Problems (15)
+    ["A picnic has 72 sandwiches and 56 cupcakes. If 38 items are eaten, how many items are left?","90 items","TWO_STEP"],
+    ["A shop has 6 boxes of 8 tennis balls. It sells 15 balls. How many tennis balls are left?","33 balls","TWO_STEP"],
+    ["A farmer collects 45 eggs in the morning and 51 in the afternoon. He packs them equally into 8 boxes. How many eggs are in each box?","12 eggs","TWO_STEP"],
+    ["There are 7 tables with 6 children at each table. Five children leave early. How many children remain?","37 children","TWO_STEP"],
+    ["A school buys 5 packs of pencils with 24 pencils in each pack. It gives 38 pencils to Year 3. How many pencils are left?","82 pencils","TWO_STEP"],
+    ["A baker makes 8 trays of 9 muffins. He sells 27 muffins. How many muffins remain?","45 muffins","TWO_STEP"],
+    ["A coach has 64 cones and buys 28 more. He shares all the cones equally among 4 teams. How many cones does each team get?","23 cones","TWO_STEP"],
+    ["A library has 325 fiction books and 187 non-fiction books. It gives away 96 old books. How many books remain?","416 books","TWO_STEP"],
+    ["A concert hall has 9 rows of 50 seats. If 128 seats are empty, how many people are seated?","322 people","TWO_STEP"],
+    ["A farmer has 6 baskets with 35 apples in each. He sells 84 apples. How many apples are left?","126 apples","TWO_STEP"],
+    ["A school raises £245 on Monday and £178 on Tuesday. It spends £96 on supplies. How much money is left?","£327","TWO_STEP"],
+    ["Lily buys 3 books at £18 each and a pencil case for £12. How much does she spend altogether?","£66","TWO_STEP"],
+    ["A cinema sells 8 rows of 9 tickets in the morning and 46 tickets in the afternoon. How many tickets are sold altogether?","118 tickets","TWO_STEP"],
+    ["A fruit shop has 240 bananas. It receives 5 boxes of 20 more bananas. How many bananas does it have now?","340 bananas","TWO_STEP"],
+    ["A teacher has 96 stickers. She gives 8 stickers to each of 7 children. How many stickers are left?","40 stickers","TWO_STEP"],
+    // Section F – Challenge & Reasoning (15)
+    ["A chicken farm collected 675 eggs. It wants to reach 900 eggs. How many more eggs are needed?","225 eggs","CHALLENGE"],
+    ["A restaurant orders 24 eggs each day for 7 days. How many eggs does it order in one week?","168 eggs","CHALLENGE"],
+    ["96 ice creams are shared equally among 4 classes. Each class has 28 children. How many children in each class will not get an ice cream?","4 children","CHALLENGE"],
+    ["A school has 320 children. It buys 3 pots of 86 coloured pencils. How many more pencils are needed to give each child one?","62 pencils","CHALLENGE"],
+    ["A shop has 85 samosas and shares them equally among 5 trays. How many samosas are on each tray?","17 samosas","CHALLENGE"],
+    ["Nabil has 64 stamps and Amal has 8 stamps. How many times as many stamps does Nabil have as Amal?","8 times","CHALLENGE"],
+    ["Half of 56 children leave the playground. How many children remain?","28 children","CHALLENGE"],
+    ["A cook bakes 40 biscuits. For a party, he needs 8 times that amount. How many biscuits does he need altogether?","320 biscuits","CHALLENGE"],
+    ["Twenty-seven cakes are shared equally among 9 children. Each cake costs 40p. How much is the value of the cakes each child receives?","£1.20","CHALLENGE"],
+    ["A school buys 30 hockey sticks at £35 each. How much does the school spend?","£1050","CHALLENGE"],
+    ["A sports shop sells tennis balls in packs of 3 for £12 per pack. What is the cost of one tennis ball?","£4","CHALLENGE"],
+    ["A tennis racket costs 4 times as much as a £12 set of tennis balls. What is the price of the racket?","£48","CHALLENGE"],
+    ["Jay has £100. Basketballs cost £28 each. He buys 3. How much money is left?","£16","CHALLENGE"],
+    ["A school picnic has 68 cartons of fruit juice for 96 children. How many children will not receive a carton if each child can have only one?","28 children","CHALLENGE"],
+    ["A shop had 500 stickers. It sold 8 packs of 35 stickers. How many stickers remain?","220 stickers","CHALLENGE"]
   ];
   return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
 })();
@@ -3859,14 +3966,12 @@ function screenExamSession(){
       var given = String(inp.value||"").trim();
       if(!given) return; // ignore empty submits
       busy = true;
-      // Numeric-strip comparison so "377", " 377 ", "377 " all match.
-      var correctStr = String(q.answer||"").trim();
-      var norm = function(s){return String(s).replace(/[^0-9.\-]/g,"");};
-      var isRight = given.toLowerCase() === correctStr.toLowerCase()
-                 || (norm(given) !== "" && norm(given) === norm(correctStr));
+      // Reuse the game's isCorrect: strips whitespace + non-numeric chars,
+      // then compares by string and by Number(). Handles "£71" == "71",
+      // "1.20" == "1.2", "8 cm" == "8", etc.
+      var isRight = isCorrect(q, given);
       inp.disabled = true;
       inp.style.borderColor = isRight ? "#22c55e" : "#ef4444";
-      // Disable the submit button too.
       var subBtn = f.querySelector("button[type=submit]"); if(subBtn) subBtn.disabled = true;
       finish(isRight, given);
     };
