@@ -1756,7 +1756,7 @@ var EXAM_PREP=[{
     {id:"y3s2_mixed_operation",   label:"Mixed Operation", sessionSize:20},
     {id:"y3s2_fraction",          label:"Fraction"},
     {id:"y3s2_perimeter",         label:"Perimeter"},
-    {id:"y3s2_missing_fraction",  label:"Missing Fraction"},
+    {id:"y3s2_missing_fraction",  label:"Missing Fraction", sessionSize:20},
     {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres", sessionSize:20},
     {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms", sessionSize:20},
     {id:"y3s2_word_problems",     label:"Word Problems", sessionSize:20},
@@ -1868,6 +1868,100 @@ EXAM_QUESTIONS["y3s2_measuring_cm"]=(function(){
     ["Four paper strips are each 12 cm long. They are placed end to end. What is the total length? ___ cm","48 cm","WORD"],
     ["A ribbon is 100 cm long. 38 cm is used for one gift and 27 cm for another. How much ribbon is left? ___ cm","35 cm","WORD"],
     ["Track A is 45 cm long. Track B is 18 cm longer than Track A. What is the total length of both tracks? ___ cm","108 cm","WORD"]
+  ];
+  return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
+})();
+
+// Wing's Year 3 Missing Fractions worksheet — 80 typed-answer questions
+// across 4 sections. Answers are strict N/D strings — the docx says
+// "keep the original denominator" so "4/8" is right and "1/2" isn't.
+// Session picks 20 at random.
+EXAM_QUESTIONS["y3s2_missing_fraction"]=(function(){
+  var raw=[
+    // Section A — Complete the Whole (20)
+    ["1/2 + ___ = 2/2","1/2","WHOLE"],
+    ["2/3 + ___ = 3/3","1/3","WHOLE"],
+    ["1/4 + ___ = 4/4","3/4","WHOLE"],
+    ["3/4 + ___ = 4/4","1/4","WHOLE"],
+    ["2/5 + ___ = 5/5","3/5","WHOLE"],
+    ["4/5 + ___ = 5/5","1/5","WHOLE"],
+    ["1/6 + ___ = 6/6","5/6","WHOLE"],
+    ["4/6 + ___ = 6/6","2/6","WHOLE"],
+    ["5/6 + ___ = 6/6","1/6","WHOLE"],
+    ["2/8 + ___ = 8/8","6/8","WHOLE"],
+    ["3/8 + ___ = 8/8","5/8","WHOLE"],
+    ["5/8 + ___ = 8/8","3/8","WHOLE"],
+    ["7/8 + ___ = 8/8","1/8","WHOLE"],
+    ["1/10 + ___ = 10/10","9/10","WHOLE"],
+    ["3/10 + ___ = 10/10","7/10","WHOLE"],
+    ["4/10 + ___ = 10/10","6/10","WHOLE"],
+    ["6/10 + ___ = 10/10","4/10","WHOLE"],
+    ["7/10 + ___ = 10/10","3/10","WHOLE"],
+    ["8/10 + ___ = 10/10","2/10","WHOLE"],
+    ["9/10 + ___ = 10/10","1/10","WHOLE"],
+    // Section B — Missing Fraction in Addition (20)
+    ["1/4 + ___ = 3/4","2/4","ADD_MISS"],
+    ["2/4 + ___ = 3/4","1/4","ADD_MISS"],
+    ["1/5 + ___ = 4/5","3/5","ADD_MISS"],
+    ["2/5 + ___ = 4/5","2/5","ADD_MISS"],
+    ["3/5 + ___ = 5/5","2/5","ADD_MISS"],
+    ["1/6 + ___ = 4/6","3/6","ADD_MISS"],
+    ["2/6 + ___ = 5/6","3/6","ADD_MISS"],
+    ["3/6 + ___ = 5/6","2/6","ADD_MISS"],
+    ["1/8 + ___ = 5/8","4/8","ADD_MISS"],
+    ["2/8 + ___ = 6/8","4/8","ADD_MISS"],
+    ["3/8 + ___ = 7/8","4/8","ADD_MISS"],
+    ["4/8 + ___ = 6/8","2/8","ADD_MISS"],
+    ["5/8 + ___ = 7/8","2/8","ADD_MISS"],
+    ["1/10 + ___ = 6/10","5/10","ADD_MISS"],
+    ["2/10 + ___ = 8/10","6/10","ADD_MISS"],
+    ["3/10 + ___ = 7/10","4/10","ADD_MISS"],
+    ["4/10 + ___ = 9/10","5/10","ADD_MISS"],
+    ["5/10 + ___ = 8/10","3/10","ADD_MISS"],
+    ["6/10 + ___ = 9/10","3/10","ADD_MISS"],
+    ["7/10 + ___ = 10/10","3/10","ADD_MISS"],
+    // Section C — Missing Fraction in Subtraction (20)
+    ["4/4 - ___ = 1/4","3/4","SUB_MISS"],
+    ["4/4 - ___ = 3/4","1/4","SUB_MISS"],
+    ["5/5 - ___ = 2/5","3/5","SUB_MISS"],
+    ["5/5 - ___ = 4/5","1/5","SUB_MISS"],
+    ["6/6 - ___ = 1/6","5/6","SUB_MISS"],
+    ["6/6 - ___ = 4/6","2/6","SUB_MISS"],
+    ["6/6 - ___ = 5/6","1/6","SUB_MISS"],
+    ["8/8 - ___ = 2/8","6/8","SUB_MISS"],
+    ["8/8 - ___ = 3/8","5/8","SUB_MISS"],
+    ["8/8 - ___ = 5/8","3/8","SUB_MISS"],
+    ["8/8 - ___ = 7/8","1/8","SUB_MISS"],
+    ["10/10 - ___ = 1/10","9/10","SUB_MISS"],
+    ["10/10 - ___ = 3/10","7/10","SUB_MISS"],
+    ["10/10 - ___ = 5/10","5/10","SUB_MISS"],
+    ["10/10 - ___ = 7/10","3/10","SUB_MISS"],
+    ["7/8 - ___ = 4/8","3/8","SUB_MISS"],
+    ["6/10 - ___ = 2/10","4/10","SUB_MISS"],
+    ["5/6 - ___ = 3/6","2/6","SUB_MISS"],
+    ["4/5 - ___ = 1/5","3/5","SUB_MISS"],
+    ["9/10 - ___ = 6/10","3/10","SUB_MISS"],
+    // Section D — Missing-Fraction Word Problems (20)
+    ["A pizza is cut into 8 equal slices. Ben eats 3 slices. What fraction of the pizza is left? ___","5/8","WORD"],
+    ["A chocolate bar has 6 equal pieces. Sara eats 2 pieces. What fraction is left? ___","4/6","WORD"],
+    ["A cake is cut into 10 equal pieces. 7 pieces are eaten. What fraction is left? ___","3/10","WORD"],
+    ["A ribbon is divided into 5 equal parts. Tom uses 1 part. What fraction is left? ___","4/5","WORD"],
+    ["A watermelon is cut into 8 equal pieces. 5 pieces are eaten. What fraction remains? ___","3/8","WORD"],
+    ["Mia reads 3/10 of a book. What fraction does she still need to read? ___","7/10","WORD"],
+    ["Jake colours 2/6 of a picture. What fraction is not coloured? ___","4/6","WORD"],
+    ["Lily drinks 3/4 of her juice. What fraction is left? ___","1/4","WORD"],
+    ["A tank is 6/10 full. What fraction of the tank is empty? ___","4/10","WORD"],
+    ["A class finishes 5/8 of a project. What fraction is still unfinished? ___","3/8","WORD"],
+    ["Sam walks 2/5 of the way to school. What fraction of the journey is left? ___","3/5","WORD"],
+    ["A box is 1/4 full of toys. What fraction of the box is empty? ___","3/4","WORD"],
+    ["Amy eats 4/10 of a cake. What fraction remains? ___","6/10","WORD"],
+    ["A bottle is 7/8 full. What fraction is empty? ___","1/8","WORD"],
+    ["Dan completes 4/6 of his homework. What fraction does he still need to complete? ___","2/6","WORD"],
+    ["There are 10 equal pieces of fruit. 3 are eaten. What fraction remains? ___","7/10","WORD"],
+    ["There are 8 equal slices of bread. 2 are used. What fraction remains? ___","6/8","WORD"],
+    ["A garden is divided into 5 equal parts. Flowers are planted in 3 parts. What fraction has no flowers? ___","2/5","WORD"],
+    ["A jar is divided into 6 equal parts. 5/6 is filled. What fraction is empty? ___","1/6","WORD"],
+    ["A race is divided into 10 equal sections. Jack has completed 8 sections. What fraction of the race is left? ___","2/10","WORD"]
   ];
   return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
 })();
@@ -4114,10 +4208,16 @@ function screenExamSession(){
       var given = String(inp.value||"").trim();
       if(!given) return; // ignore empty submits
       busy = true;
-      // Reuse the game's isCorrect: strips whitespace + non-numeric chars,
-      // then compares by string and by Number(). Handles "£71" == "71",
-      // "1.20" == "1.2", "8 cm" == "8", etc.
-      var isRight = isCorrect(q, given);
+      // Fractions get strict whitespace-insensitive string match (norm
+      // strips whitespace + lowercases). Skips numeric-strip so "58"
+      // doesn't accidentally match "5/8". Everything else uses isCorrect
+      // which handles "£71"=="71", "1.20"=="1.2", "8 cm"=="8", etc.
+      var isRight;
+      if(/\//.test(String(q.answer||""))){
+        isRight = norm(given) === norm(String(q.answer||""));
+      } else {
+        isRight = isCorrect(q, given);
+      }
       inp.disabled = true;
       inp.style.borderColor = isRight ? "#22c55e" : "#ef4444";
       var subBtn = f.querySelector("button[type=submit]"); if(subBtn) subBtn.disabled = true;
