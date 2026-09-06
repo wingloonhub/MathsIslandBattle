@@ -1753,7 +1753,7 @@ var EXAM_PREP=[{
   id:"y3_sem2",
   label:"Year 3 – 2nd Semester",
   topics:[
-    {id:"y3s2_mixed_operation",   label:"Mixed Operation"},
+    {id:"y3s2_mixed_operation",   label:"Mixed Operation", sessionSize:20},
     {id:"y3s2_fraction",          label:"Fraction"},
     {id:"y3s2_perimeter",         label:"Perimeter"},
     {id:"y3s2_missing_fraction",  label:"Missing Fraction"},
@@ -1766,9 +1766,35 @@ var EXAM_PREP=[{
     {id:"y3s2_challenge",         label:"🏆 Challenge Test", challengeMode:true, perSection:8}
   ]
 }];
-// Populated later by Wing — one key per topic id, value is an array of
-// question objects: {q, options, answer:index, cat?} for MCQ.
+// Populated by Wing per topic. Two supported shapes:
+//   MCQ    : {q, options:[...], answer:index,  cat?}
+//   Typed  : {q, answer:"<string>",           cat?}   ← no options => text input
 var EXAM_QUESTIONS={};
+// Wing's Year 3 Mixed Operations worksheet — 90 typed-answer questions
+// across 5 categories (ADD/SUB/MUL/DIV/MISS). Session picks 20 at random.
+EXAM_QUESTIONS["y3s2_mixed_operation"]=(function(){
+  var raw=[
+    ["245 + 132 = ___",377,"ADD"],["63 - 28 = ___",35,"SUB"],["7 × 4 = ___",28,"MUL"],["48 ÷ 6 = ___",8,"DIV"],["___ + 35 = 82",47,"MISS"],
+    ["376 + 214 = ___",590,"ADD"],["91 - 47 = ___",44,"SUB"],["6 × 8 = ___",48,"MUL"],["35 ÷ 5 = ___",7,"DIV"],["74 - ___ = 29",45,"MISS"],
+    ["428 + 151 = ___",579,"ADD"],["80 - 36 = ___",44,"SUB"],["9 × 3 = ___",27,"MUL"],["56 ÷ 7 = ___",8,"DIV"],["46 + ___ = 100",54,"MISS"],
+    ["153 + 246 = ___",399,"ADD"],["72 - 19 = ___",53,"SUB"],["5 × 7 = ___",35,"MUL"],["42 ÷ 6 = ___",7,"DIV"],["___ - 26 = 41",67,"MISS"],
+    ["267 + 325 = ___",592,"ADD"],["100 - 58 = ___",42,"SUB"],["4 × 9 = ___",36,"MUL"],["32 ÷ 4 = ___",8,"DIV"],["___ + 48 = 93",45,"MISS"],
+    ["519 + 270 = ___",789,"ADD"],["85 - 37 = ___",48,"SUB"],["8 × 6 = ___",48,"MUL"],["63 ÷ 9 = ___",7,"DIV"],["92 - ___ = 55",37,"MISS"],
+    ["348 + 427 = ___",775,"ADD"],["74 - 28 = ___",46,"SUB"],["3 × 8 = ___",24,"MUL"],["45 ÷ 5 = ___",9,"DIV"],["27 + ___ = 69",42,"MISS"],
+    ["608 + 174 = ___",782,"ADD"],["93 - 46 = ___",47,"SUB"],["7 × 9 = ___",63,"MUL"],["54 ÷ 6 = ___",9,"DIV"],["___ - 34 = 28",62,"MISS"],
+    ["236 + 489 = ___",725,"ADD"],["81 - 25 = ___",56,"SUB"],["6 × 6 = ___",36,"MUL"],["72 ÷ 8 = ___",9,"DIV"],["___ + 56 = 120",64,"MISS"],
+    ["457 + 328 = ___",785,"ADD"],["90 - 54 = ___",36,"SUB"],["4 × 7 = ___",28,"MUL"],["40 ÷ 8 = ___",5,"DIV"],["86 - ___ = 39",47,"MISS"],
+    ["125 + 376 = ___",501,"ADD"],["67 - 29 = ___",38,"SUB"],["8 × 8 = ___",64,"MUL"],["36 ÷ 9 = ___",4,"DIV"],["38 + ___ = 75",37,"MISS"],
+    ["294 + 507 = ___",801,"ADD"],["84 - 48 = ___",36,"SUB"],["9 × 6 = ___",54,"MUL"],["49 ÷ 7 = ___",7,"DIV"],["___ - 18 = 47",65,"MISS"],
+    ["438 + 265 = ___",703,"ADD"],["73 - 36 = ___",37,"SUB"],["5 × 9 = ___",45,"MUL"],["64 ÷ 8 = ___",8,"DIV"],["___ + 67 = 125",58,"MISS"],
+    ["182 + 619 = ___",801,"ADD"],["95 - 39 = ___",56,"SUB"],["7 × 7 = ___",49,"MUL"],["27 ÷ 3 = ___",9,"DIV"],["79 - ___ = 43",36,"MISS"],
+    ["346 + 458 = ___",804,"ADD"],["88 - 49 = ___",39,"SUB"],["6 × 9 = ___",54,"MUL"],["24 ÷ 6 = ___",4,"DIV"],["49 + ___ = 107",58,"MISS"],
+    ["573 + 218 = ___",791,"ADD"],["76 - 38 = ___",38,"SUB"],["8 × 4 = ___",32,"MUL"],["81 ÷ 9 = ___",9,"DIV"],["___ - 27 = 36",63,"MISS"],
+    ["429 + 372 = ___",801,"ADD"],["94 - 57 = ___",37,"SUB"],["3 × 9 = ___",27,"MUL"],["56 ÷ 8 = ___",7,"DIV"],["___ + 44 = 101",57,"MISS"],
+    ["657 + 146 = ___",803,"ADD"],["83 - 45 = ___",38,"SUB"],["7 × 5 = ___",35,"MUL"],["30 ÷ 5 = ___",6,"DIV"],["96 - ___ = 58",38,"MISS"]
+  ];
+  return raw.map(function(r){return {q:r[0], answer:String(r[1]), cat:r[2]};});
+})();
 var EXAM_SESSION_SIZE=15;
 function examSet(setId){return EXAM_PREP.filter(function(s){return s.id===setId;})[0];}
 function examTopic(setId, topicId){var s=examSet(setId); return s && s.topics.filter(function(t){return t.id===topicId;})[0];}
@@ -3705,13 +3731,21 @@ function screenExamSession(){
   var q = EP.questions[EP.idx];
   if(!q){ view="examResults"; return render(); }
   var t = examTopic(EP.setId, EP.topicId);
+  var isTyped = !q.options; // no options => typed answer
+  // Input block — either 4 MCQ buttons or a text input + submit button.
+  var inputHTML = isTyped
+    ? '<form id="typedForm" style="display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto">'+
+        '<input class="ans-input" id="typedAns" autocomplete="off" inputmode="decimal" placeholder="Type your answer" style="width:100%"/>'+
+        '<button class="btn" type="submit">Submit ⚔️</button>'+
+      '</form>'
+    : '<div class="grid" id="opts">'+(q.options||[]).map(function(o,k){return '<button class="opt" data-i="'+k+'">'+esc(String(o))+'</button>';}).join("")+'</div>';
   $("app").innerHTML=
     '<div class="hud"><button class="btn sm ghost" id="quit">⬅ Quit</button>'+
       '<b>'+esc((t&&t.label)||"")+'</b><span class="pill">'+(EP.idx+1)+'/'+total+'</span></div>'+
     '<div class="card" style="margin-top:12px">'+
       '<div class="bar" style="margin-bottom:12px"><i style="width:'+((EP.idx+1)/total*100)+'%;background:#3b82f6"></i></div>'+
-      '<div class="qtext" style="margin-bottom:14px">'+esc(q.q||q.prompt||"Question")+'</div>'+
-      '<div class="grid" id="opts">'+(q.options||[]).map(function(o,k){return '<button class="opt" data-i="'+k+'">'+esc(String(o))+'</button>';}).join("")+'</div>'+
+      '<div class="qtext" style="margin-bottom:14px">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
+      inputHTML +
       '<div id="feedback" style="margin-top:14px;text-align:center;font-weight:800;min-height:22px"></div>'+
     '</div>';
   $("quit").onclick=function(){
@@ -3720,47 +3754,76 @@ function screenExamSession(){
     }
   };
   var busy=false;
-  Array.prototype.forEach.call(document.querySelectorAll("#opts .opt"),function(bn){
-    bn.onclick=function(){
-      if(busy)return; busy=true;
-      var i = +bn.getAttribute("data-i");
-      var correct = (i === q.answer);
-      var cat = q.cat || "?";
-      if(!EP.byCat[cat]) EP.byCat[cat] = {correct:0, total:0};
-      EP.byCat[cat].total++;
-      if(correct) EP.byCat[cat].correct++;
-      if(q.sourceTopic){
-        if(!EP.bySection) EP.bySection={};
-        var sid = q.sourceTopic;
-        if(!EP.bySection[sid]) EP.bySection[sid] = {correct:0, total:0};
-        EP.bySection[sid].total++;
-        if(correct) EP.bySection[sid].correct++;
-      }
-      EP.answers.push({correct:correct, chosen:i, q:q});
-      Array.prototype.forEach.call(document.querySelectorAll("#opts .opt"),function(b){
-        b.disabled = true;
-        var ix = +b.getAttribute("data-i");
-        if(ix === q.answer) b.classList.add("good");
-        else if(ix === i && !correct) b.classList.add("bad");
-      });
-      $("feedback").innerHTML = correct
-        ? '<span style="color:#22c55e">✓ Correct!</span>'
-        : '<span style="color:#ef4444">✗ Correct answer: <b>'+esc(String(q.options[q.answer]))+'</b></span>';
-      sfx(correct?"hit":"miss");
-      setTimeout(function(){ EP.idx++; render(); }, correct?900:1600);
+  // Shared "record + move on" tail — same accounting for MCQ and typed.
+  function finish(correct, chosenText){
+    var cat = q.cat || "?";
+    if(!EP.byCat[cat]) EP.byCat[cat] = {correct:0, total:0};
+    EP.byCat[cat].total++;
+    if(correct) EP.byCat[cat].correct++;
+    if(q.sourceTopic){
+      if(!EP.bySection) EP.bySection={};
+      var sid = q.sourceTopic;
+      if(!EP.bySection[sid]) EP.bySection[sid] = {correct:0, total:0};
+      EP.bySection[sid].total++;
+      if(correct) EP.bySection[sid].correct++;
+    }
+    EP.answers.push({correct:correct, chosen:chosenText, q:q});
+    var goodText = q.options ? String(q.options[q.answer]) : String(q.answer);
+    $("feedback").innerHTML = correct
+      ? '<span style="color:#22c55e">✓ Correct!</span>'
+      : '<span style="color:#ef4444">✗ Correct answer: <b>'+esc(goodText)+'</b></span>';
+    sfx(correct?"hit":"miss");
+    setTimeout(function(){ EP.idx++; render(); }, correct?900:1600);
+  }
+  if(isTyped){
+    var f = $("typedForm"), inp = $("typedAns");
+    setTimeout(function(){ if(inp) inp.focus(); }, 40);
+    f.onsubmit = function(e){
+      e.preventDefault(); if(busy) return;
+      var given = String(inp.value||"").trim();
+      if(!given) return; // ignore empty submits
+      busy = true;
+      // Numeric-strip comparison so "377", " 377 ", "377 " all match.
+      var correctStr = String(q.answer||"").trim();
+      var norm = function(s){return String(s).replace(/[^0-9.\-]/g,"");};
+      var isRight = given.toLowerCase() === correctStr.toLowerCase()
+                 || (norm(given) !== "" && norm(given) === norm(correctStr));
+      inp.disabled = true;
+      inp.style.borderColor = isRight ? "#22c55e" : "#ef4444";
+      // Disable the submit button too.
+      var subBtn = f.querySelector("button[type=submit]"); if(subBtn) subBtn.disabled = true;
+      finish(isRight, given);
     };
-  });
+  } else {
+    Array.prototype.forEach.call(document.querySelectorAll("#opts .opt"),function(bn){
+      bn.onclick=function(){
+        if(busy)return; busy=true;
+        var i = +bn.getAttribute("data-i");
+        var correct = (i === q.answer);
+        Array.prototype.forEach.call(document.querySelectorAll("#opts .opt"),function(b){
+          b.disabled = true;
+          var ix = +b.getAttribute("data-i");
+          if(ix === q.answer) b.classList.add("good");
+          else if(ix === i && !correct) b.classList.add("bad");
+        });
+        finish(correct, i);
+      };
+    });
+  }
 }
 function screenExamResults(){
   if(!EP){view="exam";return render();}
   var total = EP.answers.length;
   var correct = EP.answers.filter(function(a){return a.correct;}).length;
   var pct = total ? Math.round(correct/total*100) : 0;
-  // Save to history.
+  // Save to history. Typed answers store the raw typed string in a.chosen;
+  // MCQ stores the option index — resolve either into a display string.
   try {
     var mistakes = EP.answers.filter(function(a){return !a.correct;}).map(function(a){
-      var opts = a.q.options||[];
-      return {q:a.q.q||a.q.prompt||"", chosen:String(opts[a.chosen]||a.chosen), answer:String(opts[a.q.answer]||"")};
+      var opts = a.q.options;
+      var chosenText = opts ? String(opts[a.chosen]||a.chosen) : String(a.chosen==null?"(blank)":a.chosen);
+      var answerText = opts ? String(opts[a.q.answer]||"") : String(a.q.answer||"");
+      return {q:a.q.q||a.q.prompt||"", chosen:chosenText, answer:answerText};
     });
     recordExamSession({setId:EP.setId, topicId:EP.topicId, ts:Date.now(),
       total:total, correct:correct, byCat:EP.byCat, bySection:EP.bySection||null, mistakes:mistakes});
@@ -3802,12 +3865,14 @@ function screenExamResults(){
           '<div class="bar" style="margin-top:4px"><i style="width:'+r.pct+'%;background:'+col+'"></i></div></div>';
       }).join("");
   }
-  // Mistake list
+  // Mistake list — same both-shapes resolution as recordExamSession above.
   var mistList = EP.answers.filter(function(a){return !a.correct;}).slice(0,5).map(function(a){
-    var opts=a.q.options||[];
+    var opts = a.q.options;
+    var chosenText = opts ? String(opts[a.chosen]||a.chosen) : String(a.chosen==null?"(blank)":a.chosen);
+    var answerText = opts ? String(opts[a.q.answer]||"") : String(a.q.answer||"");
     return '<div style="background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:13px">'+
-      '<div style="font-weight:700;margin-bottom:4px">'+esc(a.q.q||a.q.prompt||"")+'</div>'+
-      '<div class="muted">Your answer: <b style="color:#fca5a5">'+esc(String(opts[a.chosen]||a.chosen))+'</b> · Correct: <b style="color:#86efac">'+esc(String(opts[a.q.answer]||""))+'</b></div>'+
+      '<div style="font-weight:700;margin-bottom:4px">'+esc(a.q.q||a.q.prompt||"").replace(/_{2,}/g,'?')+'</div>'+
+      '<div class="muted">Your answer: <b style="color:#fca5a5">'+esc(chosenText)+'</b> · Correct: <b style="color:#86efac">'+esc(answerText)+'</b></div>'+
       '</div>';
   }).join("");
   $("app").innerHTML=
