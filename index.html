@@ -1758,7 +1758,7 @@ var EXAM_PREP=[{
     {id:"y3s2_perimeter",         label:"Perimeter"},
     {id:"y3s2_missing_fraction",  label:"Missing Fraction"},
     {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres", sessionSize:20},
-    {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms"},
+    {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms", sessionSize:20},
     {id:"y3s2_word_problems",     label:"Word Problems", sessionSize:20},
     // Mix-all "Challenge Test" — samples questions from every other topic
     // in this set. No bank of its own; unlocked once at least one other
@@ -1868,6 +1868,154 @@ EXAM_QUESTIONS["y3s2_measuring_cm"]=(function(){
     ["Four paper strips are each 12 cm long. They are placed end to end. What is the total length? ___ cm","48 cm","WORD"],
     ["A ribbon is 100 cm long. 38 cm is used for one gift and 27 cm for another. How much ribbon is left? ___ cm","35 cm","WORD"],
     ["Track A is 45 cm long. Track B is 18 cm longer than Track A. What is the total length of both tracks? ___ cm","108 cm","WORD"]
+  ];
+  return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
+})();
+
+// Wing's Year 3 Charts / Pictograms / Tally / Tables worksheet — 56
+// self-contained typed-answer questions (chart data bundled into each
+// prompt so the kid can see it while answering). Session picks 20 at
+// random. 5 sets from the docx that referenced bar-chart images without
+// providing numeric data are skipped — nothing to test against.
+EXAM_QUESTIONS["y3s2_charts"]=(function(){
+  var chartFruit=
+    "Favourite Fruit Pictogram   (Key: ● = 2 children)\n"+
+    "Apples:   ● ● ● ●\n"+
+    "Bananas:  ● ● ● ● ● ●\n"+
+    "Grapes:   ● ● ●\n"+
+    "Oranges:  ● ● ● ● ●\n"+
+    "Pears:    ● ●\n\n";
+  var chartBooks=
+    "Books Read by Year 3   (Key: ■ = 5 books)\n"+
+    "Adventure:  ■ ■ ■ ■ ■\n"+
+    "Mystery:    ■ ■ ■\n"+
+    "Comics:     ■ ■ ■ ■ ■ ■\n"+
+    "Science:    ■ ■\n\n";
+  var chartDrinks=
+    "Drinks with Lunch   (Key: ● = 5 children)\n"+
+    "Water:    ● ● ● ● ● ● ●\n"+
+    "Juice:    ● ● ● ●\n"+
+    "Milk:     ● ● ● ● ●\n"+
+    "Nothing:  ● ●\n\n";
+  var chartVehicles=
+    "Vehicles Passing the School   ( ||||/ = 5 )\n"+
+    "Car:          ||||/  ||||/  ||||/  |||\n"+
+    "Bus:          ||||/  ||\n"+
+    "Bicycle:      ||||/  ||||/  ||\n"+
+    "Lorry or van: ||||/  ||||\n"+
+    "Motorbike:    ||||\n\n";
+  var chartShopping=
+    "Where People Buy Fruit and Vegetables   ( ||||/ = 5 )\n"+
+    "Supermarket:   ||||/  ||||/  ||||/  ||||/  |||\n"+
+    "Corner shop:   ||||/  ||||\n"+
+    "Market stall:  ||||/  ||||/  ||||/  |\n"+
+    "Greengrocer:   ||||/  ||||/  ||\n\n";
+  var chartSunscreen=
+    "Bottles of Sunscreen Sold   (Key: ▮ = 2 bottles)\n"+
+    "Monday:     ▮ ▮\n"+
+    "Tuesday:    ▮\n"+
+    "Wednesday:  ▮ ▮ ▮\n"+
+    "Thursday:   ▮ ▮ ▮ ▮\n"+
+    "Friday:     ▮ ▮ ▮ ▮ ▮ ▮ ▮\n"+
+    "Saturday:   ▮ ▮ ▮ ▮ ▮\n"+
+    "Sunday:     ▮ ▮ ▮ ▮\n\n";
+  var chartCalls=
+    "Calls Received in One Day   (Key: ★ = 2 calls)\n"+
+    "7-9 a.m.:        ★ ★ ★ ★ ★\n"+
+    "9-11 a.m.:       ★ ★ ★ ★\n"+
+    "11 a.m.-1 p.m.:  ★ ★ ★\n"+
+    "1-3 p.m.:        ★ ★\n"+
+    "3-5 p.m.:        ★ ★ ★ ★\n"+
+    "5-7 p.m.:        ★ ★ ★\n"+
+    "7-9 p.m.:        ★ ★ ★ ★ ★\n\n";
+  var chartSandwiches=
+    "Sandwich Fillings   (frequency table)\n"+
+    "Salad:    12\n"+
+    "Tuna:     18\n"+
+    "Egg:      10\n"+
+    "Cheese:   16\n"+
+    "Chicken:   8\n\n";
+  var chartBalloons=
+    "Balloons Used for a School Disco   (Key: ● = 2 balloons)\n"+
+    "Red:     16\n"+
+    "Orange:  10\n"+
+    "Green:    8\n"+
+    "Yellow:  12\n"+
+    "Blue:     6\n\n";
+  var chartPuddings=
+    "Favourite Puddings   (Key: ● = 4 children)\n"+
+    "Apple tart:       ● ● ● ● ●\n"+
+    "Fruit and jelly:  ● ● ● ● ● ● ●\n"+
+    "Jam roly-poly:    ● ● ● ● ● ●\n"+
+    "Ice cream:        ● ● ● ● ● ● ● ● ● ●\n"+
+    "Sponge pudding:   ● ● ●\n\n";
+  var raw=[
+    // Set 1 — Fruit pictogram (6)
+    [chartFruit+"How many children chose bananas?","12","PICTOGRAM"],
+    [chartFruit+"How many children chose grapes?","6","PICTOGRAM"],
+    [chartFruit+"Which fruit was the most popular?","Bananas","PICTOGRAM"],
+    [chartFruit+"How many more children chose oranges than pears?","6","PICTOGRAM"],
+    [chartFruit+"How many children took part altogether?","40","PICTOGRAM"],
+    [chartFruit+"How many symbols would be needed to show 14 children?","7","PICTOGRAM"],
+    // Set 2 — Books pictogram (6)
+    [chartBooks+"How many adventure books were read?","25","PICTOGRAM"],
+    [chartBooks+"Which type of book was read the least?","Science","PICTOGRAM"],
+    [chartBooks+"How many more comics than mystery books were read?","15","PICTOGRAM"],
+    [chartBooks+"How many books were read altogether?","80","PICTOGRAM"],
+    [chartBooks+"How many symbols represent the mystery books?","3","PICTOGRAM"],
+    [chartBooks+"If 10 more science books were read, how many science books would there be?","20","PICTOGRAM"],
+    // Set 3 — Drinks pictogram (6)
+    [chartDrinks+"How many children drank water?","35","PICTOGRAM"],
+    [chartDrinks+"How many children drank milk?","25","PICTOGRAM"],
+    [chartDrinks+"How many children had nothing to drink?","10","PICTOGRAM"],
+    [chartDrinks+"How many more children drank water than juice?","15","PICTOGRAM"],
+    [chartDrinks+"How many children were in the survey altogether?","90","PICTOGRAM"],
+    [chartDrinks+"Which two categories differ by exactly 5 children?","Juice and Milk","PICTOGRAM"],
+    // Set 4 — Vehicles tally (5, Q19 multi-value skipped)
+    [chartVehicles+"Which vehicle was seen most often?","Car","TALLY"],
+    [chartVehicles+"Which vehicle was seen least often?","Motorbike","TALLY"],
+    [chartVehicles+"How many two-wheeled vehicles were seen altogether? (Bicycle + Motorbike)","16","TALLY"],
+    [chartVehicles+"How many more cars than buses were seen?","11","TALLY"],
+    [chartVehicles+"How many vehicles were counted altogether?","50","TALLY"],
+    // Set 5 — Shopping tally (5, Q25 multi-value skipped)
+    [chartShopping+"Where do most people shop?","Supermarket","TALLY"],
+    [chartShopping+"Where do the fewest people shop?","Corner shop","TALLY"],
+    [chartShopping+"How many more people use the supermarket than the market stall?","7","TALLY"],
+    [chartShopping+"How many people were asked altogether?","60","TALLY"],
+    [chartShopping+"How many people shop at the market stall and greengrocer altogether?","28","TALLY"],
+    // Set 9 — Sunscreen pictogram (6)
+    [chartSunscreen+"Which day had the most sales?","Friday","PICTOGRAM"],
+    [chartSunscreen+"Which day had the fewest sales?","Tuesday","PICTOGRAM"],
+    [chartSunscreen+"How many bottles were sold on Wednesday?","6","PICTOGRAM"],
+    [chartSunscreen+"How many more bottles were sold on Friday than Monday?","10","PICTOGRAM"],
+    [chartSunscreen+"Which two days had the same number of sales?","Thursday and Sunday","PICTOGRAM"],
+    [chartSunscreen+"How many bottles were sold altogether?","52","PICTOGRAM"],
+    // Set 10 — Call centre pictogram (6)
+    [chartCalls+"How many calls were received from 1 p.m. to 3 p.m.?","4","PICTOGRAM"],
+    [chartCalls+"Which two time periods had the most calls?","7-9 a.m. and 7-9 p.m.","PICTOGRAM"],
+    [chartCalls+"Which time period had the fewest calls?","1-3 p.m.","PICTOGRAM"],
+    [chartCalls+"How many calls were received altogether?","52","PICTOGRAM"],
+    [chartCalls+"How many more calls were received from 7-9 p.m. than from 5-7 p.m.?","4","PICTOGRAM"],
+    [chartCalls+"How many time periods had more than 7 calls?","4","PICTOGRAM"],
+    // Set 11 — Sandwich frequency table (5, Q61 bar chart drawing skipped)
+    [chartSandwiches+"Which sandwich filling is the most popular?","Tuna","TABLE"],
+    [chartSandwiches+"Which sandwich filling is the least popular?","Chicken","TABLE"],
+    [chartSandwiches+"How many more tuna sandwiches than salad sandwiches were made?","6","TABLE"],
+    [chartSandwiches+"How many sandwiches were made altogether?","64","TABLE"],
+    [chartSandwiches+"How many fewer egg sandwiches than cheese sandwiches were made?","6","TABLE"],
+    // Set 12 — Balloon frequency table (5, Q67 pictogram drawing skipped)
+    [chartBalloons+"Which colour has the most balloons?","Red","TABLE"],
+    [chartBalloons+"Which colour has the fewest balloons?","Blue","TABLE"],
+    [chartBalloons+"How many more red balloons than green balloons are there?","8","TABLE"],
+    [chartBalloons+"How many balloons are there altogether?","52","TABLE"],
+    [chartBalloons+"How many symbols are needed for the yellow balloons? (Key: ● = 2)","6","TABLE"],
+    // Set 14 — Puddings pictogram (6)
+    [chartPuddings+"How many children chose ice cream?","40","PICTOGRAM"],
+    [chartPuddings+"Which pudding was the least popular?","Sponge pudding","PICTOGRAM"],
+    [chartPuddings+"How many more children chose fruit and jelly than apple tart?","8","PICTOGRAM"],
+    [chartPuddings+"How many children chose jam roly-poly and sponge pudding altogether?","36","PICTOGRAM"],
+    [chartPuddings+"How many children took part in the survey altogether?","124","PICTOGRAM"],
+    [chartPuddings+"If 8 more children chose sponge pudding, how many symbols would it then need?","5","PICTOGRAM"]
   ];
   return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
 })();
@@ -3927,7 +4075,7 @@ function screenExamSession(){
       '<b>'+esc((t&&t.label)||"")+'</b><span class="pill">'+(EP.idx+1)+'/'+total+'</span></div>'+
     '<div class="card" style="margin-top:12px">'+
       '<div class="bar" style="margin-bottom:12px"><i style="width:'+((EP.idx+1)/total*100)+'%;background:#3b82f6"></i></div>'+
-      '<div class="qtext" style="margin-bottom:14px">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
+      '<div class="qtext" style="margin-bottom:14px;white-space:pre-wrap;font-family:ui-monospace,Consolas,\'Courier New\',monospace;font-size:14px;line-height:1.55">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
       inputHTML +
       '<div id="feedback" style="margin-top:14px;text-align:center;font-weight:800;min-height:22px"></div>'+
     '</div>';
