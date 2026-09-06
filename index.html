@@ -231,6 +231,10 @@
   .shop-item{border:4px solid #e2e8f0;border-radius:18px;padding:12px;text-align:center;background:#fff;}
   .shop-item.eq{border-color:#16a34a;background:#f0fdf4;} .shop-item.lk{opacity:.7;}
   .bar{height:14px;border-radius:999px;background:#e2e8f0;overflow:hidden;} .bar>i{display:block;height:100%;}
+  /* Tappable topic card in the History & Analysis report. */
+  .histcard{display:block;width:100%;text-align:left;border:0;cursor:pointer;font-family:inherit;
+    font-size:14px;color:inherit;background:#2a3346;border-radius:12px;padding:11px 13px;margin-bottom:8px;}
+  .histcard:hover{background:#323c53;}
   .tile{border:0;cursor:pointer;font-family:inherit;background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(0,0,0,.15);text-align:center;}
   .tile .av{font-size:46px;}
   .seg{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0;}
@@ -1763,7 +1767,20 @@ var EXAM_PREP=[{
     // Mix-all "Challenge Test" — samples questions from every other topic
     // in this set. No bank of its own; unlocked once at least one other
     // topic has a bank wired in.
-    {id:"y3s2_challenge",         label:"🏆 Challenge Test", challengeMode:true, perSection:8}
+    // perTopic sets the weighting Wing wants — the two broadest topics
+    // (mixed operation, word problems) carry 15 each, the rest 10, for an
+    // 80-question test. perSection is the fallback for any topic wired in
+    // later that isn't named here.
+    {id:"y3s2_challenge",         label:"🏆 Challenge Test", challengeMode:true, perSection:10,
+     perTopic:{
+       y3s2_mixed_operation:15,
+       y3s2_fraction:10,
+       y3s2_perimeter:10,
+       y3s2_missing_fraction:10,
+       y3s2_measuring_cm:10,
+       y3s2_charts:10,
+       y3s2_word_problems:15
+     }}
   ]
 }];
 // Populated by Wing per topic. Two supported shapes:
@@ -2449,6 +2466,62 @@ EXAM_QUESTIONS["y3s2_word_problems"]=(function(){
 var EXAM_SESSION_SIZE=15;
 function examSet(setId){return EXAM_PREP.filter(function(s){return s.id===setId;})[0];}
 function examTopic(setId, topicId){var s=examSet(setId); return s && s.topics.filter(function(t){return t.id===topicId;})[0];}
+// Find a topic by id without knowing its set — history entries store both,
+// but older entries and the challenge's bySection keys only carry the id.
+function examTopicAnySet(topicId){
+  var found=null;
+  EXAM_PREP.forEach(function(s){s.topics.forEach(function(t){if(t.id===topicId)found=t;});});
+  return found;
+}
+/* Friendly names for the per-question `cat` tags. Codes are only unique
+   within a topic — COMPARE means "longer or shorter" under measuring but
+   "compare two fractions" under fractions — so the lookup is topic-first,
+   then a shared fallback, then a tidied-up version of the raw code. */
+var EXAM_CAT_LABELS={
+  _shared:{ADD:"Addition", SUB:"Subtraction", MUL:"Multiplication", DIV:"Division",
+           MISS:"Missing numbers", WORD:"Word problems", COMPARE:"Comparing",
+           CHALLENGE:"Challenge & reasoning"},
+  y3s2_mixed_operation:{MISS:"Missing numbers"},
+  y3s2_measuring_cm:{RULER:"Reading a ruler", COMPARE:"Longer or shorter",
+                     ARITH:"Adding & subtracting lengths", MISS:"Missing lengths",
+                     WORD:"Length word problems"},
+  y3s2_fraction:{MODEL:"Fraction models", COMPARE:"Comparing fractions",
+                 ORDER:"Ordering fractions", SUBTRACT:"Subtracting fractions",
+                 OFNUM:"Fractions of amounts", WORD:"Fraction word problems"},
+  y3s2_missing_fraction:{WHOLE:"Complete the whole", ADD_MISS:"Missing in addition",
+                         SUB_MISS:"Missing in subtraction", WORD:"Missing-fraction word problems"},
+  y3s2_perimeter:{RECT:"Rectangles (cm)", METRE:"Rectangles (m)",
+                  SQUARE:"Squares & four-sided shapes", MISSING:"Missing side",
+                  WORD:"Perimeter word problems", JOINED:"Joined rectangles",
+                  CHALLENGE:"Challenge & reasoning"},
+  y3s2_charts:{PICTOGRAM:"Pictograms", TALLY:"Tally charts", TABLE:"Tables & bar charts"},
+  y3s2_word_problems:{ADD_SUB:"Add & subtract", MUL_DIV:"Multiply & divide",
+                      MONEY:"Money", MISS:"Missing numbers",
+                      TWO_STEP:"Two-step problems", CHALLENGE:"Challenge & reasoning"}
+};
+function catLabel(topicId, cat){
+  var m=EXAM_CAT_LABELS[topicId];
+  if(m && m[cat]) return m[cat];
+  if(EXAM_CAT_LABELS._shared[cat]) return EXAM_CAT_LABELS._shared[cat];
+  return String(cat||"").replace(/_/g," ").toLowerCase()
+    .replace(/^./,function(c){return c.toUpperCase();});
+}
+// "just now / 5m ago / 3d ago" for history lists.
+function agoLabel(ts){
+  var s=Math.max(1,(Date.now()-ts)/1000);
+  if(s<60) return "just now";
+  if(s<3600) return Math.floor(s/60)+"m ago";
+  if(s<86400) return Math.floor(s/3600)+"h ago";
+  if(s<604800) return Math.floor(s/86400)+"d ago";
+  return Math.floor(s/604800)+"w ago";
+}
+// One place for the score→colour/label bands the whole report shares.
+function pctBand(p){
+  if(p>=80) return {txt:"Strong", col:"#22c55e"};
+  if(p>=60) return {txt:"Improving", col:"#fbbf24"};
+  return {txt:"Needs work", col:"#ef4444"};
+}
+function accCol(acc){ return acc>=0.8?"#22c55e":acc>=0.55?"#fbbf24":"#ef4444"; }
 function examBank(topicId){var b=EXAM_QUESTIONS[topicId]; return (b&&b.length)?b:null;}
 function examSessionSize(topic, bank){
   if(!bank) return 0;
@@ -2461,16 +2534,30 @@ function sampleExamQuestions(bank, n){
   for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
   return a.slice(0, Math.min(n, a.length));
 }
-// Challenge Test — pull `perSection` from each other topic that has a bank,
-// tag each with sourceTopic so the results screen can break down by section.
+// Challenge Test — pull a per-topic count from each other topic that has a
+// bank, tag each with sourceTopic so the results screen can break down by
+// section.
 function challengeSources(setId){
   var s = examSet(setId); if(!s) return [];
   return s.topics.filter(function(t){return !t.challengeMode && examBank(t.id);});
 }
-function sampleChallengeQuestions(setId, perSection){
+// How many questions the challenge draws from one source topic: its entry in
+// `perTopic`, else `perSection`, never more than that topic's bank holds.
+function challengePer(challengeTopic, topicId){
+  var map = challengeTopic && challengeTopic.perTopic;
+  var n = (map && map[topicId]) || (challengeTopic && challengeTopic.perSection) || 8;
+  var bank = examBank(topicId);
+  return bank ? Math.min(n, bank.length) : 0;
+}
+function challengeTotal(setId, challengeTopic){
+  return challengeSources(setId).reduce(function(sum, t){
+    return sum + challengePer(challengeTopic, t.id);
+  }, 0);
+}
+function sampleChallengeQuestions(setId, challengeTopic){
   var out=[], sources=challengeSources(setId);
   sources.forEach(function(t){
-    var picked = sampleExamQuestions(examBank(t.id), perSection);
+    var picked = sampleExamQuestions(examBank(t.id), challengePer(challengeTopic, t.id));
     picked.forEach(function(q){ out.push(Object.assign({}, q, {sourceTopic:t.id})); });
   });
   return shuffle(out);
@@ -3439,6 +3526,7 @@ function render(){
   if(view==="examSession")return screenExamSession();
   if(view==="examResults")return screenExamResults();
   if(view==="examHistory")return screenExamHistory();
+  if(view==="examTopicDetail")return screenExamTopicDetail();
   if(view==="report")return screenReport();
   if(view==="train")return screenTrain();
   if(view==="trainlvls")return screenTrainLevels();
@@ -4254,6 +4342,8 @@ function jabCrossSVG(earned){
    bySection?, challenge?}) and is null when not in a session.
    ========================================================================= */
 var examCtx={}, EP=null;
+// Which topic the History & Analysis detail screen is showing.
+var examHistTopic=null;
 function screenExam(){
   var sets = EXAM_PREP.map(function(s){
     return '<button class="lvl" data-set="'+esc(s.id)+'" style="text-align:left"><div class="e">📚</div>'+
@@ -4264,7 +4354,7 @@ function screenExam(){
   $("app").innerHTML=
     '<div class="hud"><button class="btn sm ghost" id="back">⬅ Map</button>'+
       '<b>📚 Exam Preparation</b>'+
-      '<button class="btn sm ghost" id="hist">📈 History ('+histCount+')</button>'+
+      '<button class="btn sm ghost" id="hist">📈 Report'+(histCount?' ('+histCount+')':'')+'</button>'+
     '</div>'+
     '<div class="card" style="margin-top:12px">'+
       '<p class="muted" style="font-size:13px;margin:0 0 12px">Practice by topic — no monsters, no lives lost. Pick a set to see the topics inside.</p>'+
@@ -4317,9 +4407,10 @@ function screenExamTopic(){
       $("back").onclick=function(){view="examSet";render();};
       return;
     }
-    var per = t.perSection || 8;
-    var total = sources.length * per;
-    var list = sources.map(function(x){return '<li><b>'+esc(x.label)+'</b> — '+per+' questions</li>';}).join("");
+    var total = challengeTotal(s.id, t);
+    var list = sources.map(function(x){
+      return '<li><b>'+esc(x.label)+'</b> — '+challengePer(t, x.id)+' questions</li>';
+    }).join("");
     $("app").innerHTML=
       '<div class="hud"><button class="btn sm ghost" id="back">⬅ '+esc(s.label)+'</button><b>'+esc(t.label)+'</b><span></span></div>'+
       '<div class="card" style="margin-top:12px;text-align:center;padding:26px">'+
@@ -4335,7 +4426,7 @@ function screenExamTopic(){
     $("back").onclick=function(){view="examSet";render();};
     $("bk2").onclick=function(){view="examSet";render();};
     $("startBtn").onclick=function(){
-      var qs = sampleChallengeQuestions(s.id, per);
+      var qs = sampleChallengeQuestions(s.id, t);
       EP = {setId:s.id, topicId:t.id, challenge:true, questions:qs, idx:0, answers:[], byCat:{}, bySection:{}};
       view="examSession"; render();
     };
@@ -4493,7 +4584,7 @@ function screenExamResults(){
   var catHTML = catRows.length ? catRows.map(function(r){
     var col = r.acc>=0.8?'#22c55e':r.acc>=0.55?'#fbbf24':'#ef4444';
     return '<div style="background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
-      '<div class="row" style="justify-content:space-between;font-weight:800"><span>Category '+esc(r.cat)+'</span><span style="color:'+col+'">'+r.pct+'%</span></div>'+
+      '<div class="row" style="justify-content:space-between;font-weight:800"><span>'+esc(catLabel(EP.topicId, r.cat))+'</span><span style="color:'+col+'">'+r.pct+'%</span></div>'+
       '<div class="muted" style="font-size:12px">'+r.correct+' / '+r.total+' correct</div>'+
       '<div class="bar" style="margin-top:4px"><i style="width:'+r.pct+'%;background:'+col+'"></i></div></div>';
   }).join("") : '<p class="muted">No category tags on these questions.</p>';
@@ -4551,8 +4642,7 @@ function screenExamResults(){
   $("againBtn").onclick=function(){
     var tt = examTopic(savedSet, savedTopic);
     if(tt && tt.challengeMode){
-      var per = tt.perSection || 8;
-      EP = {setId:savedSet, topicId:savedTopic, challenge:true, questions:sampleChallengeQuestions(savedSet, per), idx:0, answers:[], byCat:{}, bySection:{}};
+      EP = {setId:savedSet, topicId:savedTopic, challenge:true, questions:sampleChallengeQuestions(savedSet, tt), idx:0, answers:[], byCat:{}, bySection:{}};
     } else {
       var bank = examBank(savedTopic);
       var n = examSessionSize(tt, bank);
@@ -4561,54 +4651,311 @@ function screenExamResults(){
     view="examSession"; render();
   };
 }
+/* ==========================================================================
+   HISTORY & ANALYSIS — the parent-facing report for Exam Preparation.
+   Two screens, mirroring the Haunted English Mansion so the same mental
+   model works across both games:
+     examHistory      — overall summary, per-topic cards (weakest first),
+                        recent sessions. Tap a card to drill in.
+     examTopicDetail  — one topic: trend sparkline, where mistakes cluster
+                        by category, every attempt, recent wrong answers.
+   Everything is derived from S.exam.history, which recordExamSession has
+   been writing all along (pct, byCat, bySection, mistakes).
+   ======================================================================== */
+
+// Roll a list of sessions into {cat:{correct,total}} totals.
+function foldByCat(sessions){
+  var agg={};
+  sessions.forEach(function(h){
+    Object.keys(h.byCat||{}).forEach(function(c){
+      if(!agg[c]) agg[c]={correct:0,total:0};
+      agg[c].correct += h.byCat[c].correct;
+      agg[c].total   += h.byCat[c].total;
+    });
+  });
+  return agg;
+}
+// Same for the challenge test's per-source-topic totals.
+function foldBySection(sessions){
+  var agg={};
+  sessions.forEach(function(h){
+    if(!h.bySection) return;
+    Object.keys(h.bySection).forEach(function(sid){
+      if(!agg[sid]) agg[sid]={correct:0,total:0};
+      agg[sid].correct += h.bySection[sid].correct;
+      agg[sid].total   += h.bySection[sid].total;
+    });
+  });
+  return agg;
+}
+// {key:{correct,total}} -> sorted rows. weakestFirst===false sorts strongest first.
+function statRows(agg, labelFn, weakestFirst){
+  var rows=Object.keys(agg).map(function(k){
+    var v=agg[k], acc=v.total? v.correct/v.total : 0;
+    return {key:k, label:labelFn(k), correct:v.correct, total:v.total,
+            pct:Math.round(acc*100), acc:acc};
+  });
+  rows.sort(function(a,b){return weakestFirst===false ? b.acc-a.acc : a.acc-b.acc;});
+  return rows;
+}
+// The panel used for every category / section row in the report.
+function statRowHTML(r, subtitle){
+  var col=accCol(r.acc);
+  return '<div style="background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
+    '<div class="row" style="justify-content:space-between;font-weight:800">'+
+      '<span>'+esc(r.label)+'</span><span style="color:'+col+'">'+r.pct+'%</span></div>'+
+    '<div class="muted" style="font-size:12px">'+esc(subtitle||(r.correct+" / "+r.total+" correct"))+'</div>'+
+    '<div class="bar" style="margin-top:4px"><i style="width:'+r.pct+'%;background:'+col+'"></i></div></div>';
+}
+// Summarise one topic's sessions: averages, best/worst, trend, weakest area.
+function topicSummary(topicId, sessions){
+  var t=examTopicAnySet(topicId);
+  var scores=sessions.map(function(h){return h.pct;});
+  var avg=Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
+  // history is prepended, so sessions[0] is the newest.
+  var latest=sessions[0].pct, prior=sessions.slice(1);
+  var priorAvg=prior.length
+    ? Math.round(prior.reduce(function(a,h){return a+h.pct;},0)/prior.length)
+    : latest;
+  var catRows=statRows(foldByCat(sessions), function(c){return catLabel(topicId,c);}, true);
+  return {
+    topicId:topicId, label:(t&&t.label)||topicId, isChallenge:!!(t&&t.challengeMode),
+    sessions:sessions, count:sessions.length,
+    latest:latest, best:Math.max.apply(null,scores), worst:Math.min.apply(null,scores),
+    avg:avg, trend: latest>priorAvg ? "up" : latest<priorAvg ? "down" : "flat",
+    catRows:catRows, weakestCat:catRows[0],
+    sectionRows: (t&&t.challengeMode)
+      ? statRows(foldBySection(sessions), function(sid){
+          return (examTopicAnySet(sid)||{}).label || sid;
+        }, false)
+      : null
+  };
+}
+function trendMark(trend, verbose){
+  if(trend==="up")   return '<span style="color:#22c55e;font-weight:800">&#9650; improving'+(verbose?" vs average":"")+'</span>';
+  if(trend==="down") return '<span style="color:#ef4444;font-weight:800">&#9660; '+(verbose?"recent scores dropping":"declining")+'</span>';
+  return '<span class="muted" style="font-weight:800">&mdash; steady</span>';
+}
+// Group every stored session by topic, newest-first within each topic.
+function historyByTopic(hist){
+  var byTopic={};
+  hist.forEach(function(h){
+    if(!byTopic[h.topicId]) byTopic[h.topicId]=[];
+    byTopic[h.topicId].push(h);
+  });
+  return byTopic;
+}
+// Actionable advice — leads with whatever matters most for this topic.
+function suggestionFor(t){
+  var parts=[];
+  if(t.trend==="down" && t.count>=2)
+    parts.push("Latest score is below the earlier average — worth a review before the next go.");
+  if(t.count<3)
+    parts.push("Take "+(3-t.count)+" more session"+(3-t.count===1?"":"s")+" for a reliable picture.");
+  // For the Challenge Test point at the weakest source topic, not a category —
+  // its category codes are pooled from seven topics and mean different things.
+  var focus = t.isChallenge
+    ? (t.sectionRows && t.sectionRows.length ? t.sectionRows[t.sectionRows.length-1] : null)
+    : t.weakestCat;
+  if(focus && focus.total>=3 && focus.acc<0.7)
+    parts.push("Focus most on <b>"+esc(focus.label)+"</b> — that is where the mistakes cluster ("+focus.pct+"%).");
+  else if(t.avg<60)
+    parts.push("Practise this topic more often — try 2–3 sessions this week.");
+  else if(t.avg>=80 && !parts.length)
+    parts.push("Strong across the board. Keep it up, or move on to the Challenge Test.");
+  return parts.length ? parts.join(" ") : "Keep practising to build a longer record.";
+}
+
 function screenExamHistory(){
-  var hist = ((S.exam&&S.exam.history)||[]);
+  var hist=((S.exam&&S.exam.history)||[]);
   if(!hist.length){
     $("app").innerHTML=
-      '<div class="hud"><button class="btn sm ghost" id="back">⬅ Exam Prep</button><b>📈 History</b><span></span></div>'+
+      '<div class="hud"><button class="btn sm ghost" id="back">⬅ Exam Prep</button><b>📈 History &amp; Analysis</b><span></span></div>'+
       '<div class="card" style="margin-top:12px;text-align:center;padding:26px">'+
         '<div style="font-size:60px">📊</div>'+
         '<h2 style="margin:8px 0 6px">No sessions yet</h2>'+
-        '<p class="muted">Complete a practice session in any topic and it will appear here.</p>'+
+        '<p class="muted" style="line-height:1.6">Complete a practice session in any topic and it will appear here. '+
+          'You will see best, worst and average scores, which question types need work, and how things change over time.</p>'+
+        '<button class="btn" id="bk2" style="margin-top:14px">⬅ Back to Exam Preparation</button>'+
       '</div>';
     $("back").onclick=function(){view="exam";render();};
+    $("bk2").onclick=function(){view="exam";render();};
     return;
   }
-  // Aggregate per topic
-  var byTopic={};
-  hist.forEach(function(h){
-    if(!byTopic[h.topicId]) byTopic[h.topicId] = {sessions:[], best:0, worst:100};
-    byTopic[h.topicId].sessions.push(h);
-    if(h.pct>byTopic[h.topicId].best) byTopic[h.topicId].best = h.pct;
-    if(h.pct<byTopic[h.topicId].worst) byTopic[h.topicId].worst = h.pct;
-  });
-  var topicHTML = Object.keys(byTopic).map(function(tid){
-    var v = byTopic[tid];
-    var t = null;
-    // Find the topic label across all sets.
-    EXAM_PREP.forEach(function(s){s.topics.forEach(function(tp){if(tp.id===tid)t=tp;});});
-    var label = t? t.label : tid;
-    var avg = Math.round(v.sessions.reduce(function(a,h){return a+h.pct;},0) / v.sessions.length);
-    return '<div style="background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
-      '<div class="row" style="justify-content:space-between;font-weight:800"><span>'+esc(label)+'</span><span>'+v.sessions.length+' sessions</span></div>'+
-      '<div class="muted" style="font-size:12px">Best '+v.best+'% · Avg '+avg+'% · Worst '+v.worst+'%</div>'+
+  var byTopic=historyByTopic(hist);
+  var rows=Object.keys(byTopic).map(function(tid){return topicSummary(tid, byTopic[tid]);})
+             .sort(function(a,b){return a.avg-b.avg;});
+
+  // Overall summary line.
+  var overallAvg=Math.round(hist.reduce(function(a,h){return a+h.pct;},0)/hist.length);
+  var weak=rows.filter(function(t){return t.avg<70;}).slice(0,3);
+  var summary='Overall accuracy <b>'+overallAvg+'%</b> across <b>'+hist.length+'</b> session'+(hist.length===1?"":"s")+'. ';
+  summary += weak.length
+    ? 'Focus on: <b style="color:#ef4444">'+weak.map(function(t){return esc(t.label);}).join(", ")+'</b>.'
+    : 'No clear weak topic — performance is fairly even.';
+
+  var topicCards=rows.map(function(t){
+    var band=pctBand(t.avg);
+    // Challenge Test gets strongest/weakest sections instead of a category line.
+    var focus="";
+    if(t.isChallenge && t.sectionRows && t.sectionRows.length){
+      var strong=t.sectionRows[0], weakest=t.sectionRows[t.sectionRows.length-1];
+      focus='<div class="row" style="gap:8px;margin-top:8px">'+
+        '<div style="flex:1;background:#14532d;color:#dcfce7;border-radius:10px;padding:8px"><div style="font-size:10px;font-weight:800">💪 STRONGEST</div><div style="font-weight:800;font-size:13px">'+esc(strong.label)+'</div><div style="font-size:12px">'+strong.pct+'%</div></div>'+
+        '<div style="flex:1;background:#7f1d1d;color:#fecaca;border-radius:10px;padding:8px"><div style="font-size:10px;font-weight:800">🎯 WEAKEST</div><div style="font-weight:800;font-size:13px">'+esc(weakest.label)+'</div><div style="font-size:12px">'+weakest.pct+'%</div></div>'+
       '</div>';
+    } else if(t.weakestCat && t.weakestCat.total>0){
+      focus = t.weakestCat.acc<0.75
+        ? '<div style="margin-top:8px;font-size:13px">🎯 <b>Weakest area</b> — '+esc(t.weakestCat.label)+' · '+t.weakestCat.correct+'/'+t.weakestCat.total+' ('+t.weakestCat.pct+'%)</div>'
+        : '<div class="muted" style="margin-top:8px;font-size:13px">✅ Every question type at 75% or better.</div>';
+    }
+    return '<button class="histcard" data-topic="'+esc(t.topicId)+'">'+
+      '<div class="row" style="justify-content:space-between;align-items:center">'+
+        '<span style="font-weight:800">'+esc(t.label)+'</span>'+
+        '<span style="color:'+band.col+';font-weight:800">'+band.txt+' · '+t.avg+'%</span>'+
+      '</div>'+
+      '<div class="muted" style="font-size:12px;margin-top:5px">'+
+        '<b>'+t.count+'</b> attempt'+(t.count===1?"":"s")+' · Latest <b>'+t.latest+'%</b> · '+
+        'Best <b>'+t.best+'%</b> · Worst <b>'+t.worst+'%</b> · '+trendMark(t.trend)+
+      '</div>'+
+      focus+
+      '<div style="margin-top:8px;font-size:13px">💡 <b>Suggestion</b> — '+suggestionFor(t)+'</div>'+
+      '<div class="muted" style="font-size:11px;margin-top:7px">Tap for detailed analysis ›</div>'+
+    '</button>';
   }).join("");
-  var recentHTML = hist.slice(0,10).map(function(h){
-    var t = null;
-    EXAM_PREP.forEach(function(s){s.topics.forEach(function(tp){if(tp.id===h.topicId)t=tp;});});
-    var label = t? t.label : h.topicId;
-    var when = new Date(h.ts);
-    var ds = when.getDate()+"/"+(when.getMonth()+1)+" "+when.getHours()+":"+("0"+when.getMinutes()).slice(-2);
-    var col = h.pct>=80?'#22c55e':h.pct>=55?'#fbbf24':'#ef4444';
+
+  var recentHTML=hist.slice(0,10).map(function(h){
+    var t=examTopicAnySet(h.topicId);
+    var col=pctBand(h.pct).col;
     return '<div class="row" style="justify-content:space-between;background:#2a3346;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
-      '<span>'+esc(label)+'</span><span style="color:'+col+';font-weight:800">'+h.pct+'% ('+h.correct+'/'+h.total+') · '+ds+'</span></div>';
+      '<span>'+esc((t&&t.label)||h.topicId)+' <span class="muted">· '+esc(agoLabel(h.ts))+'</span></span>'+
+      '<span style="color:'+col+';font-weight:800">'+h.correct+'/'+h.total+' · '+h.pct+'%</span></div>';
   }).join("");
+
   $("app").innerHTML=
-    '<div class="hud"><button class="btn sm ghost" id="back">⬅ Exam Prep</button><b>📈 History</b><span></span></div>'+
-    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">By topic</h2>'+topicHTML+'</div>'+
-    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Recent sessions</h2>'+recentHTML+'</div>';
+    '<div class="hud"><button class="btn sm ghost" id="back">⬅ Exam Prep</button><b>📈 History &amp; Analysis</b><span></span></div>'+
+    '<div class="card" style="margin-top:12px"><p style="margin:0;line-height:1.6">'+summary+'</p>'+
+      '<p class="muted" style="font-size:12px;margin:8px 0 0;font-weight:700">👆 Tap any topic below for detailed analysis.</p></div>'+
+    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">By topic — weakest first</h2>'+topicCards+'</div>'+
+    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Recent sessions</h2>'+recentHTML+'</div>'+
+    '<div class="wrap" style="justify-content:center;margin-top:14px">'+
+      '<button class="btn ghost sm" id="clearBtn">🗑️ Clear history</button>'+
+      '<button class="btn" id="bk2">⬅ Back to Exam Prep</button>'+
+    '</div>';
   $("back").onclick=function(){view="exam";render();};
+  $("bk2").onclick=function(){view="exam";render();};
+  $("clearBtn").onclick=function(){
+    if(!confirm("Clear ALL exam history for '"+S.name+"'? This cannot be undone.")) return;
+    if(S.exam) S.exam.history=[];
+    save(); toast("History cleared"); render();
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-topic]"),function(b){
+    b.onclick=function(){examHistTopic=b.getAttribute("data-topic"); view="examTopicDetail"; render();};
+  });
+}
+
+function screenExamTopicDetail(){
+  var hist=((S.exam&&S.exam.history)||[]);
+  var sessions=hist.filter(function(h){return h.topicId===examHistTopic;});
+  if(!sessions.length){ view="examHistory"; return render(); }
+  var t=topicSummary(examHistTopic, sessions);
+  var band=pctBand(t.avg);
+
+  // Trend sparkline, oldest → newest. Needs at least two points to mean anything.
+  var spark="";
+  if(sessions.length>=2){
+    var vals=sessions.slice().reverse().map(function(h){return h.pct;});
+    var W=300,H=64,pad=8, stepX=(W-2*pad)/(vals.length-1);
+    var pts=vals.map(function(v,i){
+      return (pad+i*stepX).toFixed(1)+","+(H-pad-(v/100)*(H-2*pad)).toFixed(1);
+    });
+    var avgY=(H-pad-(t.avg/100)*(H-2*pad)).toFixed(1);
+    spark='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:320px;height:70px" preserveAspectRatio="none">'+
+      '<path d="M 0 '+avgY+' L '+W+' '+avgY+'" stroke="rgba(251,191,36,.45)" stroke-width="1" stroke-dasharray="4 4" fill="none"/>'+
+      '<polyline points="'+pts.join(" ")+'" stroke="#fbbf24" stroke-width="2.5" fill="none" stroke-linejoin="round"/>'+
+      pts.map(function(p){var xy=p.split(",");return '<circle cx="'+xy[0]+'" cy="'+xy[1]+'" r="3.5" fill="#fff"/>';}).join("")+
+    '</svg>'+
+    '<div class="muted" style="font-size:11px">← older · newer → &nbsp;(dashed line = '+t.avg+'% average)</div>';
+  }
+
+  // Headline advice — same challenge/topic distinction as suggestionFor.
+  var focus = t.isChallenge
+    ? (t.sectionRows && t.sectionRows.length ? t.sectionRows[t.sectionRows.length-1] : null)
+    : t.weakestCat;
+  var advice;
+  if(focus && focus.total>=3 && focus.acc<0.7)
+    advice='<b>Focus on:</b> '+esc(focus.label)+' — '+focus.pct+'% across '+focus.total+' questions.';
+  else if(t.avg<60) advice='<b>Focus on:</b> practising this topic more often — average is '+t.avg+'%.';
+  else if(t.avg>=80) advice='<b>Great work!</b> '+t.avg+'% average across '+t.count+' attempt'+(t.count===1?"":"s")+'.';
+  else advice='<b>Steady progress:</b> '+t.avg+'% average. Push a little to reach the 80% band.';
+
+  var sectionHTML = (t.sectionRows && t.sectionRows.length)
+    ? '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Section by section — strongest first</h2>'+
+        t.sectionRows.map(function(r){
+          return statRowHTML(r, r.correct+" / "+r.total+" across "+t.count+" challenge"+(t.count===1?"":"s"));
+        }).join("")+'</div>'
+    : "";
+
+  // Category rows are skipped for the Challenge Test: its byCat mixes codes
+  // from every source topic, where the same code means different things
+  // (COMPARE is "longer or shorter" under measuring, "compare two fractions"
+  // under fractions). Section-by-section above is the meaningful breakdown.
+  var catHTML = (!t.isChallenge && t.catRows.length)
+    ? '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Where mistakes cluster — weakest first</h2>'+
+        t.catRows.map(function(r){
+          return statRowHTML(r, r.correct+" / "+r.total+" correct across "+t.count+" attempt"+(t.count===1?"":"s"));
+        }).join("")+'</div>'
+    : "";
+
+  var attemptsHTML=sessions.map(function(h,i){
+    var col=pctBand(h.pct).col;
+    var label=i===0 ? "Latest" : "#"+(sessions.length-i);
+    return '<div class="row" style="justify-content:space-between;background:#2a3346;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
+      '<span><b>'+label+'</b> <span class="muted">· '+esc(agoLabel(h.ts))+'</span></span>'+
+      '<span style="color:'+col+';font-weight:800">'+h.correct+'/'+h.total+' · '+h.pct+'%</span></div>';
+  }).join("");
+
+  // Recent wrong answers, newest sessions first, capped so the page stays readable.
+  var mistakes=[];
+  sessions.slice(0,3).forEach(function(h){
+    (h.mistakes||[]).forEach(function(m){
+      if(mistakes.length<8) mistakes.push({m:m, when:agoLabel(h.ts)});
+    });
+  });
+  var mistHTML=mistakes.map(function(x){
+    return '<div style="background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:13px">'+
+      '<div style="font-weight:700;margin-bottom:4px">'+esc(String(x.m.q||"")).replace(/_{2,}/g,'?')+
+        ' <span class="muted" style="font-size:11px">· '+esc(x.when)+'</span></div>'+
+      '<div class="muted">Answered: <b style="color:#fca5a5">'+esc(x.m.chosen||"(blank)")+'</b>'+
+        ' · Correct: <b style="color:#86efac">'+esc(x.m.answer||"")+'</b></div></div>';
+  }).join("");
+
+  $("app").innerHTML=
+    '<div class="hud"><button class="btn sm ghost" id="back">⬅ History</button><b>'+esc(t.label)+'</b><span></span></div>'+
+    '<div class="card" style="margin-top:12px">'+
+      '<div class="row" style="justify-content:space-between;align-items:center">'+
+        '<span style="font-weight:800;font-size:17px">'+esc(t.label)+'</span>'+
+        '<span style="color:'+band.col+';font-weight:800">'+band.txt+' · '+t.avg+'%</span></div>'+
+      '<div class="muted" style="font-size:12px;margin-top:6px">'+
+        '<b>'+t.count+'</b> attempt'+(t.count===1?"":"s")+' · Latest <b>'+t.latest+'%</b> · '+
+        'Best <b>'+t.best+'%</b> · Worst <b>'+t.worst+'%</b> · '+trendMark(t.trend,true)+'</div>'+
+      '<div class="banner" style="margin-top:12px;text-align:left">'+advice+'</div>'+
+      (spark?'<div style="margin-top:12px;text-align:center">'+spark+'</div>':'')+
+    '</div>'+
+    sectionHTML + catHTML +
+    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Every attempt</h2>'+attemptsHTML+'</div>'+
+    (mistHTML ? '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">Recent mistakes</h2>'+mistHTML+'</div>' : '')+
+    '<div class="wrap" style="justify-content:center;margin-top:14px">'+
+      '<button class="btn ghost sm" id="bk2">⬅ Back</button>'+
+      '<button class="btn" id="practiceBtn">🎯 Practise this topic</button>'+
+    '</div>';
+  $("back").onclick=function(){view="examHistory";render();};
+  $("bk2").onclick=function(){view="examHistory";render();};
+  $("practiceBtn").onclick=function(){
+    var setId=(sessions[0]&&sessions[0].setId)||(EXAM_PREP[0]&&EXAM_PREP[0].id);
+    examCtx={setId:setId, topicId:examHistTopic};
+    view="examTopic"; render();
+  };
 }
 
 function screenBadges(){
