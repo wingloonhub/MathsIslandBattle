@@ -1757,7 +1757,7 @@ var EXAM_PREP=[{
     {id:"y3s2_fraction",          label:"Fraction"},
     {id:"y3s2_perimeter",         label:"Perimeter"},
     {id:"y3s2_missing_fraction",  label:"Missing Fraction"},
-    {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres"},
+    {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres", sessionSize:20},
     {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms"},
     {id:"y3s2_word_problems",     label:"Word Problems"},
     // Mix-all "Challenge Test" — samples questions from every other topic
@@ -1794,6 +1794,82 @@ EXAM_QUESTIONS["y3s2_mixed_operation"]=(function(){
     ["657 + 146 = ___",803,"ADD"],["83 - 45 = ___",38,"SUB"],["7 × 5 = ___",35,"MUL"],["30 ÷ 5 = ___",6,"DIV"],["96 - ___ = 58",38,"MISS"]
   ];
   return raw.map(function(r){return {q:r[0], answer:String(r[1]), cat:r[2]};});
+})();
+
+// Wing's Year 3 Measuring in Centimetres worksheet — 60 typed-answer
+// questions across 5 sections (RULER / COMPARE / ARITH / MISS / WORD).
+// Session picks 20 at random. Answers are stored with the "cm" suffix so
+// the results screen reads naturally; isCorrect's numeric-strip means the
+// kid can type "9", "9 cm", or "9cm" — all match.
+EXAM_QUESTIONS["y3s2_measuring_cm"]=(function(){
+  var raw=[
+    // Section A — read the ruler marks (10)
+    ["A line starts at the 2 cm mark and ends at the 11 cm mark. How long is the line? ___ cm","9 cm","RULER"],
+    ["A line starts at the 4 cm mark and ends at the 15 cm mark. How long is the line? ___ cm","11 cm","RULER"],
+    ["A line starts at the 1 cm mark and ends at the 13 cm mark. How long is the line? ___ cm","12 cm","RULER"],
+    ["A line starts at the 3 cm mark and ends at the 9 cm mark. How long is the line? ___ cm","6 cm","RULER"],
+    ["A line starts at the 5 cm mark and ends at the 17 cm mark. How long is the line? ___ cm","12 cm","RULER"],
+    ["A line starts at the 7 cm mark and ends at the 18 cm mark. How long is the line? ___ cm","11 cm","RULER"],
+    ["A line starts at the 6 cm mark and ends at the 14 cm mark. How long is the line? ___ cm","8 cm","RULER"],
+    ["A line starts at the 9 cm mark and ends at the 20 cm mark. How long is the line? ___ cm","11 cm","RULER"],
+    ["A line starts at the 4 cm mark and ends at the 12 cm mark. How long is the line? ___ cm","8 cm","RULER"],
+    ["A line starts at the 8 cm mark and ends at the 19 cm mark. How long is the line? ___ cm","11 cm","RULER"],
+    // Section B — longer or shorter (10)
+    ["A ribbon is 18 cm long. Another ribbon is 5 cm longer. How long is the second ribbon? ___ cm","23 cm","COMPARE"],
+    ["A pencil is 34 cm long. Another pencil is 7 cm longer. How long is the second pencil? ___ cm","41 cm","COMPARE"],
+    ["A string is 26 cm long. Another string is 9 cm longer. How long is the second string? ___ cm","35 cm","COMPARE"],
+    ["A paper strip is 45 cm long. Another paper strip is 8 cm longer. How long is the second paper strip? ___ cm","53 cm","COMPARE"],
+    ["A toy road is 17 cm long. Another toy road is 12 cm longer. How long is the second toy road? ___ cm","29 cm","COMPARE"],
+    ["A straw is 35 cm long. Another straw is 7 cm shorter. How long is the second straw? ___ cm","28 cm","COMPARE"],
+    ["A rope is 48 cm long. Another rope is 9 cm shorter. How long is the second rope? ___ cm","39 cm","COMPARE"],
+    ["A model train is 60 cm long. Another model train is 13 cm shorter. How long is the second model train? ___ cm","47 cm","COMPARE"],
+    ["A bookmark is 54 cm long. Another bookmark is 12 cm shorter. How long is the second bookmark? ___ cm","42 cm","COMPARE"],
+    ["A shoelace is 71 cm long. Another shoelace is 15 cm shorter. How long is the second shoelace? ___ cm","56 cm","COMPARE"],
+    // Section C — add and subtract lengths (15)
+    ["24 cm + 36 cm = ___ cm","60 cm","ARITH"],
+    ["57 cm + 18 cm = ___ cm","75 cm","ARITH"],
+    ["43 cm + 29 cm = ___ cm","72 cm","ARITH"],
+    ["68 cm + 17 cm = ___ cm","85 cm","ARITH"],
+    ["35 cm + 46 cm = ___ cm","81 cm","ARITH"],
+    ["90 cm - 27 cm = ___ cm","63 cm","ARITH"],
+    ["84 cm - 39 cm = ___ cm","45 cm","ARITH"],
+    ["72 cm - 28 cm = ___ cm","44 cm","ARITH"],
+    ["65 cm - 17 cm = ___ cm","48 cm","ARITH"],
+    ["100 cm - 46 cm = ___ cm","54 cm","ARITH"],
+    ["33 cm + 25 cm + 12 cm = ___ cm","70 cm","ARITH"],
+    ["92 cm - 31 cm - 24 cm = ___ cm","37 cm","ARITH"],
+    ["48 cm + 16 cm - 9 cm = ___ cm","55 cm","ARITH"],
+    ["75 cm - 22 cm + 14 cm = ___ cm","67 cm","ARITH"],
+    ["39 cm + 27 cm + 8 cm = ___ cm","74 cm","ARITH"],
+    // Section D — missing lengths (10)
+    ["___ cm + 18 cm = 47 cm","29 cm","MISS"],
+    ["26 cm + ___ cm = 60 cm","34 cm","MISS"],
+    ["___ cm + 35 cm = 82 cm","47 cm","MISS"],
+    ["49 cm + ___ cm = 90 cm","41 cm","MISS"],
+    ["___ cm - 17 cm = 38 cm","55 cm","MISS"],
+    ["72 cm - ___ cm = 29 cm","43 cm","MISS"],
+    ["___ cm - 24 cm = 41 cm","65 cm","MISS"],
+    ["88 cm - ___ cm = 53 cm","35 cm","MISS"],
+    ["31 cm + ___ cm = 75 cm","44 cm","MISS"],
+    ["___ cm + 27 cm = 64 cm","37 cm","MISS"],
+    // Section E — centimetre word problems (15)
+    ["A pencil is 17 cm long. A crayon is 9 cm shorter. How long is the crayon? ___ cm","8 cm","WORD"],
+    ["Maya has two ribbons. One is 24 cm long and the other is 36 cm long. What is their total length? ___ cm","60 cm","WORD"],
+    ["A toy train is 52 cm long. A toy bus is 14 cm shorter than the train. How long is the bus? ___ cm","38 cm","WORD"],
+    ["Three straws are 18 cm, 25 cm and 17 cm long. What is their total length? ___ cm","60 cm","WORD"],
+    ["A rope is 84 cm long. Sam cuts off 29 cm. How much rope is left? ___ cm","55 cm","WORD"],
+    ["A book is 28 cm tall. A notebook is 7 cm shorter. How tall is the notebook? ___ cm","21 cm","WORD"],
+    ["A plant is 46 cm tall. Another plant is 13 cm taller. How tall is the second plant? ___ cm","59 cm","WORD"],
+    ["A 75 cm paper strip has 18 cm cut from one end and 22 cm cut from the other end. How much remains? ___ cm","35 cm","WORD"],
+    ["Two pieces of ribbon are 32 cm and 27 cm long. They are joined end to end. How long are they altogether? ___ cm","59 cm","WORD"],
+    ["A model bridge is 68 cm long. A model tower is 15 cm shorter. How tall is the tower? ___ cm","53 cm","WORD"],
+    ["A shelf is 90 cm wide. Two stacks of books use 24 cm and 31 cm of the shelf. How much space is left? ___ cm","35 cm","WORD"],
+    ["A 63 cm string is cut into 3 equal pieces. How long is each piece? ___ cm","21 cm","WORD"],
+    ["Four paper strips are each 12 cm long. They are placed end to end. What is the total length? ___ cm","48 cm","WORD"],
+    ["A ribbon is 100 cm long. 38 cm is used for one gift and 27 cm for another. How much ribbon is left? ___ cm","35 cm","WORD"],
+    ["Track A is 45 cm long. Track B is 18 cm longer than Track A. What is the total length of both tracks? ___ cm","108 cm","WORD"]
+  ];
+  return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
 })();
 var EXAM_SESSION_SIZE=15;
 function examSet(setId){return EXAM_PREP.filter(function(s){return s.id===setId;})[0];}
