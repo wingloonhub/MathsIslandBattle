@@ -1754,7 +1754,7 @@ var EXAM_PREP=[{
   label:"Year 3 – 2nd Semester",
   topics:[
     {id:"y3s2_mixed_operation",   label:"Mixed Operation", sessionSize:20},
-    {id:"y3s2_fraction",          label:"Fraction"},
+    {id:"y3s2_fraction",          label:"Fraction", sessionSize:20},
     {id:"y3s2_perimeter",         label:"Perimeter"},
     {id:"y3s2_missing_fraction",  label:"Missing Fraction", sessionSize:20},
     {id:"y3s2_measuring_cm",      label:"Measuring in Centimetres", sessionSize:20},
@@ -1870,6 +1870,112 @@ EXAM_QUESTIONS["y3s2_measuring_cm"]=(function(){
     ["Track A is 45 cm long. Track B is 18 cm longer than Track A. What is the total length of both tracks? ___ cm","108 cm","WORD"]
   ];
   return raw.map(function(r){return {q:r[0], answer:r[1], cat:r[2]};});
+})();
+
+// Wing's Year 3 Fractions worksheet (90 questions) — models, comparing,
+// ordering, subtraction, fractions of amounts and word problems. The docx
+// drew Sections A/C as pictures and grids; those are rebuilt here as inline
+// text so each question is self-contained, the same trick the charts bank
+// uses. Comparing, ordering and the three reasoning word problems are MCQ
+// (typing "<" or a comma-separated list is the wrong kind of hard for a
+// Year 3); everything else is typed. Session picks 20 at random.
+EXAM_QUESTIONS["y3s2_fraction"]=(function(){
+  var out=[];
+
+  // Section A — fraction models (15). Shaded cells lead the bar, exactly as
+  // the docx tables are drawn (blue cells first, then white).
+  [[1,4],[3,4],[2,5],[4,5],[1,6],[5,6],[3,8],[6,8],[4,10],[7,10],[2,3],[5,7],[4,9],[9,10],[1,8]]
+  .forEach(function(m){
+    var bar=[];
+    for(var i=0;i<m[1];i++) bar.push(i<m[0] ? "██" : "░░");
+    out.push({q:"Fraction model   (██ = shaded, ░░ = not shaded)\n"+bar.join(" ")+
+                "\n\nWhat fraction is shaded? ___",
+              answer:m[0]+"/"+m[1], cat:"MODEL"});
+  });
+
+  // Section B — compare two fractions (15). Same denominator: bigger
+  // numerator wins. Same numerator: bigger denominator = smaller pieces.
+  var SIGNS=["<",">","="];
+  [["3/4","1/4",">"],["2/5","4/5","<"],["7/8","5/8",">"],["1/3","1/6",">"],["1/8","1/4","<"],
+   ["6/10","3/10",">"],["1/5","1/2","<"],["5/6","2/6",">"],["1/10","1/7","<"],["4/9","4/9","="],
+   ["2/7","6/7","<"],["1/4","1/9",">"],["3/8","7/8","<"],["1/6","1/3","<"],["5/10","9/10","<"]]
+  .forEach(function(c){
+    out.push({q:"Which sign belongs in the gap?\n\n"+c[0]+"   ___   "+c[1],
+              options:SIGNS.slice(), answer:SIGNS.indexOf(c[2]), cat:"COMPARE"});
+  });
+
+  // Section C — order from smallest to largest (15). Each entry is
+  // [as printed on the worksheet, correct order]. Distractors are the
+  // reverse and two near-miss swaps; the rotation keeps the right answer
+  // from always sitting in the same slot.
+  [[["1/5","4/5","2/5","3/5"],   ["1/5","2/5","3/5","4/5"]],
+   [["7/8","2/8","5/8","1/8"],   ["1/8","2/8","5/8","7/8"]],
+   [["3/6","1/6","5/6","2/6"],   ["1/6","2/6","3/6","5/6"]],
+   [["9/10","4/10","7/10","2/10"],["2/10","4/10","7/10","9/10"]],
+   [["4/7","1/7","6/7","3/7"],   ["1/7","3/7","4/7","6/7"]],
+   [["1/2","1/4","1/8","1/3"],   ["1/8","1/4","1/3","1/2"]],
+   [["1/5","1/10","1/2","1/4"],  ["1/10","1/5","1/4","1/2"]],
+   [["1/3","1/9","1/6","1/2"],   ["1/9","1/6","1/3","1/2"]],
+   [["5/9","2/9","8/9","4/9"],   ["2/9","4/9","5/9","8/9"]],
+   [["6/8","3/8","1/8","5/8"],   ["1/8","3/8","5/8","6/8"]],
+   [["2/10","8/10","5/10","1/10"],["1/10","2/10","5/10","8/10"]],
+   [["1/6","1/12","1/3","1/4"],  ["1/12","1/6","1/4","1/3"]],
+   [["3/5","1/5","5/5","4/5"],   ["1/5","3/5","4/5","5/5"]],
+   [["7/10","3/10","6/10","9/10"],["3/10","6/10","7/10","9/10"]],
+   [["1/7","1/5","1/10","1/2"],  ["1/10","1/7","1/5","1/2"]]]
+  .forEach(function(o,k){
+    var given=o[0], right=o[1], correct=right.join(", ");
+    var sw1=right.slice(), sw2=right.slice(), tmp;
+    tmp=sw1[0]; sw1[0]=sw1[1]; sw1[1]=tmp;
+    tmp=sw2[2]; sw2[2]=sw2[3]; sw2[3]=tmp;
+    var opts=[correct, right.slice().reverse().join(", "), sw1.join(", "), sw2.join(", ")];
+    var shift=k%4;
+    opts=opts.slice(shift).concat(opts.slice(0,shift));
+    out.push({q:"Order these from smallest to largest:\n\n"+given.join(",   "),
+              options:opts, answer:opts.indexOf(correct), cat:"ORDER"});
+  });
+
+  // Section D — subtract with the same denominator (15). The docx says keep
+  // the original denominator, so "2/4" is right and "1/2" is not.
+  [["3/4 - 1/4 = ___","2/4"],["4/5 - 2/5 = ___","2/5"],["5/6 - 1/6 = ___","4/6"],
+   ["7/8 - 3/8 = ___","4/8"],["9/10 - 4/10 = ___","5/10"],["2/3 - 1/3 = ___","1/3"],
+   ["6/7 - 2/7 = ___","4/7"],["8/9 - 5/9 = ___","3/9"],["10/10 - 3/10 = ___","7/10"],
+   ["5/8 - 2/8 = ___","3/8"],["4/6 - 3/6 = ___","1/6"],["7/10 - 2/10 = ___","5/10"],
+   ["6/8 - 1/8 = ___","5/8"],["5/5 - 1/5 = ___","4/5"],["7/9 - 4/9 = ___","3/9"]]
+  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"SUBTRACT"}); });
+
+  // Section E — fractions of amounts (15).
+  [["Find 1/2 of 14. ___","7"],["Find 1/2 of 18. ___","9"],["Find 1/2 of 24. ___","12"],
+   ["Find 1/4 of 20. ___","5"],["Find 1/4 of 32. ___","8"],["Find 1/4 of 48. ___","12"],
+   ["Find 1/3 of 18. ___","6"],["Find 1/3 of 27. ___","9"],["Find 1/3 of 42. ___","14"],
+   ["Find 1/5 of 25. ___","5"],["Find 1/5 of 40. ___","8"],["Find 1/10 of 60. ___","6"],
+   ["Find 1/10 of 90. ___","9"],["Find 1/8 of 32. ___","4"],["Find 1/6 of 36. ___","6"]]
+  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"OFNUM"}); });
+
+  // Section F — word problems and reasoning (15). Typed answers carry their
+  // unit ("6 crayons") — isCorrect's numeric strip means a bare "6" is still
+  // marked right. The three reasoning questions are MCQ.
+  [["A box has 24 crayons. One quarter of them are blue. How many blue crayons are there? ___","6 crayons"],
+   ["There are 18 apples. One third are green. How many green apples are there? ___","6 apples"],
+   ["A class has 30 children. One half bring a packed lunch. How many children bring a packed lunch? ___","15 children"],
+   ["A pizza is cut into 8 equal slices. Hana eats 3 slices. What fraction of the pizza did she eat? ___","3/8"],
+   ["A chocolate bar has 10 equal pieces. 7 pieces are still left. What fraction of the bar is left? ___","7/10"],
+   ["A ribbon is divided into 6 equal parts. 5 parts are red. What fraction of the ribbon is red? ___","5/6"],
+   ["A garden has 12 flowers. One third are yellow. How many yellow flowers are there? ___","4 flowers"],
+   ["A tray has 20 cupcakes. One quarter have chocolate icing. How many have chocolate icing? ___","5 cupcakes"],
+   ["A jug is divided into 8 equal parts. It contains 6 parts of water. What fraction of the jug is filled? ___","6/8"],
+   ["A pack contains 40 stickers. One fifth are star stickers. How many star stickers are there? ___","8 stickers"],
+   ["A whole shape is divided into 9 equal parts. All 9 parts are shaded. Write the fraction that represents the whole. ___","9/9"],
+   ["Tom has 5/10 of a ribbon and Ali has 3/10 of an equal ribbon. How much more ribbon does Tom have? ___","2/10"]]
+  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"WORD"}); });
+  out.push({q:"Ben has read 4/7 of a book and Mei has read 6/7 of the same book.\n\nWho has read more?",
+            options:["Ben","Mei"], answer:1, cat:"WORD"});
+  out.push({q:"Which is larger: 1/3 of a cake or 1/6 of the same cake?",
+            options:["1/3","1/6"], answer:0, cat:"WORD"});
+  out.push({q:"Sara says 8/8 is equal to one whole.\n\nIs she correct?",
+            options:["Yes","No"], answer:0, cat:"WORD"});
+
+  return out;
 })();
 
 // Wing's Year 3 Missing Fractions worksheet — 80 typed-answer questions
