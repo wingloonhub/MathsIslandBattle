@@ -2523,6 +2523,24 @@ function pctBand(p){
 }
 function accCol(acc){ return acc>=0.8?"#22c55e":acc>=0.55?"#fbbf24":"#ef4444"; }
 function examBank(topicId){var b=EXAM_QUESTIONS[topicId]; return (b&&b.length)?b:null;}
+/* Which on-screen keyboard a typed question should raise on a phone.
+   inputmode="decimal" gives big number keys but NO letters and no "/" —
+   fine for "377", impossible for "3/8" (fractions are matched strictly, so
+   the slash must be typeable) or for a chart answer like "Bananas".
+   So: number pad only when the expected answer is nothing but digits;
+   otherwise the full keyboard. Answers that carry a unit ("26 cm") count as
+   text too, so the kid can write the answer the way the question asks it —
+   isCorrect still accepts a bare "26". */
+function answerInputMode(q){
+  if(!q || q.options) return "text";
+  return /^-?\d+(\.\d+)?$/.test(String(q.answer==null?"":q.answer).trim())
+    ? "decimal" : "text";
+}
+// A plain N/D answer — gets the two-box fraction input instead of one field.
+function isFractionAnswer(q){
+  return !!q && !q.options &&
+    /^\s*\d+\s*\/\s*\d+\s*$/.test(String(q.answer==null?"":q.answer));
+}
 function examSessionSize(topic, bank){
   if(!bank) return 0;
   var base = (topic && topic.sessionSize) || EXAM_SESSION_SIZE;
@@ -4477,7 +4495,20 @@ function screenExamSession(){
   // Input block — either 4 MCQ buttons or a text input + submit button.
   var inputHTML = isTyped
     ? '<form id="typedForm" style="display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto">'+
-        '<input class="ans-input" id="typedAns" autocomplete="off" inputmode="decimal" placeholder="Type your answer" style="width:100%"/>'+
+        (isFractionAnswer(q)
+          // Fraction answers get two number boxes with a fixed "/" between
+          // them. A phone's number pad has no "/" and the symbols layer is
+          // a lot to ask of a Year 3, so the slash is part of the UI.
+          ? '<div style="display:flex;align-items:center;justify-content:center;gap:10px">'+
+              '<input class="ans-input" id="fracN" autocomplete="off" inputmode="numeric" '+
+                'aria-label="Numerator (top number)" placeholder="?" style="width:104px"/>'+
+              '<span style="font-size:32px;font-weight:800;line-height:1">/</span>'+
+              '<input class="ans-input" id="fracD" autocomplete="off" inputmode="numeric" '+
+                'aria-label="Denominator (bottom number)" placeholder="?" style="width:104px"/>'+
+            '</div>'
+          : '<input class="ans-input" id="typedAns" autocomplete="off" autocorrect="off" '+
+              'autocapitalize="off" spellcheck="false" inputmode="'+answerInputMode(q)+'" '+
+              'placeholder="Type your answer" style="width:100%"/>')+
         '<button class="btn" type="submit">Submit ⚔️</button>'+
       '</form>'
     : '<div class="grid" id="opts">'+(q.options||[]).map(function(o,k){return '<button class="opt" data-i="'+k+'">'+esc(String(o))+'</button>';}).join("")+'</div>';
@@ -4486,7 +4517,7 @@ function screenExamSession(){
       '<b>'+esc((t&&t.label)||"")+'</b><span class="pill">'+(EP.idx+1)+'/'+total+'</span></div>'+
     '<div class="card" style="margin-top:12px">'+
       '<div class="bar" style="margin-bottom:12px"><i style="width:'+((EP.idx+1)/total*100)+'%;background:#3b82f6"></i></div>'+
-      '<div class="qtext" style="margin-bottom:14px;white-space:pre-wrap;font-family:ui-monospace,Consolas,\'Courier New\',monospace;font-size:14px;line-height:1.55">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
+      '<div class="qtext" style="margin-bottom:14px;white-space:pre-wrap;font-family:ui-monospace,Consolas,\'Courier New\',monospace;font-size:16.5px;line-height:1.6;overflow-x:auto">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
       inputHTML +
       '<div id="feedback" style="margin-top:14px;text-align:center;font-weight:800;min-height:22px"></div>'+
     '</div>';
@@ -4518,12 +4549,28 @@ function screenExamSession(){
     setTimeout(function(){ EP.idx++; render(); }, correct?900:1600);
   }
   if(isTyped){
-    var f = $("typedForm"), inp = $("typedAns");
-    setTimeout(function(){ if(inp) inp.focus(); }, 40);
+    var f = $("typedForm"), isFrac = isFractionAnswer(q);
+    // One field normally; numerator + denominator for fraction answers.
+    var fields = isFrac ? [$("fracN"), $("fracD")] : [$("typedAns")];
+    setTimeout(function(){ if(fields[0]) fields[0].focus(); }, 40);
+    if(isFrac){
+      // Jump to the denominator once the numerator has a digit, so the kid
+      // never has to reach for the slash or hunt for the second box.
+      fields[0].oninput = function(){
+        if(/\d/.test(fields[0].value) && fields[0].value.length>=1) fields[1].focus();
+      };
+    }
+    function readGiven(){
+      if(isFrac){
+        var n=String(fields[0].value||"").trim(), d=String(fields[1].value||"").trim();
+        return (n && d) ? (n+"/"+d) : "";
+      }
+      return String(fields[0].value||"").trim();
+    }
     f.onsubmit = function(e){
       e.preventDefault(); if(busy) return;
-      var given = String(inp.value||"").trim();
-      if(!given) return; // ignore empty submits
+      var given = readGiven();
+      if(!given) return; // ignore empty submits (both boxes needed for a fraction)
       busy = true;
       // Fractions get strict whitespace-insensitive string match (norm
       // strips whitespace + lowercases). Skips numeric-strip so "58"
@@ -4535,8 +4582,10 @@ function screenExamSession(){
       } else {
         isRight = isCorrect(q, given);
       }
-      inp.disabled = true;
-      inp.style.borderColor = isRight ? "#22c55e" : "#ef4444";
+      fields.forEach(function(el){
+        el.disabled = true;
+        el.style.borderColor = isRight ? "#22c55e" : "#ef4444";
+      });
       var subBtn = f.querySelector("button[type=submit]"); if(subBtn) subBtn.disabled = true;
       finish(isRight, given);
     };
