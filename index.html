@@ -247,6 +247,13 @@
   .tally1{letter-spacing:2px;}
   .chart-svg{display:block;width:100%;max-width:460px;margin:0 auto;height:auto;color:#0f172a;}
   .chart-key{text-align:center;font-weight:700;font-size:13px;margin-top:8px;}
+  /* Perimeter shapes — drawn, so they never fall out of alignment. */
+  .shape-box{background:#f8fafc;border:2px solid #cbd5e1;border-radius:14px;padding:12px;margin-bottom:14px;color:#0f172a;text-align:center;overflow-x:auto;}
+  .shape-svg{display:block;max-width:320px;width:100%;height:auto;margin:0 auto;color:#0f172a;}
+  /* The bed plans are wide: let the box scroll rather than shrink the
+     labels to nothing on a phone. */
+  .shape-svg.wide{max-width:620px;min-width:520px;}
+  .shape-note{font-size:12px;font-weight:700;margin-top:8px;color:#0f172a;}
   /* Tappable topic card in the History & Analysis report. */
   .histcard{display:block;width:100%;text-align:left;border:0;cursor:pointer;font-family:inherit;
     font-size:14px;color:inherit;background:#2a3346;border-radius:12px;padding:11px 13px;margin-bottom:8px;}
@@ -2014,124 +2021,112 @@ EXAM_QUESTIONS["y3s2_fraction"]=(function(){
   return out;
 })();
 
-// Wing's Year 3 Perimeters worksheet — 80 questions across 7 sections.
-// Questions 1-10 were labelled rectangle images in the docx; their
-// dimensions are recoverable from the answer key working (Q1 reads
-// "2 × (8 + 5)"), so each is redrawn here as a labelled box, the same
-// self-contained trick the charts and fractions banks use. Answers keep
-// their unit ("26 cm") — isCorrect's numeric strip means a bare "26"
-// still marks right. Session picks 20 at random.
+// Wing's Year 3 Perimeters worksheet (v2) — all 80 questions across five
+// sections. The rectangles, grids and bed plans were pictures in the docx;
+// each one's dimensions were measured off those images and confirmed
+// against the answer key (every derived length reproduces its printed
+// perimeter exactly). They are redrawn as SVG by shapeHTML() so they keep
+// their proportions instead of drifting like the old text boxes.
+//
+// Q79 and Q80 ask a yes/no and then "explain". They are typed, and accept
+// either the yes/no or the value behind it (7 cm, 40 m).
 EXAM_QUESTIONS["y3s2_perimeter"]=(function(){
-  var out=[];
-  // Schematic, not to scale: width is clamped so the box never wraps on a
-  // phone, and the row count just hints at the shape being tall or flat.
-  function rectArt(L,W,unit){
-    var innerW=Math.max(8,Math.min(16,Math.round(L*0.7)));
-    var rows=Math.max(1,Math.min(3,Math.round(W/3)));
-    // ASCII rather than box-drawing characters: ┌─┐ fall back to a
-    // different font in the question panel and stop lining up.
-    var dash=new Array(innerW+1).join("-"), gap=new Array(innerW+1).join(" ");
-    var topLab=L+" "+unit;
-    var pad=new Array(Math.max(0,Math.floor((innerW+2-topLab.length)/2))+1).join(" ");
-    var lines=[pad+topLab, "+"+dash+"+"];
-    for(var i=0;i<rows;i++){
-      lines.push("|"+gap+"|"+(i===Math.floor((rows-1)/2) ? "  "+W+" "+unit : ""));
-    }
-    lines.push("+"+dash+"+");
-    return lines.join("\n");
-  }
-  function P(L,W){ return 2*(L+W); }
-
-  // Section A — rectangles in centimetres (15). Q1-10 are the drawn
-  // rectangles; Q11-15 give the dimensions in words.
-  [[8,5],[12,4],[9,7],[15,6],[11,3],[14,8],[10,6],[13,5],[16,7],[18,4]]
-  .forEach(function(d){
-    out.push({q:rectArt(d[0],d[1],"cm")+"\n\nFind the perimeter. ___",
-              answer:P(d[0],d[1])+" cm", cat:"RECT"});
+  var raw=[
+    // Section A — find the perimeter of a labelled rectangle (20)
+    ["A","Find the perimeter.","20 cm","RECT",{type:"rect",L:6,W:4,unit:"cm"}],
+    ["A","Find the perimeter.","24 cm","RECT",{type:"rect",L:9,W:3,unit:"cm"}],
+    ["A","Find the perimeter.","24 cm","RECT",{type:"rect",L:7,W:5,unit:"cm"}],
+    ["A","Find the perimeter.","28 cm","RECT",{type:"rect",L:12,W:2,unit:"cm"}],
+    ["A","Find the perimeter.","28 cm","RECT",{type:"rect",L:8,W:6,unit:"cm"}],
+    ["A","Find the perimeter.","36 cm","RECT",{type:"rect",L:14,W:4,unit:"cm"}],
+    ["A","Find the perimeter.","20 cm","RECT",{type:"rect",L:5,W:5,unit:"cm"}],
+    ["A","Find the perimeter.","36 cm","RECT",{type:"rect",L:11,W:7,unit:"cm"}],
+    ["A","Find the perimeter.","36 cm","RECT",{type:"rect",L:15,W:3,unit:"cm"}],
+    ["A","Find the perimeter.","36 cm","RECT",{type:"rect",L:10,W:8,unit:"cm"}],
+    ["A","Find the perimeter.","18 m","RECT",{type:"rect",L:6,W:3,unit:"m"}],
+    ["A","Find the perimeter.","26 m","RECT",{type:"rect",L:9,W:4,unit:"m"}],
+    ["A","Find the perimeter.","34 m","RECT",{type:"rect",L:12,W:5,unit:"m"}],
+    ["A","Find the perimeter.","28 m","RECT",{type:"rect",L:7,W:7,unit:"m"}],
+    ["A","Find the perimeter.","42 m","RECT",{type:"rect",L:15,W:6,unit:"m"}],
+    ["A","Find the perimeter.","38 m","RECT",{type:"rect",L:10,W:9,unit:"m"}],
+    ["A","Find the perimeter.","34 m","RECT",{type:"rect",L:14,W:3,unit:"m"}],
+    ["A","Find the perimeter.","26 m","RECT",{type:"rect",L:8,W:5,unit:"m"}],
+    ["A","Find the perimeter.","30 m","RECT",{type:"rect",L:11,W:4,unit:"m"}],
+    ["A","Find the perimeter.","40 m","RECT",{type:"rect",L:13,W:7,unit:"m"}],
+    // Section B — count the 1 cm squares, then find the perimeter (16)
+    ["B","Find the perimeter.","14 cm","GRID",{type:"grid",L:4,W:3}],
+    ["B","Find the perimeter.","18 cm","GRID",{type:"grid",L:5,W:4}],
+    ["B","Find the perimeter.","16 cm","GRID",{type:"grid",L:6,W:2}],
+    ["B","Find the perimeter.","20 cm","GRID",{type:"grid",L:7,W:3}],
+    ["B","Find the perimeter.","12 cm","GRID",{type:"grid",L:3,W:3}],
+    ["B","Find the perimeter.","24 cm","GRID",{type:"grid",L:8,W:4}],
+    ["B","Find the perimeter.","14 cm","GRID",{type:"grid",L:5,W:2}],
+    ["B","Find the perimeter.","22 cm","GRID",{type:"grid",L:6,W:5}],
+    ["B","Find the perimeter.","24 cm","GRID",{type:"grid",L:9,W:3}],
+    ["B","Find the perimeter.","16 cm","GRID",{type:"grid",L:4,W:4}],
+    ["B","Find the perimeter.","24 cm","GRID",{type:"grid",L:7,W:5}],
+    ["B","Find the perimeter.","24 cm","GRID",{type:"grid",L:10,W:2}],
+    ["B","Find the perimeter.","22 cm","GRID",{type:"grid",L:8,W:3}],
+    ["B","Find the perimeter.","20 cm","GRID",{type:"grid",L:6,W:4}],
+    ["B","Find the perimeter.","20 cm","GRID",{type:"grid",L:5,W:5}],
+    ["B","Find the perimeter.","26 cm","GRID",{type:"grid",L:9,W:4}],
+    // Section C — vegetable bed plans, read off a shared diagram (16)
+    ["C","Find the perimeter of bed A.","30 m","BEDS",null,"planBeds1"],
+    ["C","Find the perimeter of bed E.","26 m","BEDS",null,"planBeds1"],
+    ["C","Find the perimeter of bed B.","28 m","BEDS",null,"planBeds1"],
+    ["C","Find the perimeter of bed D.","36 m","BEDS",null,"planBeds1"],
+    ["C","Find the perimeter of bed C.","32 m","BEDS",null,"planBeds1"],
+    ["C","Beds A and E are joined to make one rectangular bed. Find its perimeter.","36 m","BEDS",null,"planBeds1"],
+    ["C","Beds B and D are joined to make one rectangular bed. Find its perimeter.","40 m","BEDS",null,"planBeds1"],
+    ["C","Beds A, E, B and D are joined to make one rectangular bed. Find its perimeter.","60 m","BEDS",null,"planBeds1"],
+    ["C","Find the perimeter of bed F.","26 m","BEDS",null,"planBeds2"],
+    ["C","Find the perimeter of bed G.","30 m","BEDS",null,"planBeds2"],
+    ["C","Find the perimeter of bed H.","36 m","BEDS",null,"planBeds2"],
+    ["C","Find the perimeter of bed I.","28 m","BEDS",null,"planBeds2"],
+    ["C","Find the perimeter of bed J.","36 m","BEDS",null,"planBeds2"],
+    ["C","Beds F and G are joined to make one rectangular bed. Find its perimeter.","38 m","BEDS",null,"planBeds2"],
+    ["C","Beds H and I are joined to make one rectangular bed. Find its perimeter.","42 m","BEDS",null,"planBeds2"],
+    ["C","Beds F, G, H and I are joined to make one rectangular bed. Find its perimeter.","60 m","BEDS",null,"planBeds2"],
+    // Section D — use the perimeter to find the missing side (16)
+    ["D","A rectangle has a perimeter of 20 cm and a length of 6 cm. What is its width?","4 cm","MISSING"],
+    ["D","A rectangle has a perimeter of 30 cm and a width of 5 cm. What is its length?","10 cm","MISSING"],
+    ["D","A rectangle has a perimeter of 26 cm and a length of 8 cm. What is its width?","5 cm","MISSING"],
+    ["D","A rectangle has a perimeter of 36 cm and a width of 7 cm. What is its length?","11 cm","MISSING"],
+    ["D","A rectangle has a perimeter of 40 cm and a length of 13 cm. What is its width?","7 cm","MISSING"],
+    ["D","A rectangle has a perimeter of 34 cm and a width of 6 cm. What is its length?","11 cm","MISSING"],
+    ["D","A square has a perimeter of 24 cm. How long is each side?","6 cm","MISSING"],
+    ["D","A square has a perimeter of 36 cm. How long is each side?","9 cm","MISSING"],
+    ["D","A garden is rectangular. Its perimeter is 28 m and its length is 9 m. What is its width?","5 m","MISSING"],
+    ["D","A field has a perimeter of 50 m and a width of 8 m. What is its length?","17 m","MISSING"],
+    ["D","A rectangular pen has a perimeter of 44 m. Its length is 14 m. What is its width?","8 m","MISSING"],
+    ["D","A rectangular playground has a perimeter of 64 m. Its width is 12 m. What is its length?","20 m","MISSING"],
+    ["D","A picture frame is 10 cm long. Its perimeter is 32 cm. How wide is it?","6 cm","MISSING"],
+    ["D","A book cover is 8 cm wide. Its perimeter is 38 cm. How long is it?","11 cm","MISSING"],
+    ["D","A square tile has a perimeter of 48 cm. What is the length of one side?","12 cm","MISSING"],
+    ["D","A square garden has a perimeter of 60 m. What is the length of one side?","15 m","MISSING"],
+    // Section E — perimeter word problems (12)
+    ["E","A rectangular sandpit is 7 m long and 4 m wide. How much edging is needed to go all the way around it?","22 m","WORD"],
+    ["E","A photo frame is 18 cm long and 12 cm wide. What is its perimeter?","60 cm","WORD"],
+    ["E","A vegetable patch is 9 m long and 6 m wide. A fence goes around the outside. How many metres of fence are needed?","30 m","WORD"],
+    ["E","A rectangular table top is 120 cm long and 60 cm wide. What is the distance all the way around it?","360 cm","WORD"],
+    ["E","A square playground has sides of 14 m. What is its perimeter?","56 m","WORD"],
+    ["E","A rectangular rug is 8 m long and 3 m wide. A border is sewn around the edge. How long is the border?","22 m","WORD"],
+    ["E","Maya walks once around a rectangular garden that is 12 m long and 5 m wide. How far does she walk?","34 m","WORD"],
+    ["E","A rectangular notice board is 90 cm long and 40 cm wide. Ribbon is placed around its edge. How much ribbon is needed?","260 cm","WORD"],
+    ["E","Two identical rectangular pens are each 6 m by 4 m. What is the total of their perimeters?","40 m","WORD"],
+    ["E","A rectangle is 11 cm long and 7 cm wide. A second rectangle is 2 cm longer but has the same width. What is the perimeter of the second rectangle?","40 cm","WORD"],
+    // Typed, and both the yes/no and the value behind it are accepted, since
+    // the worksheet asks the child to answer and then explain.
+    ["E","A rectangle has a perimeter of 32 cm. Its length is 9 cm. Ben says its width is 8 cm. Is Ben correct? Explain.","No","WORD",null,null,["7 cm","7","No. The width is 7 cm."]],
+    ["E","A farmer has 40 m of fencing. He makes a rectangular pen 12 m long and 8 m wide. Does he have exactly enough fencing? Explain.","Yes","WORD",null,null,["40 m","40","Yes. He has exactly enough."]]
+  ];
+  return raw.map(function(r){
+    var e={set:r[0], q:r[1], answer:r[2], cat:r[3]};
+    if(r[4]) e.shape=r[4];
+    if(r[5]) e.chart=r[5];
+    if(r[6]) e.accept=r[6];   // extra spellings isCorrect will also allow
+    return e;
   });
-  [[20,9],[17,6],[25,5],[22,8],[19,10]].forEach(function(d){
-    out.push({q:"A rectangle is "+d[0]+" cm long and "+d[1]+" cm wide. Find its perimeter. ___",
-              answer:P(d[0],d[1])+" cm", cat:"RECT"});
-  });
-
-  // Section B — rectangles in metres (10).
-  [[6,3],[9,4],[12,5],[15,7],[20,6],[18,9],[25,10],[14,11],[30,8],[16,12]]
-  .forEach(function(d){
-    out.push({q:"A rectangular area is "+d[0]+" m long and "+d[1]+" m wide. Find its perimeter. ___",
-              answer:P(d[0],d[1])+" m", cat:"METRE"});
-  });
-
-  // Section C — squares and four-sided shapes (10).
-  [["A square has sides of 6 cm. Find its perimeter. ___","24 cm"],
-   ["A square has sides of 9 cm. Find its perimeter. ___","36 cm"],
-   ["A square has sides of 12 cm. Find its perimeter. ___","48 cm"],
-   ["A square garden has sides of 15 m. Find its perimeter. ___","60 m"],
-   ["A square playground has sides of 20 m. Find its perimeter. ___","80 m"],
-   ["A four-sided shape has sides 8 cm, 5 cm, 8 cm and 5 cm. Find its perimeter. ___","26 cm"],
-   ["A four-sided shape has sides 12 cm, 7 cm, 12 cm and 7 cm. Find its perimeter. ___","38 cm"],
-   ["A rectangular card has sides 14 cm, 9 cm, 14 cm and 9 cm. Find its perimeter. ___","46 cm"],
-   ["A rectangular field has sides 24 m, 10 m, 24 m and 10 m. Find its perimeter. ___","68 m"],
-   ["A rectangular mat has sides 18 cm, 11 cm, 18 cm and 11 cm. Find its perimeter. ___","58 cm"]]
-  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"SQUARE"}); });
-
-  // Section D — find the missing side (10). Halve the perimeter, then
-  // subtract the side you know.
-  [[30,10,"cm"],[34,12,"cm"],[40,15,"cm"],[44,17,"cm"],[50,18,"cm"],
-   [26,8,"m"],[36,11,"m"],[48,16,"m"],[60,20,"m"],[70,25,"m"]]
-  .forEach(function(d){
-    out.push({q:"A rectangle has a perimeter of "+d[0]+" "+d[2]+". Its length is "+d[1]+" "+d[2]+
-                ". What is its width? ___",
-              answer:(d[0]/2-d[1])+" "+d[2], cat:"MISSING"});
-  });
-
-  // Section E — perimeter word problems (15). Wording kept as printed so
-  // the kid still has to work out that "fencing" means perimeter.
-  [["A photo frame is 18 cm long and 12 cm wide. What is the perimeter of the frame? ___","60 cm"],
-   ["A rectangular book cover is 24 cm long and 17 cm wide. What is its perimeter? ___","82 cm"],
-   ["A small noticeboard is 90 cm long and 60 cm wide. How much border is needed to go all the way around it? ___","300 cm"],
-   ["A rectangular table top is 120 cm long and 70 cm wide. What is its perimeter? ___","380 cm"],
-   ["A garden is 14 m long and 9 m wide. How many metres of fencing are needed to go around it? ___","46 m"],
-   ["A dog run is 18 m long and 7 m wide. How much fencing is needed? ___","50 m"],
-   ["A vegetable bed is 11 m long and 4 m wide. Find the distance around it. ___","30 m"],
-   ["A rectangular pond is 16 m long and 6 m wide. Find its perimeter. ___","44 m"],
-   ["A playground is 25 m long and 15 m wide. A child walks once around it. How far does the child walk? ___","80 m"],
-   ["A rectangular field is 32 m long and 18 m wide. How much fencing is needed for one complete boundary? ___","100 m"],
-   ["A square sandpit has sides of 7 m. What is its perimeter? ___","28 m"],
-   ["A square tile has sides of 13 cm. What is its perimeter? ___","52 cm"],
-   ["A ribbon is placed around a rectangular card 21 cm long and 8 cm wide. How much ribbon is needed? ___","58 cm"],
-   ["A rectangular picture is 35 cm long and 25 cm wide. What length of edging is needed around it? ___","120 cm"],
-   ["A farmer has a rectangular pen 40 m long and 12 m wide. How many metres of wire are needed to go around it once? ___","104 m"]]
-  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"WORD"}); });
-
-  // Section F — two beds joined side by side (10). Add the lengths first,
-  // the shared edge is not part of the new boundary.
-  [[8,6,4,"m"],[10,7,5,"m"],[12,9,6,"m"],[15,5,8,"m"],[20,10,7,"m"],
-   [6,4,3,"cm"],[9,5,4,"cm"],[11,7,6,"cm"],[13,8,5,"cm"],[16,9,7,"cm"]]
-  .forEach(function(d){
-    out.push({q:"Two rectangular beds are joined side by side. The first is "+d[0]+" "+d[3]+
-                " long and the second is "+d[1]+" "+d[3]+" long. Both are "+d[2]+" "+d[3]+
-                " wide.\n\nWhat is the perimeter of the new combined rectangle? ___",
-              answer:P(d[0]+d[1],d[2])+" "+d[3], cat:"JOINED"});
-  });
-
-  // Section G — challenge and reasoning (10). The two "which is bigger"
-  // questions are MCQ; typing "They are equal: 34 cm each" is not a fair
-  // test of whether the kid worked out both perimeters.
-  [["A rectangle has a perimeter of 28 cm. Its length is 9 cm. Find its width. ___","5 cm"],
-   ["A rectangle has a perimeter of 50 cm. Its width is 8 cm. Find its length. ___","17 cm"],
-   ["A square has a perimeter of 36 cm. How long is each side? ___","9 cm"],
-   ["A square garden has a perimeter of 64 m. How long is each side? ___","16 m"],
-   ["A rectangular garden has a perimeter of 72 m and a length of 22 m. What is its width? ___","14 m"],
-   ["A rectangle is 20 cm long and 10 cm wide. If the length increases by 5 cm but the width stays the same, what is the new perimeter? ___","70 cm"],
-   ["A rectangle is 15 m long and 9 m wide. If both the length and width increase by 1 m, what is the new perimeter? ___","52 m"],
-   ["A square and a rectangle both have a perimeter of 40 cm. The rectangle is 12 cm long. What is the rectangle's width? ___","8 cm"]]
-  .forEach(function(r){ out.push({q:r[0], answer:r[1], cat:"CHALLENGE"}); });
-  out.push({q:"Rectangle A is 12 cm by 5 cm.\nRectangle B is 10 cm by 7 cm.\n\nWhich has the greater perimeter?",
-            options:["Rectangle A","Rectangle B","They are equal"], answer:2, cat:"CHALLENGE"});
-  out.push({q:"Rectangle A is 18 m by 4 m.\nRectangle B is 14 m by 7 m.\n\nWhich has the greater perimeter?",
-            options:["Rectangle A","Rectangle B","They are equal"], answer:0, cat:"CHALLENGE"});
-
-  return out;
 })();
 
 // Wing's Year 3 Missing Fractions worksheet — 80 typed-answer questions
@@ -2257,6 +2252,15 @@ var CHART_DEFS={
   gondolier:{set:15, title:"Gondolier trips in one week", type:"bar", yMax:60, yStep:5, rows:[["Alberto",25],["Enzo",45],["Luigi",30],["Marco",55],["Nico",40]]},
   // Price lists the Word Problems worksheet's sections refer to. `tables`
   // holds more than one grid in a single box, the way the page prints them.
+  // The two vegetable-bed plans Section C of the perimeter worksheet shares.
+  planBeds1:{type:"plan", unit:"m", h:8, cols:[
+    {w:10, parts:[{label:"A",h:5},{label:"E",h:3}]},
+    {w:12, parts:[{label:"B",h:2},{label:"D",h:6}]},
+    {w:8,  parts:[{label:"C",h:8}]}]},
+  planBeds2:{type:"plan", unit:"m", h:10, cols:[
+    {w:9,  parts:[{label:"F",h:4},{label:"G",h:6}]},
+    {w:11, parts:[{label:"H",h:7},{label:"I",h:3}]},
+    {w:8,  parts:[{label:"J",h:10}]}]},
   refSportsShop:{title:"Sports shop", type:"table", tables:[
     {head:["Item","Price"], rows:[["Cricket bat","£118"],["Tennis racket","£74"],["Skateboard","£156"],["Trainers","£92"],["Scooter","£268"],["Bicycle","£485"],["Helmet","£48"]]},
     {head:["Shopper","Money available"], rows:[["Amira","£150"],["Noah","£250"],["Sophie","£500"]]}]},
@@ -2509,10 +2513,9 @@ var EXAM_CAT_LABELS={
                  OFNUM:"Fractions of amounts", WORD:"Fraction word problems"},
   y3s2_missing_fraction:{WHOLE:"Complete the whole", ADD_MISS:"Missing in addition",
                          SUB_MISS:"Missing in subtraction", WORD:"Missing-fraction word problems"},
-  y3s2_perimeter:{RECT:"Rectangles (cm)", METRE:"Rectangles (m)",
-                  SQUARE:"Squares & four-sided shapes", MISSING:"Missing side",
-                  WORD:"Perimeter word problems", JOINED:"Joined rectangles",
-                  CHALLENGE:"Challenge & reasoning"},
+  y3s2_perimeter:{RECT:"Labelled rectangles", GRID:"Rectangles on a 1 cm grid",
+                  BEDS:"Vegetable bed plans", MISSING:"Missing side lengths",
+                  WORD:"Perimeter word problems"},
   y3s2_charts:{PICTOGRAM:"Pictograms", TALLY:"Tally charts", TABLE:"Frequency tables", BAR:"Bar charts"},
   y3s2_word_problems:{SHOP:"Sports shop spending", FOWL:"Fowl problems",
                       SCHOOL:"School shopping", SIGNS:"Missing signs",
@@ -2551,8 +2554,62 @@ function tallyMarks(n){
   if(rest) out.push('<span class="tally1">'+new Array(rest+1).join("|")+'</span>');
   return out.join(" ");
 }
+/* Draws the perimeter worksheet's shapes as SVG so they keep their
+   proportions — the previous ASCII boxes drifted out of line whenever the
+   monospace font fell back. Three kinds:
+     rect  labelled rectangle, dimensions written outside the shape
+     grid  rectangle on 1 cm squares, deliberately unlabelled (count them)
+     plan  a row of vegetable beds, each column split into named beds     */
+function shapeHTML(s){
+  if(!s) return "";
+  if(s.type==="rect"){
+    var scale=Math.max(14, Math.min(26, Math.min(300/s.L, 150/s.W)));
+    var w=s.L*scale, h=s.W*scale, padL=42, padT=26, padB=26, padR=14;
+    return '<div class="shape-box"><svg class="shape-svg" viewBox="0 0 '+(w+padL+padR)+' '+(h+padT+padB)+'" role="img" aria-label="Rectangle '+s.L+' by '+s.W+' '+s.unit+'">'+
+      '<rect x="'+padL+'" y="'+padT+'" width="'+w+'" height="'+h+'" fill="none" stroke="currentColor" stroke-width="3"/>'+
+      '<text x="'+(padL+w/2)+'" y="'+(padT+h+20)+'" text-anchor="middle" font-size="15" fill="currentColor">'+s.L+' '+esc(s.unit)+'</text>'+
+      '<text x="'+(padL-12)+'" y="'+(padT+h/2)+'" text-anchor="middle" font-size="15" fill="currentColor" transform="rotate(-90 '+(padL-12)+' '+(padT+h/2)+')">'+s.W+' '+esc(s.unit)+'</text>'+
+    '</svg></div>';
+  }
+  if(s.type==="grid"){
+    var u=22, w2=s.L*u, h2=s.W*u, pad=10, i;
+    var g=['<rect x="'+pad+'" y="'+pad+'" width="'+w2+'" height="'+h2+'" fill="#fff"/>'];
+    for(i=1;i<s.L;i++) g.push('<line x1="'+(pad+i*u)+'" y1="'+pad+'" x2="'+(pad+i*u)+'" y2="'+(pad+h2)+'" stroke="#93c5fd" stroke-width="1"/>');
+    for(i=1;i<s.W;i++) g.push('<line x1="'+pad+'" y1="'+(pad+i*u)+'" x2="'+(pad+w2)+'" y2="'+(pad+i*u)+'" stroke="#93c5fd" stroke-width="1"/>');
+    g.push('<rect x="'+pad+'" y="'+pad+'" width="'+w2+'" height="'+h2+'" fill="none" stroke="currentColor" stroke-width="3.5"/>');
+    return '<div class="shape-box"><svg class="shape-svg" viewBox="0 0 '+(w2+pad*2)+' '+(h2+pad*2)+'" role="img" aria-label="Rectangle '+s.L+' by '+s.W+' squares on a 1 cm grid">'+
+      g.join("")+'</svg><div class="shape-note">Each square is 1 cm.</div></div>';
+  }
+  if(s.type==="plan"){
+    var u2=21, padL2=40, padT2=36, padR2=40, padB2=12;
+    var totalW=s.cols.reduce(function(a,c){return a+c.w;},0);
+    var W=totalW*u2, H=s.h*u2, o=[], x=0;
+    s.cols.forEach(function(c){
+      var cw=c.w*u2, y=0;
+      // width label with an arrow line above the column
+      o.push('<line x1="'+(padL2+x+3)+'" y1="'+(padT2-12)+'" x2="'+(padL2+x+cw-3)+'" y2="'+(padT2-12)+'" stroke="currentColor" stroke-width="1.2" marker-start="url(#ar)" marker-end="url(#ar)"/>');
+      o.push('<text x="'+(padL2+x+cw/2)+'" y="'+(padT2-19)+'" text-anchor="middle" font-size="15" fill="currentColor">'+c.w+' '+esc(s.unit)+'</text>');
+      c.parts.forEach(function(p,pi){
+        var ph=p.h*u2;
+        if(pi>0) o.push('<line x1="'+(padL2+x)+'" y1="'+(padT2+y)+'" x2="'+(padL2+x+cw)+'" y2="'+(padT2+y)+'" stroke="#16a34a" stroke-width="2.5"/>');
+        o.push('<text x="'+(padL2+x+cw/2)+'" y="'+(padT2+y+ph/2+7)+'" text-anchor="middle" font-size="20" font-weight="800" fill="currentColor">'+esc(p.label)+'</text>');
+        o.push('<text x="'+(padL2+x+12)+'" y="'+(padT2+y+ph/2)+'" text-anchor="middle" font-size="14" fill="currentColor" transform="rotate(-90 '+(padL2+x+12)+' '+(padT2+y+ph/2)+')">'+p.h+' '+esc(s.unit)+'</text>');
+        y+=ph;
+      });
+      x+=cw;
+      if(x<W) o.push('<line x1="'+(padL2+x)+'" y1="'+padT2+'" x2="'+(padL2+x)+'" y2="'+(padT2+H)+'" stroke="#2563eb" stroke-width="2.5"/>');
+    });
+    o.push('<rect x="'+padL2+'" y="'+padT2+'" width="'+W+'" height="'+H+'" fill="none" stroke="currentColor" stroke-width="3"/>');
+    o.push('<text x="'+(padL2+W+16)+'" y="'+(padT2+H/2)+'" text-anchor="middle" font-size="13" fill="currentColor" transform="rotate(-90 '+(padL2+W+16)+' '+(padT2+H/2)+')">'+s.h+' '+esc(s.unit)+'</text>');
+    return '<div class="shape-box"><svg class="shape-svg wide" viewBox="0 0 '+(W+padL2+padR2)+' '+(H+padT2+padB2)+'" role="img" aria-label="Plan of vegetable beds">'+
+      '<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,3.5 L7,1 L7,6 Z" fill="currentColor"/></marker></defs>'+
+      o.join("")+'</svg></div>';
+  }
+  return "";
+}
 function chartHTML(id){
   var d = CHART_DEFS[id]; if(!d) return "";
+  if(d.type==="plan") return shapeHTML(d);
   var head='<div class="chart-title">'+esc(d.title)+'</div>';
   var body="";
   if(d.type==="bar"){
@@ -4629,7 +4686,7 @@ function screenExamSession(){
       '<b>'+esc((t&&t.label)||"")+'</b><span class="pill">'+(EP.idx+1)+'/'+total+'</span></div>'+
     '<div class="card" style="margin-top:12px">'+
       '<div class="bar" style="margin-bottom:12px"><i style="width:'+((EP.idx+1)/total*100)+'%;background:#3b82f6"></i></div>'+
-      (q.chart ? chartHTML(q.chart) : "")+
+      (q.shape ? shapeHTML(q.shape) : q.chart ? chartHTML(q.chart) : "")+
       '<div class="qtext" style="margin-bottom:14px;white-space:pre-wrap;font-family:ui-monospace,Consolas,\'Courier New\',monospace;font-size:16.5px;line-height:1.6;overflow-x:auto">'+esc(q.q||q.prompt||"Question").replace(/_{2,}/g,'<span style="display:inline-block;min-width:30px;padding:1px 10px;background:#fbbf24;color:#0b0b0b;border-radius:6px;font-weight:800;margin:0 2px">?</span>')+'</div>'+
       inputHTML +
       '<div id="feedback" style="margin-top:14px;text-align:center;font-weight:800;min-height:22px"></div>'+
