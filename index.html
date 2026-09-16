@@ -264,6 +264,23 @@
   .histcard{display:block;width:100%;text-align:left;border:0;cursor:pointer;font-family:inherit;
     font-size:14px;color:inherit;background:#2a3346;border-radius:12px;padding:11px 13px;margin-bottom:8px;}
   .histcard:hover{background:#323c53;}
+  /* A past session in a history list — tap to open its details. */
+  .sessrow{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;
+    border:0;cursor:pointer;font-family:inherit;font-size:13px;color:inherit;
+    background:#2a3346;border-radius:10px;padding:9px 11px;margin-bottom:5px;}
+  .sessrow:hover{background:#323c53;}
+  /* One question inside the test-details screen. */
+  .sessq{background:#2a3346;border-radius:10px;padding:10px 12px;margin-bottom:7px;border-left:5px solid #22c55e;}
+  .sessq.no{border-left-color:#ef4444;}
+  .sessq-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .sessq-mark{font-weight:900;font-size:15px;}
+  .sessq.ok .sessq-mark{color:#22c55e;} .sessq.no .sessq-mark{color:#ef4444;}
+  .sessq-num{font-weight:800;font-size:12px;opacity:.75;}
+  .sessq-text{font-weight:700;font-size:14px;line-height:1.45;white-space:pre-wrap;}
+  .sessq-ans{font-size:13px;margin-top:6px;opacity:.95;}
+  .sesspic{margin-top:7px;}
+  .sesspic summary{cursor:pointer;font-size:12px;font-weight:700;opacity:.85;}
+  .sesspic .chart-box,.sesspic .shape-box{margin:8px 0 0;}
   .tile{border:0;cursor:pointer;font-family:inherit;background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(0,0,0,.15);text-align:center;}
   .tile .av{font-size:46px;}
   .seg{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0;}
@@ -2830,6 +2847,8 @@ function sampleChallengeQuestions(setId, challengeTopic){
   });
   return shuffle(out);
 }
+// How many recent sessions keep their full question-by-question record.
+var EXAM_DETAIL_KEEP = 20;
 function recordExamSession(entry){
   if(!S.exam) S.exam = {history:[]};
   if(!S.exam.history) S.exam.history = [];
@@ -2841,8 +2860,16 @@ function recordExamSession(entry){
     byCat:entry.byCat||{}, bySection:entry.bySection||null,
     mistakes:(entry.mistakes||[]).slice(0,10)
   };
+  if(entry.answers) clean.answers = entry.answers;
   S.exam.history.unshift(clean);
   S.exam.history = S.exam.history.slice(0, 50);
+  // Keep the full question-by-question record only for the most recent
+  // sessions. Older ones keep their summary and mistakes, which bounds the
+  // save (it goes to localStorage twice and to the cloud) at roughly 20 x 60
+  // answers per player however long the history grows.
+  for(var i=EXAM_DETAIL_KEEP; i<S.exam.history.length; i++){
+    if(S.exam.history[i].answers) delete S.exam.history[i].answers;
+  }
   save();
 }
 
@@ -3795,6 +3822,7 @@ function render(){
   if(view==="examResults")return screenExamResults();
   if(view==="examHistory")return screenExamHistory();
   if(view==="examTopicDetail")return screenExamTopicDetail();
+  if(view==="examSessionDetail")return screenExamSessionDetail();
   if(view==="report")return screenReport();
   if(view==="train")return screenTrain();
   if(view==="trainlvls")return screenTrainLevels();
@@ -4612,6 +4640,8 @@ function jabCrossSVG(earned){
 var examCtx={}, EP=null;
 // Which topic the History & Analysis detail screen is showing.
 var examHistTopic=null;
+// Which past session the test-details screen shows, and where Back returns to.
+var examHistSession=null, examSessBack="examHistory";
 function screenExam(){
   var sets = EXAM_PREP.map(function(s){
     return '<button class="lvl" data-set="'+esc(s.id)+'" style="text-align:left"><div class="e">📚</div>'+
@@ -4911,15 +4941,33 @@ function screenExamResults(){
   var pct = total ? Math.round(correct/total*100) : 0;
   // Save to history. Typed answers store the raw typed string in a.chosen;
   // MCQ stores the option index — resolve either into a display string.
+  // Every answer is kept (not just the mistakes) so the report can show the
+  // whole test later; the question text is stored rather than looked up,
+  // because the banks get replaced and an old session must still read true.
   try {
-    var mistakes = EP.answers.filter(function(a){return !a.correct;}).map(function(a){
+    var answers = EP.answers.map(function(a){
       var opts = a.q.options;
-      var chosenText = opts ? String(opts[a.chosen]||a.chosen) : String(a.chosen==null?"(blank)":a.chosen);
-      var answerText = opts ? String(opts[a.q.answer]||"") : String(a.q.answer||"");
-      return {q:a.q.q||a.q.prompt||"", chosen:chosenText, answer:answerText};
+      var rec = {
+        q: a.q.q||a.q.prompt||"",
+        chosen: opts ? String(opts[a.chosen]!=null ? opts[a.chosen] : a.chosen)
+                     : String(a.chosen==null?"(blank)":a.chosen),
+        answer: opts ? String(opts[a.q.answer]!=null ? opts[a.q.answer] : "")
+              : a.q.yesNo ? (a.q.yesNo.answer+" — "+a.q.yesNo.value)
+              : String(a.q.answer==null?"":a.q.answer),
+        ok: !!a.correct
+      };
+      if(a.q.cat) rec.cat = a.q.cat;
+      if(a.q.sourceTopic) rec.src = a.q.sourceTopic;
+      if(a.q.chart) rec.chart = a.q.chart;
+      if(a.q.shape) rec.shape = a.q.shape;
+      return rec;
+    });
+    var mistakes = answers.filter(function(r){return !r.ok;}).map(function(r){
+      return {q:r.q, chosen:r.chosen, answer:r.answer};
     });
     recordExamSession({setId:EP.setId, topicId:EP.topicId, ts:Date.now(),
-      total:total, correct:correct, byCat:EP.byCat, bySection:EP.bySection||null, mistakes:mistakes});
+      total:total, correct:correct, byCat:EP.byCat, bySection:EP.bySection||null,
+      mistakes:mistakes, answers:answers});
   } catch(e){}
   var band = pct>=80 ? {e:"🏆",h:"Excellent!"} : pct>=60 ? {e:"👍",h:"Good work!"} : pct>=40 ? {e:"🙂",h:"Keep practising."} : {e:"📖",h:"Let's try again."};
   var t = examTopic(EP.setId, EP.topicId), s = examSet(EP.setId);
@@ -5173,9 +5221,9 @@ function screenExamHistory(){
   var recentHTML=hist.slice(0,10).map(function(h){
     var t=examTopicAnySet(h.topicId);
     var col=pctBand(h.pct).col;
-    return '<div class="row" style="justify-content:space-between;background:#2a3346;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
+    return '<button class="sessrow" data-sess="'+h.ts+'">'+
       '<span>'+esc((t&&t.label)||h.topicId)+' <span class="muted">· '+esc(agoLabel(h.ts))+'</span></span>'+
-      '<span style="color:'+col+';font-weight:800">'+h.correct+'/'+h.total+' · '+h.pct+'%</span></div>';
+      '<span><b style="color:'+col+'">'+h.correct+'/'+h.total+' · '+h.pct+'%</b> <span class="muted">›</span></span></button>';
   }).join("");
 
   $("app").innerHTML=
@@ -5197,6 +5245,18 @@ function screenExamHistory(){
   };
   Array.prototype.forEach.call(document.querySelectorAll("[data-topic]"),function(b){
     b.onclick=function(){examHistTopic=b.getAttribute("data-topic"); view="examTopicDetail"; render();};
+  });
+  wireSessionRows("examHistory");
+}
+// Tapping a session row opens that test's detail; `backTo` is the screen
+// the detail's back button should return to.
+function wireSessionRows(backTo){
+  Array.prototype.forEach.call(document.querySelectorAll("[data-sess]"),function(b){
+    b.onclick=function(){
+      examHistSession=Number(b.getAttribute("data-sess"));
+      examSessBack=backTo;
+      view="examSessionDetail"; render();
+    };
   });
 }
 
@@ -5256,9 +5316,9 @@ function screenExamTopicDetail(){
   var attemptsHTML=sessions.map(function(h,i){
     var col=pctBand(h.pct).col;
     var label=i===0 ? "Latest" : "#"+(sessions.length-i);
-    return '<div class="row" style="justify-content:space-between;background:#2a3346;border-radius:10px;padding:8px 11px;margin-bottom:5px;font-size:13px">'+
+    return '<button class="sessrow" data-sess="'+h.ts+'">'+
       '<span><b>'+label+'</b> <span class="muted">· '+esc(agoLabel(h.ts))+'</span></span>'+
-      '<span style="color:'+col+';font-weight:800">'+h.correct+'/'+h.total+' · '+h.pct+'%</span></div>';
+      '<span><b style="color:'+col+'">'+h.correct+'/'+h.total+' · '+h.pct+'%</b> <span class="muted">›</span></span></button>';
   }).join("");
 
   // Recent wrong answers, newest sessions first, capped so the page stays readable.
@@ -5302,6 +5362,116 @@ function screenExamTopicDetail(){
     examCtx={setId:setId, topicId:examHistTopic};
     view="examTopic"; render();
   };
+  wireSessionRows("examTopicDetail");
+}
+
+// "Wed 17 Sep, 3:42 pm" — the detail screen needs the actual time, not "2d ago".
+function fullDateLabel(ts){
+  var d=new Date(ts);
+  var days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var h=d.getHours(), ap=h>=12?"pm":"am"; h=h%12||12;
+  return days[d.getDay()]+" "+d.getDate()+" "+months[d.getMonth()]+" "+d.getFullYear()+
+         ", "+h+":"+("0"+d.getMinutes()).slice(-2)+" "+ap;
+}
+
+/* One past test, question by question: what was asked, what was answered,
+   and the right answer where it was missed. Sessions saved before answers
+   were recorded (or old enough to have been trimmed) only have their
+   mistakes, so those show that and say why. */
+function screenExamSessionDetail(){
+  var hist=((S.exam&&S.exam.history)||[]);
+  var h=hist.filter(function(x){return x.ts===examHistSession;})[0];
+  var back=examSessBack||"examHistory";
+  if(!h){ view=back; return render(); }
+  var t=examTopicAnySet(h.topicId);
+  var label=(t&&t.label)||h.topicId;
+  var band=pctBand(h.pct);
+  var isChallenge=!!(t&&t.challengeMode);
+
+  // Breakdown: by source topic for the Challenge Test, by question type otherwise.
+  var breakdown="";
+  if(isChallenge && h.bySection){
+    breakdown='<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">By topic</h2>'+
+      statRows(h.bySection, function(sid){return (examTopicAnySet(sid)||{}).label||sid;}, false)
+        .map(function(r){return statRowHTML(r);}).join("")+'</div>';
+  } else if(h.byCat && Object.keys(h.byCat).length){
+    breakdown='<div class="card" style="margin-top:12px"><h2 style="margin:0 0 8px">By question type</h2>'+
+      statRows(h.byCat, function(c){return catLabel(h.topicId,c);}, true)
+        .map(function(r){return statRowHTML(r);}).join("")+'</div>';
+  }
+
+  // Question list.
+  var list, filterBar="";
+  if(h.answers && h.answers.length){
+    var wrongCount=h.answers.filter(function(a){return !a.ok;}).length;
+    filterBar=wrongCount
+      ? '<div class="seg" style="justify-content:flex-start;margin:0 0 10px">'+
+          '<button class="on" data-filt="all">All '+h.answers.length+'</button>'+
+          '<button data-filt="wrong">Wrong only ('+wrongCount+')</button></div>'
+      : '<p class="muted" style="margin:0 0 10px;font-weight:700">Every question right 🎉</p>';
+    list=h.answers.map(function(a,i){
+      var pic="";
+      if(a.shape||a.chart){
+        var inner=a.shape?shapeHTML(a.shape):chartHTML(a.chart);
+        if(inner) pic='<details class="sesspic"><summary>Show the picture</summary>'+inner+'</details>';
+      }
+      var topicTag = (isChallenge && a.src)
+        ? '<span class="muted" style="font-size:11px"> · '+esc((examTopicAnySet(a.src)||{}).label||a.src)+'</span>' : "";
+      return '<div class="sessq '+(a.ok?"ok":"no")+'" data-ok="'+(a.ok?1:0)+'">'+
+        '<div class="sessq-head"><span class="sessq-mark">'+(a.ok?"✓":"✗")+'</span>'+
+          '<span class="sessq-num">Q'+(i+1)+'</span>'+topicTag+'</div>'+
+        '<div class="sessq-text">'+esc(String(a.q)).replace(/_{2,}/g,"?")+'</div>'+
+        pic+
+        '<div class="sessq-ans">Answered: <b style="color:'+(a.ok?"#86efac":"#fca5a5")+'">'+esc(a.chosen||"(blank)")+'</b>'+
+          (a.ok?'':' · Correct: <b style="color:#86efac">'+esc(a.answer)+'</b>')+'</div>'+
+      '</div>';
+    }).join("");
+  } else if(h.mistakes && h.mistakes.length){
+    list='<p class="muted" style="margin:0 0 10px;line-height:1.5">This test was saved before every answer was recorded, '+
+         'so only the questions that were missed are shown.</p>'+
+      h.mistakes.map(function(m){
+        return '<div class="sessq no"><div class="sessq-head"><span class="sessq-mark">✗</span></div>'+
+          '<div class="sessq-text">'+esc(String(m.q)).replace(/_{2,}/g,"?")+'</div>'+
+          '<div class="sessq-ans">Answered: <b style="color:#fca5a5">'+esc(m.chosen||"(blank)")+'</b>'+
+          ' · Correct: <b style="color:#86efac">'+esc(m.answer)+'</b></div></div>';
+      }).join("");
+  } else {
+    list='<p class="muted" style="margin:0;line-height:1.5">'+
+      (h.correct===h.total ? 'Every question was right. The individual questions were not recorded for this older test.'
+                           : 'The individual questions were not recorded for this older test.')+'</p>';
+  }
+
+  $("app").innerHTML=
+    '<div class="hud"><button class="btn sm ghost" id="back">⬅ Back</button><b>Test details</b><span></span></div>'+
+    '<div class="card" style="margin-top:12px;text-align:center">'+
+      '<div style="font-weight:800;font-size:17px">'+esc(label)+'</div>'+
+      '<div class="muted" style="font-size:13px;margin-top:3px">'+esc(fullDateLabel(h.ts))+'</div>'+
+      '<div style="font-size:34px;font-weight:800;margin-top:8px">'+h.correct+' / '+h.total+'</div>'+
+      '<div style="color:'+band.col+';font-weight:800">'+h.pct+'% · '+band.txt+'</div>'+
+    '</div>'+
+    breakdown+
+    '<div class="card" style="margin-top:12px"><h2 style="margin:0 0 10px">Every question</h2>'+filterBar+
+      '<div id="sessList">'+list+'</div></div>'+
+    '<div class="wrap" style="justify-content:center;margin-top:14px">'+
+      '<button class="btn ghost sm" id="bk2">⬅ Back</button>'+
+      '<button class="btn" id="practiceBtn">🎯 Practise this topic</button>'+
+    '</div>';
+  $("back").onclick=function(){view=back;render();};
+  $("bk2").onclick=function(){view=back;render();};
+  $("practiceBtn").onclick=function(){
+    examCtx={setId:h.setId||(EXAM_PREP[0]&&EXAM_PREP[0].id), topicId:h.topicId};
+    view="examTopic"; render();
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-filt]"),function(b){
+    b.onclick=function(){
+      var wrongOnly=b.getAttribute("data-filt")==="wrong";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-filt]"),function(o){o.classList.toggle("on",o===b);});
+      Array.prototype.forEach.call(document.querySelectorAll("#sessList .sessq"),function(el){
+        el.hidden = wrongOnly && el.getAttribute("data-ok")==="1";
+      });
+    };
+  });
 }
 
 function screenBadges(){
