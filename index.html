@@ -2306,6 +2306,21 @@ var CHART_DEFS={
   refSchoolShop:{title:"School shopping", type:"table", tables:[
     {head:["Item","Price"], rows:[["Bookcase","£84"],["Bench","£142"],["Tablet","£348"],["Laptop","£286"],["CD player","£78"],["Game","£46"]]},
     {head:["Shopper","Money available"], rows:[["Ethan","£100"],["Mia","£200"],["Lucas","£500"]]}]},
+  // Reference tables the Word Problems sections quote.
+  refSupplies:{title:"Classroom supplies", type:"table", tables:[
+    {head:["Container","Items in each box / pot"], rows:[["Scissors",48],["Rulers",64],
+      ["Coloured pencils",75],["Glue sticks",28],["Paintbrushes",36],["Notebooks",45]]}]},
+  refSchoolV2:{title:"School shopping", type:"table", tables:[
+    {head:["Item","Price"], rows:[["Bookcase","£82"],["Bench","£145"],["Tablet","£360"],
+      ["Laptop","£295"],["CD player","£78"],["Game","£44"]]},
+    {head:["Shopper","Money available"], rows:[["Oscar","£100"],["Mina","£200"],["Louis","£500"]]}]},
+  refSportsV2:{title:"Sports equipment", type:"table", tables:[
+    {head:["Sports equipment","Price"], rows:[["Football","£42"],["Basketball","£31"],
+      ["Set of 3 tennis balls","£15"],["Box of 6 hockey sticks","£54"],
+      ["Hockey stick","£36"],["Frisbee","£24"]]}]},
+  refFair:{title:"Year 3 summer fair", type:"table", tables:[
+    {head:["Food item","Number"], rows:[["Sandwiches",84],["Cupcakes",60],
+      ["Cartons of juice",72],["Fruit skewers",90],["Samosas",80],["Ice creams",96]]}]},
   // Reference tables the Measuring in Centimetres sections quote.
   refLines:{title:"Line lengths", type:"table", tables:[
     {head:["Line","Length","Line","Length"], rows:[
@@ -2438,105 +2453,120 @@ EXAM_QUESTIONS["y3s2_charts"]=(function(){
   });
 })();
 
-// Wing's Year 3 "80 Word Problems Based on References" worksheet — 78 of
-// its 80 questions across four lettered sections. Q20 and Q60 are left out:
-// both say "answers vary" (choose any two/three items), so there is nothing
-// to mark against. Sections A, C and D quote a price list, drawn by
-// chartHTML() as a real table, so each question stands on its own.
+// Wing's Year 3 "90 Word Problems (reference style)" worksheet — all 90
+// questions across seven sections. Four of them quote a table (classroom
+// supplies, school shopping, sports equipment, summer fair), drawn by
+// chartHTML() so each question stands on its own.
 //
-// A session is one whole section (see sessionMode "sets"), which is how the
-// worksheet is laid out. Q61-66 pick a missing sign, and Q57 and Q77 ask a
-// yes/no with a reason, so those eight are multiple choice.
+// The answer key prints the working as well as the answer
+// ("74 + 63 = 137 eggs"), so the stored answer is the final value only.
+// Q23 and Q66 ask a yes/no and then the number behind it, so they use the
+// Yes/No pair plus a value box.
 EXAM_QUESTIONS["y3s2_word_problems"]=(function(){
   var raw=[
-    // Section A — questions 1-20
-    ["A","refSportsShop","Amira buys a tennis racket. How much change will she get from £150?","£76","SHOP"],
-    ["A","refSportsShop","Noah buys a tennis racket and a helmet. How much does he spend altogether?","£122","SHOP"],
-    ["A","refSportsShop","Sophie needs two tennis rackets. How much money does she need?","£148","SHOP"],
-    ["A","refSportsShop","Sophie buys a cricket bat and a scooter. How much does she pay altogether?","£386","SHOP"],
-    ["A","refSportsShop","Noah buys trainers. How much change will he get from £250?","£158","SHOP"],
-    ["A","refSportsShop","Sophie buys a skateboard. How much change will she get from £500?","£344","SHOP"],
-    ["A","refSportsShop","Amira buys the cheapest item. How much change will she get?","£102","SHOP"],
-    ["A","refSportsShop","Amira wants to buy two cricket bats. How much more money does she need?","£86","SHOP"],
-    ["A","refSportsShop","Sophie buys a skateboard and a helmet. How much does she spend?","£204","SHOP"],
-    ["A","refSportsShop","Noah and Sophie put their money together. They buy a bicycle. How much money is left?","£265","SHOP"],
-    ["A","refSportsShop","Noah buys a tennis racket and trainers. How much change will he get from £250?","£84","SHOP"],
-    ["A","refSportsShop","Sophie buys a scooter and trainers. How much money will she have left?","£140","SHOP"],
-    ["A","refSportsShop","A helmet and a cricket bat cost how much altogether?","£166","SHOP"],
-    ["A","refSportsShop","How much more does a bicycle cost than a skateboard?","£329","SHOP"],
-    ["A","refSportsShop","How much cheaper is a helmet than a tennis racket?","£26","SHOP"],
-    ["A","refSportsShop","Noah wants to buy a scooter. How much more money does he need?","£18","SHOP"],
-    ["A","refSportsShop","Sophie buys two skateboards. How much money will she have left?","£188","SHOP"],
-    ["A","refSportsShop","Amira buys a helmet and trainers. How much change will she get?","£10","SHOP"],
-    ["A","refSportsShop","Sophie buys a bicycle. How much change will she get?","£15","SHOP"],
-    // Section B — questions 21-40
-    ["B",null,"The chickens laid 72 eggs on Monday and 59 eggs on Tuesday. How many eggs were laid in those two days?","131 eggs","FOWL"],
-    ["B",null,"In one week 148 eggs were laid. The following week 96 eggs were laid. How many eggs were laid in the two weeks?","244 eggs","FOWL"],
-    ["B",null,"The chickens ate 235 g of food one day and 248 g the next day. How much food was eaten in the two days?","483 g","FOWL"],
-    ["B",null,"There were 468 eggs. The cook used 295. How many eggs were left to sell?","173 eggs","FOWL"],
-    ["B",null,"The school cook needs 85 eggs today. The chickens have laid 61. How many more eggs are needed?","24 eggs","FOWL"],
-    ["B",null,"The school collected 36 eggs this morning. They put them into boxes of 6. How many boxes do they fill?","6 boxes","FOWL"],
-    ["B",null,"Chicken food costs £348 for a year. The eggs sell for £625 that year. How much more money is made from the eggs than is spent on food?","£277","FOWL"],
-    ["B",null,"There were 329 eggs. The cook took 74. How many eggs were left?","255 eggs","FOWL"],
-    ["B",null,"A local café orders 26 eggs every day. How many eggs will it order in 7 days?","182 eggs","FOWL"],
-    ["B",null,"The school target is 680 eggs. So far they have collected 425. How many more eggs do they need?","255 eggs","FOWL"],
-    ["B",null,"Next term the school will buy 40 more chickens. Then it will have 252 altogether. How many chickens does it have now?","212 chickens","FOWL"],
-    ["B",null,"Before half term 564 eggs were collected and 338 after half term. How many eggs were collected altogether?","902 eggs","FOWL"],
-    ["B",null,"Each tray holds 10 eggs. How many eggs are in 8 full trays?","80 eggs","FOWL"],
-    ["B",null,"There are 54 eggs shared equally between 6 classrooms. How many eggs does each classroom receive?","9 eggs","FOWL"],
-    ["B",null,"The farm packs 96 eggs into boxes of 8. How many boxes are needed?","12 boxes","FOWL"],
-    ["B",null,"The hens lay 35 eggs each day for 5 days. How many eggs do they lay altogether?","175 eggs","FOWL"],
-    ["B",null,"The school has 240 eggs. It sells 85 in the morning and 67 in the afternoon. How many eggs are left?","88 eggs","FOWL"],
-    ["B",null,"A shop orders 9 boxes of eggs. Each box contains 12 eggs. How many eggs are ordered?","108 eggs","FOWL"],
-    ["B",null,"The farm has 315 eggs and wants to have 500. How many more eggs are needed?","185 eggs","FOWL"],
-    ["B",null,"The school sells 7 trays of eggs. Each tray has 10 eggs. It had 95 eggs at the start. How many eggs are left?","25 eggs","FOWL"],
-    // Section C — questions 41-60
-    ["C","refSchoolShop","Ethan buys a bookcase. How much change will he get?","£16","SCHOOL"],
-    ["C","refSchoolShop","Mia buys a bookcase and a CD player. How much does she spend?","£162","SCHOOL"],
-    ["C","refSchoolShop","Ethan wants to buy a bench. How much more money does he need?","£42","SCHOOL"],
-    ["C","refSchoolShop","Mia buys a bench. How much money will she have left?","£58","SCHOOL"],
-    ["C","refSchoolShop","Mia wants to buy a bench and a CD player. How much more money does she need?","£20","SCHOOL"],
-    ["C","refSchoolShop","Lucas buys a tablet. How much change will he get?","£152","SCHOOL"],
-    ["C","refSchoolShop","Mia buys the cheapest item. How much change will she get?","£154","SCHOOL"],
-    ["C","refSchoolShop","Mia decides to buy two benches. How much more money will she need?","£84","SCHOOL"],
-    ["C","refSchoolShop","Lucas buys a tablet and two games. How much does he spend altogether?","£440","SCHOOL"],
-    ["C","refSchoolShop","Mia and Lucas put their money together and buy a tablet and a laptop. How much money is left?","£66","SCHOOL"],
-    ["C","refSchoolShop","Lucas buys a laptop and a CD player. How much change will he get from £500?","£136","SCHOOL"],
-    ["C","refSchoolShop","Ethan buys a game. How much change will he get?","£54","SCHOOL"],
-    ["C","refSchoolShop","How much more does the tablet cost than the bench?","£206","SCHOOL"],
-    ["C","refSchoolShop","How much cheaper is the CD player than the bookcase?","£6","SCHOOL"],
-    ["C","refSchoolShop","Mia buys two CD players. How much money will she have left?","£44","SCHOOL"],
-    ["C","refSchoolShop","Lucas buys a bookcase, a bench and a game. How much change will he get?","£228","SCHOOL"],
-    ["C","refSchoolShop","Ethan wants a bookcase and a game. Does he have enough money? If not, how much more does he need?",1,"SCHOOL",["Yes — he has £30 left","No — he needs £30 more","No — he needs £16 more","Yes — he has exactly enough"]],
-    ["C","refSchoolShop","Lucas buys two laptops. How much more money does he need?","£72","SCHOOL"],
-    ["C","refSchoolShop","Mia buys a bookcase and two games. How much does she spend?","£176","SCHOOL"],
-    // Section D — questions 61-66
-    ["D",null,"5 □ 8 = 40",2,"SIGNS",["+","-","×","÷"]],
-    ["D",null,"42 □ 7 = 6",3,"SIGNS",["+","-","×","÷"]],
-    ["D",null,"26 □ 9 = 35",0,"SIGNS",["+","-","×","÷"]],
-    ["D",null,"51 □ 18 = 33",1,"SIGNS",["+","-","×","÷"]],
-    ["D",null,"9 □ 6 = 54",2,"SIGNS",["+","-","×","÷"]],
-    ["D",null,"64 □ 8 = 8",3,"SIGNS",["+","-","×","÷"]],
-    // Section D — questions 67-80
-    ["D","refSportsEquip","How much would 2 frisbees cost?","£48","EQUIP"],
-    ["D","refSportsEquip","How much would 3 sets of tennis balls cost?","£36","EQUIP"],
-    ["D","refSportsEquip","How much would 2 boxes of hockey sticks cost?","£60","EQUIP"],
-    ["D","refSportsEquip","How much would 4 footballs cost?","£168","EQUIP"],
-    ["D","refSportsEquip","The school buys 30 hockey sticks at £36 each. How much does it spend?","£1,080","EQUIP"],
-    ["D","refSportsEquip","What is the difference in price between a football and a basketball?","£11","EQUIP"],
-    ["D","refSportsEquip","What is the cost of 5 sets of tennis balls?","£60","EQUIP"],
-    ["D","refSportsEquip","A set has 3 tennis balls and costs £12. How much does 1 tennis ball cost?","£4","EQUIP"],
-    ["D","refSportsEquip","The sports shop has sold out of tennis rackets. A tennis racket costs 4 times as much as one set of tennis balls. What would one tennis racket cost?","£48","EQUIP"],
-    ["D","refSportsEquip","How much do 8 basketballs cost?","£248","EQUIP"],
-    ["D","refSportsEquip","Jay has £100. Can he buy 3 basketballs? Explain why or why not.",0,"EQUIP",["Yes — he has £7 left","Yes — he has £17 left","No — he needs £7 more","No — he needs £14 more"]],
-    ["D","refSportsEquip","A school buys 4 boxes of hockey sticks. Each box contains 6 sticks. How many hockey sticks does it buy?","24 hockey sticks","EQUIP"],
-    ["D","refSportsEquip","The school buys 2 footballs and 3 basketballs. How much does it spend altogether?","£177","EQUIP"],
-    ["D","refSportsEquip","A teacher has £150. She buys 2 footballs and 1 frisbee. How much money is left?","£42","EQUIP"]
+    // Section A — questions 1-15
+    ["A",null,"The hens laid 74 eggs on Monday and 63 eggs on Tuesday. How many eggs were laid altogether?","137 eggs","FARM"],
+    ["A",null,"One week the hens laid 152 eggs. The next week they laid 87 eggs. How many eggs were laid in the two weeks?","239 eggs","FARM"],
+    ["A",null,"The chickens ate 248 g of food in the morning and 236 g in the afternoon. How much food did they eat altogether?","484 g","FARM"],
+    ["A",null,"There were 476 eggs in the store. The cook used 308. How many eggs were left?","168 eggs","FARM"],
+    ["A",null,"The school cook needs 92 eggs today. The hens have laid 57. How many more eggs are needed?","35 eggs","FARM"],
+    ["A",null,"The farm collected 48 eggs and packed them equally into boxes of 6. How many boxes were filled?","8 boxes","FARM"],
+    ["A",null,"The farm sells 9 trays of eggs. Each tray holds 10 eggs. How many eggs are sold?","90 eggs","FARM"],
+    ["A",null,"A café orders 26 eggs every day for 5 days. How many eggs does it order?","130 eggs","FARM"],
+    ["A",null,"The school's target is 700 eggs. So far, 438 eggs have been collected. How many more are needed?","262 eggs","FARM"],
+    ["A",null,"Next month the farm will buy 45 more chickens. Then it will have 268 chickens. How many chickens does it have now?","223 chickens","FARM"],
+    ["A",null,"The hens laid 38 eggs each day for 4 days. How many eggs did they lay?","152 eggs","FARM"],
+    ["A",null,"There are 72 eggs shared equally between 8 classes. How many eggs does each class receive?","9 eggs","FARM"],
+    ["A",null,"The farm had 320 eggs. It sold 86 in the morning and 74 in the afternoon. How many eggs were left?","160 eggs","FARM"],
+    ["A",null,"Chicken food costs £375 for the year. The farm earns £640 from selling eggs. How much more does it earn than it spends on food?","£265","FARM"],
+    ["A",null,"Before half term, 584 eggs were collected. After half term, 347 eggs were collected. How many eggs were collected altogether?","931 eggs","FARM"],
+    // Section B — questions 16-30
+    ["B","refSupplies","How many pairs of scissors are there in 3 boxes?","144 pairs","SUPPLIES"],
+    ["B","refSupplies","How many coloured pencils are there in 4 pots?","300 pencils","SUPPLIES"],
+    ["B","refSupplies","How many glue sticks are there in 6 boxes?","168 glue sticks","SUPPLIES"],
+    ["B","refSupplies","The class needs 100 paintbrushes. It already has 2 boxes. How many more paintbrushes are needed?","28","SUPPLIES"],
+    ["B","refSupplies","Year 3 needs 250 coloured pencils. They have 3 pots. How many more pencils are needed?","25","SUPPLIES"],
+    ["B","refSupplies","The school orders 5 boxes of glue sticks in Term 1, 4 in Term 2 and 3 in Term 3. How many glue sticks are ordered altogether?","336 glue sticks","SUPPLIES"],
+    ["B","refSupplies","The school buys one box of rulers. Each ruler costs £2. How much would all 64 rulers cost?","£128","SUPPLIES"],
+    ["B","refSupplies","There are 320 children. The school buys 4 pots of coloured pencils. Is that enough for one pencil per child? How many more are needed?","No","SUPPLIES",null,{"answer":"No","value":"20","accept":["20 more","20 pencils"],"prompt":"How many more are needed?"}],
+    ["B","refSupplies","How many notebooks are there in 5 boxes?","225 notebooks","SUPPLIES"],
+    ["B","refSupplies","The school has 3 boxes of scissors and gives 50 pairs to Year 3. How many pairs are left?","94","SUPPLIES"],
+    ["B","refSupplies","Two boxes of paintbrushes are shared equally among 8 tables. How many paintbrushes does each table get?","9","SUPPLIES"],
+    ["B","refSupplies","A teacher buys 2 boxes of notebooks and 3 boxes of glue sticks. How many items does she buy altogether?","174 items","SUPPLIES"],
+    ["B","refSupplies","There are 256 rulers. If each box contains 64 rulers, how many boxes are there?","4 boxes","SUPPLIES"],
+    ["B","refSupplies","The school wants 500 items. It already has 4 boxes of notebooks and 5 boxes of glue sticks. How many more items are needed?","180","SUPPLIES"],
+    ["B","refSupplies","A class uses 24 scissors from one box of 48. How many pairs of scissors are still unused?","24 pairs","SUPPLIES"],
+    // Section C — questions 31-40
+    ["C",null,"A number is 8 times 6. What is the number?","48","CLUES"],
+    ["C",null,"A number is double 17. What is the number?","34","CLUES"],
+    ["C",null,"A number is half of 72. What is the number?","36","CLUES"],
+    ["C",null,"A number is 5 times 9. What is the number?","45","CLUES"],
+    ["C",null,"A number is double 12, then 7 is added. What is the number?","31","CLUES"],
+    ["C",null,"A number is 4 times 8, then 5 is subtracted. What is the number?","27","CLUES"],
+    ["C",null,"A number is half of 64, then half again. What is the number?","16","CLUES"],
+    ["C",null,"A number is the same as 9 × 4 and 6 × 6. What is the number?","36","CLUES"],
+    ["C",null,"A number is 3 less than 7 × 5. What is the number?","32","CLUES"],
+    ["C",null,"A number is 5 more than 6 × 7. What is the number?","47","CLUES"],
+    // Section D — questions 41-55
+    ["D","refSchoolV2","Oscar buys a bookcase. How much change will he get?","£18","SHOP"],
+    ["D","refSchoolV2","Mina buys a bookcase and a CD player. How much does she spend?","£160","SHOP"],
+    ["D","refSchoolV2","Oscar wants to buy a bench. How much more money does he need?","£45","SHOP"],
+    ["D","refSchoolV2","Mina buys a bench. How much money will she have left?","£55","SHOP"],
+    ["D","refSchoolV2","Mina wants to buy a bench and a CD player. How much more money does she need?","£23 more","SHOP"],
+    ["D","refSchoolV2","Louis buys a tablet. How much change will he get?","£140","SHOP"],
+    ["D","refSchoolV2","Mina buys the cheapest item in the shop. How much change will she get?","£156","SHOP"],
+    ["D","refSchoolV2","Mina decides to buy two benches. How much more money will she need?","£90 more","SHOP"],
+    ["D","refSchoolV2","Louis buys a tablet and two games. How much does he spend altogether?","£448","SHOP"],
+    ["D","refSchoolV2","Mina and Louis put their money together and buy a tablet and a laptop. How much money is left?","£45","SHOP"],
+    ["D","refSchoolV2","Louis buys a laptop and a CD player. How much change will he get?","£127","SHOP"],
+    ["D","refSchoolV2","Oscar buys a game. How much change will he get?","£56","SHOP"],
+    ["D","refSchoolV2","How much more does the tablet cost than the bench?","£215","SHOP"],
+    ["D","refSchoolV2","How much cheaper is the CD player than the bookcase?","£4","SHOP"],
+    ["D","refSchoolV2","Mina buys two CD players. How much money will she have left?","£44","SHOP"],
+    // Section E — questions 56-70
+    ["E","refSportsV2","How much would 2 frisbees cost?","£48","SPORTS"],
+    ["E","refSportsV2","How much would 3 sets of tennis balls cost?","£45","SPORTS"],
+    ["E","refSportsV2","How much would 2 boxes of hockey sticks cost?","£108","SPORTS"],
+    ["E","refSportsV2","How much would 4 footballs cost?","£168","SPORTS"],
+    ["E","refSportsV2","The school buys 20 individual hockey sticks at £36 each. How much does it spend?","£720","SPORTS"],
+    ["E","refSportsV2","What is the difference in price between a football and a basketball?","£11","SPORTS"],
+    ["E","refSportsV2","What is the cost of 5 sets of tennis balls?","£75","SPORTS"],
+    ["E","refSportsV2","A set has 3 tennis balls and costs £15. How much does one tennis ball cost?","£5","SPORTS"],
+    ["E","refSportsV2","A tennis racket costs 4 times as much as one set of tennis balls. What would one tennis racket cost?","£60","SPORTS"],
+    ["E","refSportsV2","How much do 8 basketballs cost?","£248","SPORTS"],
+    ["E","refSportsV2","Jay has £100. Can he buy 3 basketballs? How much money would be left or still needed?","Yes","SPORTS",null,{"answer":"Yes","value":"£7","accept":["7","£7 left"],"prompt":"How much is left?"}],
+    ["E","refSportsV2","A school buys 4 boxes of hockey sticks. Each box contains 6 sticks. How many hockey sticks does it buy?","24 sticks","SPORTS"],
+    ["E","refSportsV2","The school buys 2 footballs and 3 basketballs. How much does it spend altogether?","£177","SPORTS"],
+    ["E","refSportsV2","A teacher has £150. She buys 2 footballs and 1 frisbee. How much money is left?","£42","SPORTS"],
+    ["E","refSportsV2","The school needs 30 footballs. It already has 18. How many more footballs does it need?","12 footballs","SPORTS"],
+    // Section F — questions 71-85
+    ["F","refFair","The 84 sandwiches are shared equally between 4 groups. How many sandwiches does each group get?","21","FAIR"],
+    ["F","refFair","The 80 samosas are shared equally between 5 groups. How many samosas does each group get?","16","FAIR"],
+    ["F","refFair","The 72 cartons of juice are divided equally between 3 classes. How many cartons does each class get?","24","FAIR"],
+    ["F","refFair","Three trays each contain 90 fruit skewers. How many fruit skewers are there altogether?","270","FAIR"],
+    ["F","refFair","The cook makes 4 batches of 84 sandwiches. How many sandwiches does she make?","336","FAIR"],
+    ["F","refFair","The 96 ice creams are divided equally among 4 classes. How many ice creams does each class get?","24","FAIR"],
+    ["F","refFair","There are 96 children but only 72 cartons of juice. How many children do not receive a carton?","24","FAIR"],
+    ["F","refFair","Half of the 60 cupcakes are eaten. How many cupcakes are left?","30","FAIR"],
+    ["F","refFair","The school buys another 5 trays of 60 cupcakes. How many cupcakes is that?","300","FAIR"],
+    ["F","refFair","The 84 sandwiches are put into trays of 7. How many trays are needed?","12 trays","FAIR"],
+    ["F","refFair","The 90 fruit skewers are shared equally among 9 tables. How many skewers does each table get?","10","FAIR"],
+    ["F","refFair","The school wants 120 ice creams. It already has 96. How many more does it need?","24","FAIR"],
+    ["F","refFair","The school has 60 cupcakes and 80 samosas. How many items are there altogether?","140","FAIR"],
+    ["F","refFair","The 72 juice cartons are packed into boxes of 8. How many boxes are needed?","9 boxes","FAIR"],
+    ["F","refFair","The school gives away 35 sandwiches from 84. How many sandwiches are left?","49","FAIR"],
+    // Section G — questions 86-90
+    ["G",null,"A class has 6 boxes of pencils. Each box has 24 pencils. They give 35 pencils away. How many pencils are left?","109","CHALLENGE"],
+    ["G",null,"A shop has 250 balloons. It sells 78 in the morning and 96 in the afternoon. How many balloons remain?","76","CHALLENGE"],
+    ["G",null,"A coach buys 5 packs of 8 cones. He already has 17 cones. How many cones does he have altogether?","57","CHALLENGE"],
+    ["G",null,"There are 144 children going on a trip. They are split equally into 6 buses. How many children are on each bus?","24","CHALLENGE"],
+    ["G",null,"A baker makes 9 trays of 12 muffins. She sells 65 muffins. How many muffins are left?","43","CHALLENGE"]
   ];
   return raw.map(function(r){
     var e={set:r[0], q:r[2], answer:r[3], cat:r[4]};
     if(r[1]) e.chart=r[1];
-    if(r[5]) e.options=r[5];
+    if(r[5]) e.accept=r[5];
+    if(r[6]) e.yesNo=r[6];
     return e;
   });
 })();
@@ -2572,9 +2602,10 @@ var EXAM_CAT_LABELS={
                   BEDS:"Vegetable bed plans", MISSING:"Missing side lengths",
                   WORD:"Perimeter word problems"},
   y3s2_charts:{PICTOGRAM:"Pictograms", TALLY:"Tally charts", TABLE:"Frequency tables", BAR:"Bar charts"},
-  y3s2_word_problems:{SHOP:"Sports shop spending", FOWL:"Fowl problems",
-                      SCHOOL:"School shopping", SIGNS:"Missing signs",
-                      EQUIP:"Sports equipment"}
+  y3s2_word_problems:{FARM:"Farm problems", SUPPLIES:"Classroom supplies",
+                      CLUES:"Number clues", SHOP:"School shopping",
+                      SPORTS:"Sports equipment", FAIR:"Summer fair",
+                      CHALLENGE:"Challenge problems"}
 };
 function catLabel(topicId, cat){
   var m=EXAM_CAT_LABELS[topicId];
