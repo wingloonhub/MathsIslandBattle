@@ -1813,6 +1813,8 @@ var EXAM_PREP=[{
     {id:"y3s2_charts",            label:"Tally Charts, Bar Charts & Pictograms", sessionMode:"sets", setsPerSession:2},
     // One whole lettered section per session, as the worksheet lays it out.
     {id:"y3s2_word_problems",     label:"Word Problems", sessionMode:"sets", setsPerSession:1, setNoun:"section"},
+    // Practice-only: kept out of the Challenge Test mix on purpose.
+    {id:"y3s2_correct_operations", label:"Correct Operations", sessionSize:15, excludeFromChallenge:true},
     // Mix-all "Challenge Test" — samples questions from every other topic
     // in this set. No bank of its own; unlocked once at least one other
     // topic has a bank wired in.
@@ -2588,6 +2590,99 @@ EXAM_QUESTIONS["y3s2_word_problems"]=(function(){
   });
 })();
 
+// Wing's Year 3 "Choose the Correct Operation" worksheet — 80 word problems.
+// The child reads the story and picks the operation (+ − × ÷) before
+// calculating; no working out is marked, only the choice. Each question is
+// tagged with its correct operation, so the report shows which operation is
+// hardest to recognise. Session picks 15 at random. Not part of the
+// Challenge Test (see excludeFromChallenge on the topic).
+EXAM_QUESTIONS["y3s2_correct_operations"]=(function(){
+  var OPS=["+","−","×","÷"];
+  var raw=[
+    ["Year 3 has 46 red pencils and 35 blue pencils. How many pencils are there altogether?",0,"ADD"],
+    ["There are 95 notebooks in the cupboard. 28 are given to pupils. How many notebooks are left?",1,"SUB"],
+    ["Class 3A has 27 pupils. Class 3B has 5 more pupils than Class 3A. How many pupils are in Class 3B?",0,"ADD"],
+    ["A school needs 120 rulers. It already has 86 rulers. How many more rulers are needed?",1,"SUB"],
+    ["A farm collected 245 eggs on Monday and 180 eggs on Tuesday. How many eggs were collected altogether?",0,"ADD"],
+    ["A farmer collected 640 eggs. He sold 375 eggs. How many eggs were left?",1,"SUB"],
+    ["Ben has 84 football cards. Jack has 69 football cards. How many more cards does Ben have?",1,"SUB"],
+    ["Mia has £35. Her grandmother gives her £20 more. How much money does Mia have now?",0,"ADD"],
+    ["A sports shop had 150 tennis balls. It sold 48. How many tennis balls remain?",1,"SUB"],
+    ["A red rope is 86 cm long. A blue rope is 54 cm long. How much longer is the red rope?",1,"SUB"],
+    ["The school bought 125 exercise books and 74 drawing books. How many books did it buy altogether?",0,"ADD"],
+    ["Sarah read 68 pages on Saturday. She read another 37 pages on Sunday. How many pages did she read altogether?",0,"ADD"],
+    ["A book has 180 pages. Adam has read 125 pages. How many pages does he still need to read?",1,"SUB"],
+    ["Tower A is 516 cm tall. Tower D is 486 cm tall. How much shorter is Tower D?",1,"SUB"],
+    ["A stall earned £720 in the morning and £265 in the afternoon. How much did it earn altogether?",0,"ADD"],
+    ["Chicken food costs £375. The farm earns £640 from selling eggs. How much more does it earn than it spends on food?",1,"SUB"],
+    ["Ali has 48 marbles. His brother gives him 16 more marbles. How many marbles does Ali have now?",0,"ADD"],
+    ["There are 96 children at the summer fair. 29 children go home. How many children remain?",1,"SUB"],
+    ["One line is 13 cm long and another line is 8 cm long. By how much is the first line longer?",1,"SUB"],
+    ["The school has 84 footballs and buys 18 more. How many footballs does it have now?",0,"ADD"],
+    ["There are 6 boxes of scissors. Each box contains 8 scissors. How many scissors are there altogether?",2,"MUL"],
+    ["48 scissors are packed equally into 6 boxes. How many scissors are in each box?",3,"DIV"],
+    ["There are 4 pots of coloured pencils. Each pot contains 75 pencils. How many pencils are there altogether?",2,"MUL"],
+    ["256 rulers are packed into boxes of 64 rulers. How many boxes are needed?",3,"DIV"],
+    ["There are 5 trays. Each tray holds 12 cupcakes. How many cupcakes are there?",2,"MUL"],
+    ["60 cupcakes are shared equally between 5 tables. How many cupcakes does each table get?",3,"DIV"],
+    ["The summer fair has 9 plates. There are 10 fruit skewers on each plate. How many fruit skewers are there?",2,"MUL"],
+    ["90 fruit skewers are put equally onto 9 plates. How many are on each plate?",3,"DIV"],
+    ["There are 8 bags. Each bag contains 9 cartons of juice. How many cartons are there altogether?",2,"MUL"],
+    ["72 cartons of juice are shared equally between 8 groups. How many cartons does each group receive?",3,"DIV"],
+    ["A farmer has 7 chicken coops. Each coop contains 6 chickens. How many chickens are there altogether?",2,"MUL"],
+    ["42 chickens are placed equally into 7 coops. How many chickens are in each coop?",3,"DIV"],
+    ["The PE teacher has 5 bags of footballs. Each bag contains 7 footballs. How many footballs are there?",2,"MUL"],
+    ["35 footballs are put equally into 5 bags. How many footballs are in each bag?",3,"DIV"],
+    ["There are 8 rows of chairs. Each row contains 6 chairs. How many chairs are there altogether?",2,"MUL"],
+    ["48 pupils sit equally in 8 rows. How many pupils sit in each row?",3,"DIV"],
+    ["A shop has 9 boxes of tennis balls. Each box contains 4 balls. How many tennis balls are there?",2,"MUL"],
+    ["36 tennis balls are packed equally into boxes of 4. How many boxes are needed?",3,"DIV"],
+    ["80 samosas are shared equally between 5 groups. How many samosas does each group get?",3,"DIV"],
+    ["There are 5 groups. Each group receives 16 samosas. How many samosas are needed altogether?",2,"MUL"],
+    ["Each pot contains 75 coloured pencils. The school has 3 pots. How many coloured pencils are there altogether?",2,"MUL"],
+    ["Year 3 needs 250 coloured pencils. It has 3 pots with 75 pencils in each pot. Which operation should you do first to find how many pencils it already has?",2,"MUL"],
+    ["Year 3 has 225 coloured pencils but needs 250. Which operation finds how many more pencils are needed?",1,"SUB"],
+    ["One box contains 48 scissors and another box contains 64 rulers. Which operation finds the total number of items?",0,"ADD"],
+    ["There are 128 rulers. Each box contains 64 rulers. Which operation finds the number of boxes?",3,"DIV"],
+    ["Each box contains 36 paintbrushes. The school buys 4 boxes. Which operation finds the total number of paintbrushes?",2,"MUL"],
+    ["The school needs 100 glue sticks. It already has 56. Which operation finds how many more are needed?",1,"SUB"],
+    ["Two boxes contain 48 scissors each. Which operation finds the total number of scissors?",2,"MUL"],
+    ["There are 180 notebooks. Each box contains 45 notebooks. Which operation finds how many boxes there are?",3,"DIV"],
+    ["There are 75 coloured pencils and 45 notebooks. Which operation finds how many more coloured pencils there are than notebooks?",1,"SUB"],
+    ["There are 84 sandwiches and 60 cupcakes at the summer fair. How many are there altogether?",0,"ADD"],
+    ["There are 96 ice creams and 60 cupcakes. How many more ice creams are there?",1,"SUB"],
+    ["The 80 samosas are shared equally between 5 groups. Which operation should be used?",3,"DIV"],
+    ["The 72 cartons of juice are shared equally among 8 tables. Which operation should be used?",3,"DIV"],
+    ["There are 60 cupcakes. Another 20 cupcakes are delivered. Which operation finds the new number of cupcakes?",0,"ADD"],
+    ["There are 96 ice creams. 24 are sold. Which operation finds how many are left?",1,"SUB"],
+    ["There are 90 fruit skewers. They are placed equally onto 9 trays. Which operation finds how many are on each tray?",3,"DIV"],
+    ["Each of 7 tables needs 12 sandwiches. Which operation finds the total number of sandwiches needed?",2,"MUL"],
+    ["There are 96 ice creams and 80 samosas. Which operation finds how many more ice creams there are?",1,"SUB"],
+    ["There are 84 sandwiches. The fair sells 35. Which operation finds how many sandwiches remain?",1,"SUB"],
+    ["A sports shop has 6 shelves. There are 9 footballs on each shelf. How many footballs are there altogether?",2,"MUL"],
+    ["A sports shop has 54 footballs. They are placed equally onto 6 shelves. How many footballs go on each shelf?",3,"DIV"],
+    ["A basketball costs £28 and a football costs £19. How much do they cost altogether?",0,"ADD"],
+    ["A basketball costs £28 and a football costs £19. How much more expensive is the basketball?",1,"SUB"],
+    ["Emma has £50. She spends £18 on a toy. How much money does she have left?",1,"SUB"],
+    ["Emma has £32. Her father gives her £18 more. How much money does she have now?",0,"ADD"],
+    ["A farmer has 8 trays of eggs. Each tray contains 10 eggs. How many eggs are there altogether?",2,"MUL"],
+    ["A farmer has 80 eggs. He places 10 eggs in each tray. How many trays does he need?",3,"DIV"],
+    ["A farm earned £850 and spent £620. Which operation finds how much more it earned than it spent?",1,"SUB"],
+    ["A farm earned £450 from eggs and £275 from vegetables. Which operation finds its total earnings?",0,"ADD"],
+    ["Line F is 8 cm long. Line P is 7 cm long. Which operation finds how much longer Line F is?",1,"SUB"],
+    ["A ribbon is 35 cm long. Another 20 cm piece is joined to it. Which operation finds the new length?",0,"ADD"],
+    ["A 75 cm ribbon is cut. A 28 cm piece is used. Which operation finds the length that remains?",1,"SUB"],
+    ["There are 4 pieces of ribbon. Each piece is 12 cm long. Which operation finds their total length?",2,"MUL"],
+    ["A 60 cm ribbon is cut into 5 equal pieces. Which operation finds the length of each piece?",3,"DIV"],
+    ["Year 3 needs 200 exercise books. There are already 4 boxes with 45 books in each box. Which operation should be done first?",2,"MUL"],
+    ["After counting the boxes, Year 3 has 180 books but needs 200. Which operation finds how many more books are needed?",1,"SUB"],
+    ["A shop has 7 boxes of tennis balls. Each box contains 8 tennis balls. Which operation should be done to find how many tennis balls the shop has?",2,"MUL"],
+    ["The shop has 56 tennis balls and sells 19. Which operation finds how many are left?",1,"SUB"],
+    ["63 pupils are placed equally into 7 teams. Which operation finds the number of pupils in each team?",3,"DIV"]
+  ];
+  return raw.map(function(r){return {q:r[0], options:OPS.slice(), answer:r[1], cat:r[2]};});
+})();
+
 var EXAM_SESSION_SIZE=15;
 function examSet(setId){return EXAM_PREP.filter(function(s){return s.id===setId;})[0];}
 function examTopic(setId, topicId){var s=examSet(setId); return s && s.topics.filter(function(t){return t.id===topicId;})[0];}
@@ -2619,6 +2714,8 @@ var EXAM_CAT_LABELS={
                   BEDS:"Vegetable bed plans", MISSING:"Missing side lengths",
                   WORD:"Perimeter word problems"},
   y3s2_charts:{PICTOGRAM:"Pictograms", TALLY:"Tally charts", TABLE:"Frequency tables", BAR:"Bar charts"},
+  y3s2_correct_operations:{ADD:"Spotting addition", SUB:"Spotting subtraction",
+                           MUL:"Spotting multiplication", DIV:"Spotting division"},
   y3s2_word_problems:{FARM:"Farm problems", SUPPLIES:"Classroom supplies",
                       CLUES:"Number clues", SHOP:"School shopping",
                       SPORTS:"Sports equipment", FAIR:"Summer fair",
@@ -2824,7 +2921,7 @@ function sampleExamQuestions(bank, n){
 // section.
 function challengeSources(setId){
   var s = examSet(setId); if(!s) return [];
-  return s.topics.filter(function(t){return !t.challengeMode && examBank(t.id);});
+  return s.topics.filter(function(t){return !t.challengeMode && !t.excludeFromChallenge && examBank(t.id);});
 }
 // How many questions the challenge draws from one source topic: its entry in
 // `perTopic`, else `perSection`, never more than that topic's bank holds.
